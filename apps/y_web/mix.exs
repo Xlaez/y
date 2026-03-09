@@ -14,8 +14,7 @@ defmodule YWeb.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      compilers: Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      compilers: Mix.compilers()
     ]
   end
 
@@ -47,6 +46,8 @@ defmodule YWeb.MixProject do
       {:redix, "~> 1.3"},
       {:jason, "~> 1.4"},
       {:bandit, "~> 1.0"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:mox, "~> 1.0", only: :test},
       {:telemetry_metrics, "~> 1.0"},

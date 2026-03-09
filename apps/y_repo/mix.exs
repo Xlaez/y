@@ -11,7 +11,14 @@ defmodule YRepo.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
+    ]
+  end
+
+  defp aliases do
+    [
+      setup: ["deps.get"]
     ]
   end
 
