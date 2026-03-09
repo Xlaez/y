@@ -1,0 +1,5 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     '/Users/utee/Documents/y/.elixir_ls/build/test/lib/argon2_elixir/priv/argon2_nif.so'
+relocations:     []
+...

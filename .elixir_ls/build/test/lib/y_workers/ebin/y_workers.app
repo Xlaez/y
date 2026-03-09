@@ -1,0 +1,9 @@
+{application,y_workers,
+             [{modules,['Elixir.YWorkers','Elixir.YWorkers.Application',
+                        'Elixir.YWorkers.Workers.NotificationWorker']},
+              {optional_applications,[]},
+              {applications,[kernel,stdlib,elixir,logger,y_core,y_repo,oban]},
+              {description,"y_workers"},
+              {registered,[]},
+              {vsn,"0.1.0"},
+              {mod,{'Elixir.YWorkers.Application',[]}}]}.
