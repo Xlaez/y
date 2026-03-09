@@ -34,6 +34,13 @@ defmodule YWeb.Layouts do
   slot :inner_block, required: true
 
   def app(assigns) do
+    assigns =
+      assigns
+      |> Map.put_new(:current_user, nil)
+      |> Map.put_new(:current_scope, nil)
+      |> Map.put_new(:flash, %{})
+      |> Map.put_new(:inner_block, [])
+
     ~H"""
     <header class="navbar px-4 sm:px-6 lg:px-8">
       <div class="flex-1">

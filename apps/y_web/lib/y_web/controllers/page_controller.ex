@@ -3,6 +3,8 @@ defmodule YWeb.PageController do
 
   def home(conn, _params) do
     # The home page for anonymous users
-    render(conn, :home)
+    conn
+    |> assign(:current_user, nil)
+    |> render(:home)
   end
 end

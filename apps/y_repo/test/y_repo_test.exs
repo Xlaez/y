@@ -1,8 +1,7 @@
 defmodule YRepoTest do
-  use ExUnit.Case
-  doctest YRepo
+  use YRepo.DataCase
 
-  test "greets the world" do
-    assert YRepo.hello() == :world
+  test "repo is started" do
+    assert Process.whereis(YRepo.Repo)
   end
 end
