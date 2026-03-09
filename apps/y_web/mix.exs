@@ -53,6 +53,13 @@ defmodule YWeb.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:phoenix_live_dashboard, "~> 0.8"},
       {:telemetry_poller, "~> 1.0"},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.1.1",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
       {:plug_cowboy, "~> 2.7"}
     ]
   end
