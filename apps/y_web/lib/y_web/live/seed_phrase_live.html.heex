@@ -1,0 +1,53 @@
+<div class="min-h-screen flex flex-col items-center justify-center px-4 py-12 max-w-2xl mx-auto">
+  <div class="w-full text-center mb-8">
+    <h1 class="text-white text-3xl font-bold mb-3">Your recovery phrase</h1>
+    <p class="text-muted text-sm max-w-sm mx-auto">
+      Write these 12 words down in order and store them somewhere safe. You will never see them again.
+    </p>
+  </div>
+
+  <div class="w-full bg-warning/10 border border-warning rounded-xl p-4 mb-8 flex gap-3 items-center">
+    <span class="hero-exclamation-triangle size-6 text-warning shrink-0"></span>
+    <p class="text-warning text-sm font-medium">
+      Do not screenshot this page. Do not share these words with anyone.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full mb-8">
+    <%= for {word, index} <- Enum.with_index(@words, 1) do %>
+      <div class="bg-brand-bg border border-brand-border rounded-xl p-3 flex items-center justify-between">
+        <span class="text-muted text-xs font-mono"><%= index %></span>
+        <span class="text-body-text font-mono text-sm"><%= word %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="w-full space-y-6">
+    <label class="flex items-start gap-3 cursor-pointer group">
+      <div class="relative flex items-center pt-0.5">
+        <input
+          type="checkbox"
+          phx-click="toggle_confirm"
+          class="peer appearance-none size-5 border-2 border-brand-border rounded transition-all checked:bg-accent checked:border-accent"
+        />
+        <span class="hero-check size-3.5 text-white absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 peer-checked:opacity-100 transition-opacity"></span>
+      </div>
+      <span class="text-body-text text-sm select-none group-hover:text-white transition-colors">
+        I have written down my recovery phrase
+      </span>
+    </label>
+
+    <button
+      phx-click="continue"
+      disabled={!@confirmed}
+      class={[
+        "w-full font-bold rounded-full py-4 transition-all duration-200",
+        if(@confirmed, 
+          do: "bg-accent hover:bg-[#CE35E0] text-white active:scale-[0.98]", 
+          else: "bg-muted/20 text-muted cursor-not-allowed")
+      ]}
+    >
+      Continue to y
+    </button>
+  </div>
+</div>

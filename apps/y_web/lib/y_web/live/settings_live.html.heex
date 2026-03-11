@@ -1,0 +1,178 @@
+<header class="sticky top-0 z-40 bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 py-4">
+  <h2 class="text-white text-xl font-bold">Settings</h2>
+</header>
+
+<div class="p-4 space-y-6">
+  <!-- Account Section -->
+  <section class="bg-brand-surface border border-brand-border rounded-xl overflow-hidden shadow-lg">
+    <div class="px-4 py-3 border-b border-brand-border/50">
+      <h3 class="text-white font-bold">Account</h3>
+    </div>
+    
+    <div class="divide-y divide-brand-border/30">
+      <!-- Bitmoji Picker -->
+      <div phx-click="open_bitmoji_modal" class="px-4 py-4 hover:bg-white/5 transition-colors cursor-pointer flex justify-between items-center group">
+        <div>
+          <p class="text-white text-sm font-semibold">Bitmoji Style</p>
+          <p class="text-muted text-xs">Change your unique monogram color</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <YWeb.Layouts.bitmoji user={@user} size="sm" />
+          <span class="hero-chevron-right size-4 text-muted group-hover:text-white transition-colors"></span>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="px-4 py-4 space-y-3">
+        <div phx-click="toggle_password_form" class="flex justify-between items-center cursor-pointer group">
+          <p class="text-white text-sm font-semibold">Change Password</p>
+          <span class={["hero-chevron-down size-4 text-muted group-hover:text-white transition-all duration-300", if(@show_password_form, do: "rotate-180")]}></span>
+        </div>
+        
+        <%= if @show_password_form do %>
+          <div class="pt-2 space-y-4 animate-in slide-in-from-top-2 duration-200">
+            <input type="password" placeholder="Current password" class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-2 text-sm text-body_text outline-none focus:ring-1 focus:ring-accent" />
+            <input type="password" placeholder="New password" class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-2 text-sm text-body_text outline-none focus:ring-1 focus:ring-accent" />
+            <button class="bg-accent hover:bg-[#CE35E0] text-white text-sm font-bold rounded-full px-4 py-2 transition-all">
+              Update password
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy Section -->
+  <section class="bg-brand-surface border border-brand-border rounded-xl overflow-hidden shadow-lg">
+    <div class="px-4 py-3 border-b border-brand-border/50">
+      <h3 class="text-white font-bold">Privacy</h3>
+    </div>
+    
+    <div class="divide-y divide-brand-border/30">
+      <div class="px-4 py-4 flex justify-between items-start">
+        <div class="flex-1">
+          <p class="text-white text-sm font-semibold">Lock account</p>
+          <p class="text-muted text-xs pr-4">Only your followers can see your takes. New followers must be approved.</p>
+        </div>
+        
+        <button 
+          phx-click="toggle_lock"
+          class={[
+            "relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out shrink-0",
+            if(@lock_account, do: "bg-accent", else: "bg-brand-border")
+          ]}
+        >
+          <div class={[
+            "absolute top-1 left-1 bg-white size-4 rounded-full transition-transform duration-200 ease-in-out flex items-center justify-center",
+            if(@lock_account, do: "translate-x-5")
+          ]}>
+             <%= if @lock_account do %>
+                <span class="hero-check size-2.5 text-accent"></span>
+             <% end %>
+          </div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Section -->
+  <section class="bg-brand-surface border border-brand-border rounded-xl overflow-hidden shadow-lg">
+    <div class="px-4 py-3 border-b border-brand-border/50">
+      <h3 class="text-white font-bold">Content</h3>
+    </div>
+    <div class="divide-y divide-brand-border/30 text-sm">
+      <div class="px-4 py-4 flex justify-between items-center hover:bg-white/5 cursor-pointer">
+        <span class="text-white font-medium">Muted accounts</span>
+        <div class="flex items-center gap-2">
+          <span class="badge badge-sm bg-brand-bg border-brand-border text-muted">0</span>
+          <span class="text-accent2 font-semibold">Manage</span>
+        </div>
+      </div>
+      <div class="px-4 py-4 flex justify-between items-center hover:bg-white/5 cursor-pointer">
+        <span class="text-white font-medium">Blocked accounts</span>
+        <div class="flex items-center gap-2">
+          <span class="badge badge-sm bg-brand-bg border-brand-border text-muted">12</span>
+          <span class="text-accent2 font-semibold">Manage</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seed Phrase Info -->
+  <div class="bg-brand-surface/50 border border-brand-border rounded-xl p-4 flex gap-3">
+    <span class="hero-key size-6 text-accent shrink-0"></span>
+    <p class="text-muted text-xs leading-relaxed">
+      Your 12-word recovery phrase was shown once at signup. It cannot be displayed again. If you've lost it, your account cannot be recovered if you forget your password.
+    </p>
+  </div>
+
+  <!-- Danger Zone -->
+  <section class="border border-error/50 rounded-xl overflow-hidden shadow-lg shadow-error/5">
+    <div class="px-4 py-3 border-b border-error/20 bg-error/5">
+      <h3 class="text-error font-bold">Danger Zone</h3>
+    </div>
+    <div class="px-4 py-6 bg-brand-bg flex justify-between items-center">
+       <div>
+         <p class="text-white text-sm font-semibold">Delete Account</p>
+         <p class="text-muted text-xs">This action is permanent and irreversible.</p>
+       </div>
+       <button phx-click="open_delete_modal" class="border border-error text-error hover:bg-error/10 text-xs font-bold rounded-full px-5 py-2 transition-all">
+         Delete account
+       </button>
+    </div>
+  </section>
+</div>
+
+<!-- Bitmoji Modal -->
+<%= if @show_bitmoji_modal do %>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div phx-click="close_modal" class="absolute inset-0 bg-brand-bg/80 backdrop-blur-sm"></div>
+    <div class="relative bg-brand-surface border border-brand-border rounded-3xl p-8 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+      <h3 class="text-white text-xl font-bold mb-6 text-center">Pick your style</h3>
+      
+      <div class="grid grid-cols-4 gap-4">
+        <%= for color <- @colors do %>
+          <button 
+            phx-click="select_color" 
+            phx-value-color={color}
+            class="size-12 rounded-full border-2 border-transparent hover:scale-110 transition-transform flex items-center justify-center"
+            style={"background-color: #{color};"}
+          >
+            <%= if @user.bitmoji_color == color do %>
+              <span class="hero-check size-6 text-white drop-shadow"></span>
+            <% end %>
+          </button>
+        <% end %>
+      </div>
+      
+      <button phx-click="close_modal" class="w-full mt-8 bg-brand-bg border border-brand-border text-white font-bold rounded-full py-2 hover:bg-white/5 transition-colors">
+        Cancel
+      </button>
+    </div>
+  </div>
+<% end %>
+
+<!-- Delete Confirmation Modal -->
+<%= if @show_delete_modal do %>
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div phx-click="close_modal" class="absolute inset-0 bg-brand-bg/80 backdrop-blur-sm"></div>
+    <div class="relative bg-brand-surface border border-error/30 rounded-3xl p-8 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+      <div class="size-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6">
+        <span class="hero-exclamation-triangle size-10 text-error"></span>
+      </div>
+      <h3 class="text-white text-xl font-bold mb-2 text-center">Delete account?</h3>
+      <p class="text-muted text-sm text-center mb-8">This will permanently delete your username, takes, and all data. There is no going back.</p>
+      
+      <div class="space-y-3">
+        <button phx-click="confirm_delete" class="w-full bg-error hover:bg-error/80 text-white font-bold rounded-full py-3 transition-all">
+          Yes, delete everything
+        </button>
+        <button phx-click="close_modal" class="w-full bg-brand-bg border border-brand-border text-white font-bold rounded-full py-3 hover:bg-white/5 transition-colors">
+          I changed my mind
+        </button>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<YWeb.Layouts.toast_group flash={@flash} />

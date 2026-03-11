@@ -1,0 +1,86 @@
+<!-- Sticky Header & Search -->
+<header class="sticky top-0 z-40 bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 py-3 space-y-4">
+  <h2 class="text-white text-xl font-bold">Explore</h2>
+  
+  <div class="relative group">
+    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+      <span class="hero-magnifying-glass size-5 text-muted group-focus-within:text-accent transition-colors"></span>
+    </div>
+    <form phx-change="search">
+      <input
+        type="text"
+        name="query"
+        value={@search_query}
+        placeholder="Search users or takes..."
+        class="w-full bg-brand-surface border border-brand-border rounded-full pl-12 pr-4 py-3 text-body-text outline-none focus:ring-2 focus:ring-accent transition-all duration-150"
+      />
+    </form>
+  </div>
+</header>
+
+<div class="divide-y divide-brand-border">
+  <%= if @search_query == "" do %>
+    <!-- Trending Section -->
+    <div class="py-2">
+      <h3 class="px-4 py-3 text-white font-bold text-lg border-b border-brand-border">Trending</h3>
+      <div class="divide-y divide-brand-border/50">
+        <%= for hashtag <- @hashtags do %>
+          <div class="px-4 py-4 hover:bg-brand-surface transition-colors cursor-pointer flex justify-between items-center group">
+            <div>
+              <p class="text-white font-bold group-hover:underline"><%= hashtag.name %></p>
+              <p class="text-muted text-xs">Trending in y</p>
+            </div>
+            <span class="text-muted text-sm font-medium"><%= hashtag.count %> takes</span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <!-- Search Results Section -->
+    <div class="py-2">
+      <!-- Users -->
+      <div class="px-4 py-3 border-b border-brand-border">
+         <h4 class="text-white font-bold text-base">Users</h4>
+      </div>
+      <div class="divide-y divide-brand-border/30 mb-4">
+        <%= for user <- @results.users do %>
+          <div class="px-4 py-4 hover:bg-brand-surface/40 transition-colors flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <YWeb.Layouts.bitmoji user={user} size="md" />
+              <div>
+                <p class="text-white font-bold hover:underline cursor-pointer"><%= user.username %></p>
+                <p class="text-muted text-sm"><%= user.handle %></p>
+              </div>
+            </div>
+            <button class="border border-accent text-accent hover:bg-accent/10 text-sm font-bold rounded-full px-5 py-2 transition-all">
+              Follow
+            </button>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Takes -->
+      <div class="px-4 py-3 border-b border-brand-border">
+         <h4 class="text-white font-bold text-base">Takes</h4>
+      </div>
+      <div class="divide-y divide-brand-border/30">
+        <%= for take <- @results.takes do %>
+          <div class="px-4 py-4 hover:bg-brand-surface/40 transition-colors cursor-pointer">
+            <div class="flex gap-3">
+              <YWeb.Layouts.bitmoji user={take.user} size="sm" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-white font-bold text-sm"><%= take.user.username %></span>
+                  <span class="text-muted text-xs">· <%= take.inserted_at %></span>
+                </div>
+                <p class="text-body-text text-sm leading-relaxed line-clamp-2 mt-1">
+                  <%= take.body %>
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

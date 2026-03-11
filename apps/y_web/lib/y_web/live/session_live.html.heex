@@ -1,0 +1,84 @@
+<div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+  <div class="text-center mb-8">
+    <h1 class="text-accent text-7xl font-black mb-2 select-none">y</h1>
+    <p class="text-muted text-sm font-medium tracking-wide">say whatever.</p>
+  </div>
+
+  <div class="w-full max-w-sm bg-brand-surface rounded-xl border border-brand-border p-8 shadow-2xl">
+    <h2 class="text-white text-xl font-bold mb-6">Sign in</h2>
+
+    <form phx-submit="submit" class="space-y-4">
+      <div>
+        <label for="username" class="block text-body-text text-sm font-semibold mb-1">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="e.g. voidwalker"
+          class={[
+            "w-full bg-brand-bg border rounded-xl px-4 py-3 text-body-text outline-none transition-all duration-150",
+            "focus:ring-2 focus:ring-accent",
+            if(@error, do: "border-error", else: "border-brand-border")
+          ]}
+          required
+        />
+        <%= if @error do %>
+          <p class="text-error text-xs mt-1"><%= @error %></p>
+        <% end %>
+      </div>
+
+      <div class="relative">
+        <label for="password" class="block text-body-text text-sm font-semibold mb-1">Password</label>
+        <div class="relative">
+          <input
+            type={if @show_password, do: "text", else: "password"}
+            id="password"
+            name="password"
+            class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-body-text outline-none focus:ring-2 focus:ring-accent transition-all duration-150"
+            required
+          />
+          <button
+            type="button"
+            phx-click="toggle_password"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-body-text transition-colors"
+          >
+            <%= if @show_password do %>
+              <span class="hero-eye-slash size-5"></span>
+            <% else %>
+              <span class="hero-eye size-5"></span>
+            <% end %>
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-accent hover:bg-[#CE35E0] active:scale-[0.98] text-white font-bold rounded-full py-3 mt-2 transition-all duration-150"
+      >
+        Sign in
+      </button>
+
+      <div class="relative flex items-center py-2">
+        <div class="flex-grow border-t border-brand-border"></div>
+        <span class="flex-shrink mx-4 text-muted text-sm">or</span>
+        <div class="flex-grow border-t border-brand-border"></div>
+      </div>
+
+      <.link
+        patch={~p"/signup"}
+        class="block w-full text-center border border-accent text-accent hover:bg-accent/10 active:scale-[0.98] font-bold rounded-full py-3 transition-all duration-150"
+      >
+        Create account
+      </.link>
+    </form>
+
+    <div class="mt-6 text-center">
+      <.link
+        patch={~p"/forgot-password"}
+        class="text-accent2 text-sm font-medium hover:underline"
+      >
+        Forgot password?
+      </.link>
+    </div>
+  </div>
+</div>

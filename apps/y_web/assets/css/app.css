@@ -6,6 +6,20 @@
 @source "../js";
 @source "../../lib/y_web";
 
+@theme {
+  --color-brand-bg: #0D0D1A;
+  --color-brand-surface: #1A1A2E;
+  --color-brand-border: #2A2A3E;
+  --color-accent: #E040FB;
+  --color-accent2: #00E5FF;
+  --color-body-text: #CCCCDD;
+  --color-muted: #666680;
+  --color-error: #FF5252;
+  --color-warning: #FFB300;
+
+  --font-inter: "Inter", system-ui, sans-serif;
+}
+
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available.
    The heroicons installation itself is managed by your mix.exs */
 @plugin "../vendor/heroicons";

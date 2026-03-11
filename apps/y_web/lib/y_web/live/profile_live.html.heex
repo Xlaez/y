@@ -1,0 +1,89 @@
+<header class="sticky top-0 z-40 bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 py-3 flex items-center gap-6">
+  <.link patch={~p"/home"} class="p-2 hover:bg-brand-surface rounded-full transition-colors">
+    <span class="hero-arrow-left size-5 text-white"></span>
+  </.link>
+  <div>
+    <h2 class="text-white text-lg font-bold leading-tight"><%= @user.username %></h2>
+    <p class="text-muted text-xs"><%= @user.take_count %> Takes</p>
+  </div>
+</header>
+
+<div class="relative">
+  <!-- Profile Header Content -->
+  <div class="px-6 py-6 border-b border-brand-border space-y-4">
+    <div class="flex justify-between items-start">
+      <div class="p-1 bg-brand-bg rounded-full -mt-2">
+        <YWeb.Layouts.bitmoji user={@user} size="xl" />
+      </div>
+      
+      <button 
+        phx-click="toggle_follow"
+        class={[
+          "px-6 py-2 rounded-full font-bold transition-all duration-200",
+          if(@following, 
+            do: "bg-transparent border border-brand-border text-white hover:border-error hover:text-error hover:bg-error/5 group", 
+            else: "bg-white text-black hover:bg-white/90")
+        ]}
+      >
+        <%= if @following do %>
+          <span class="block group-hover:hidden">Following</span>
+          <span class="hidden group-hover:block">Unfollow</span>
+        <% else %>
+          Follow
+        <% end %>
+      </button>
+    </div>
+
+    <div class="space-y-1">
+      <div class="flex items-center gap-1.5">
+        <h3 class="text-white text-2xl font-black"><%= @user.username %></h3>
+        <%= if @user.is_locked do %>
+          <span class="hero-lock-closed-micro size-4 text-muted"></span>
+        <% end %>
+      </div>
+      <p class="text-muted text-base"><%= @user.handle %></p>
+    </div>
+
+    <div class="flex items-center gap-4 text-sm">
+      <div class="hover:underline cursor-pointer">
+        <span class="text-white font-bold"><%= @user.following_count %></span>
+        <span class="text-muted">Following</span>
+      </div>
+      <div class="hover:underline cursor-pointer">
+        <span class="text-white font-bold"><%= @user.follower_count %></span>
+        <span class="text-muted">Followers</span>
+      </div>
+    </div>
+
+    <%= if @user.is_locked do %>
+      <div class="flex items-center gap-2 text-muted text-sm bg-brand-surface/30 p-3 rounded-xl border border-brand-border/50">
+        <span class="hero-lock-closed size-5 text-accent"></span>
+        <p>This account is locked. Only followers can see their takes.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Tabs (Static) -->
+  <div class="flex border-b border-brand-border h-14">
+    <div class="flex-1 flex flex-col items-center justify-center relative cursor-pointer group hover:bg-brand-surface/30 transition-colors">
+      <span class="text-white font-bold text-sm">Takes</span>
+      <div class="absolute bottom-0 w-16 h-1 bg-accent rounded-full"></div>
+    </div>
+    <div class="flex-1 flex items-center justify-center cursor-pointer text-muted font-medium hover:bg-brand-surface/30 transition-colors">
+      Replies
+    </div>
+    <div class="flex-1 flex items-center justify-center cursor-pointer text-muted font-medium hover:bg-brand-surface/30 transition-colors">
+      Media
+    </div>
+    <div class="flex-1 flex items-center justify-center cursor-pointer text-muted font-medium hover:bg-brand-surface/30 transition-colors">
+      Agrees
+    </div>
+  </div>
+
+  <!-- Profile Feed -->
+  <div class="divide-y divide-brand-border">
+    <%= for take <- @takes do %>
+      <YWeb.Layouts.take_card take={take} />
+    <% end %>
+  </div>
+</div>

@@ -2,28 +2,26 @@ defmodule YWeb.ProfileLive do
   use YWeb, :live_view
 
   def mount(%{"username" => username}, _session, socket) do
-    {:ok, assign(socket, username: username, takes: [])}
+    # Find user by username in dummy data
+    user = 
+      Enum.find(YWeb.DummyData.users(), fn u -> u.username == username end) || 
+      Enum.at(YWeb.DummyData.users(), 0)
+
+    takes = Enum.filter(YWeb.DummyData.takes(), fn t -> t.user.id == user.id end)
+    
+    # If user has no takes in dummy data, just show first 5 for variety
+    takes = if Enum.empty?(takes), do: Enum.take(YWeb.DummyData.takes(), 5), else: takes
+
+    {:ok,
+     socket
+     |> assign(active_tab: :profile)
+     |> assign(user: user)
+     |> assign(takes: takes)
+     |> assign(following: false),
+     layout: {YWeb.Layouts, :authenticated}}
   end
 
-  def render(assigns) do
-    ~H"""
-    <div class="max-w-2xl mx-auto py-8 px-4">
-      <div class="flex items-center space-x-4 mb-8">
-        <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-          <%= String.at(@username, 0) |> String.upcase() %>
-        </div>
-        <div>
-          <h1 class="text-3xl font-bold">@<%= @username %></h1>
-          <p class="text-gray-500">Anonymous Content Creator</p>
-        </div>
-      </div>
-
-      <div class="border-t border-gray-100 pt-8">
-        <div class="space-y-4">
-          <p class="text-center py-8 text-gray-500">No takes from @<%= @username %> yet.</p>
-        </div>
-      </div>
-    </div>
-    """
+  def handle_event("toggle_follow", _, socket) do
+    {:noreply, assign(socket, following: !socket.assigns.following)}
   end
 end

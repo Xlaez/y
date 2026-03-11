@@ -24,18 +24,25 @@ defmodule YWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/login", AuthController, :new
-    post "/login", AuthController, :create
-    delete "/logout", AuthController, :delete
+    live "/login", SessionLive, :index
+    live "/signup", RegistrationLive, :index
+    live "/forgot-password", PasswordResetLive, :index
   end
 
-  # Authenticated routes
-  scope "/", YWeb do
-    pipe_through [:browser, YWeb.Plugs.RequireAuth]
+  scope "/onboarding", YWeb do
+    pipe_through :browser
+    live "/seed-phrase", SeedPhraseLive, :index
+  end
 
-    live "/feed", FeedLive, :index
-    live "/p/:id", PostLive, :show
-    live "/u/:username", ProfileLive, :show
+  scope "/", YWeb do
+    pipe_through :browser
+
+    live "/home", HomeLive, :index
+    live "/explore", ExploreLive, :index
+    live "/notifications", NotificationsLive, :index
+    live "/bookmarks", BookmarksLive, :index
+    live "/settings", SettingsLive, :index
+    live "/:username", ProfileLive, :show
   end
 
   # Other scopes may use custom stacks.
