@@ -1,16 +1,16 @@
-<header class="sticky top-0 z-40 bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 py-3">
-  <h2 class="text-white text-xl font-bold">Bookmarks</h2>
-  <p class="text-muted text-xs"><%= @current_user.handle %></p>
+<header class="sticky top-0 z-40 backdrop-blur-xl bg-black/70 border-b border-y-border px-4 py-3">
+  <h2 class="text-white text-xl font-semibold">Bookmarks</h2>
+  <p class="text-y-muted text-xs"><%= @current_user.handle %></p>
 </header>
 
-<div class="divide-y divide-brand-border min-h-[400px]">
+<div class="divide-y divide-y-border min-h-[400px]">
   <%= if Enum.empty?(@bookmarks) do %>
     <div class="flex flex-col items-center justify-center py-20 px-8 text-center">
-      <div class="size-20 bg-brand-surface rounded-full flex items-center justify-center mb-6">
-        <span class="hero-bookmark size-10 text-accent2"></span>
+      <div class="size-20 bg-y-surface rounded-full flex items-center justify-center mb-6">
+        <span class="hero-bookmark size-10 text-y-bookmark"></span>
       </div>
       <h3 class="text-white text-2xl font-bold mb-2">Nothing saved yet</h3>
-      <p class="text-muted text-sm max-w-[300px]">
+      <p class="text-y-muted text-sm max-w-[300px]">
         Tap the bookmark icon on any take to save it here. It's the only way to remember anything in this noise.
       </p>
     </div>

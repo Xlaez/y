@@ -1,15 +1,15 @@
 <div class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
   <div class="text-center mb-8">
-    <h1 class="text-accent text-7xl font-black mb-2 select-none">y</h1>
-    <p class="text-muted text-sm font-medium tracking-wide">say whatever.</p>
+    <h1 class="text-y-white text-7xl font-black mb-2 select-none">y</h1>
+    <p class="text-y-muted text-sm font-medium tracking-wide">say whatever.</p>
   </div>
 
-  <div class="w-full max-w-sm bg-brand-surface rounded-xl border border-brand-border p-8 shadow-2xl">
+  <div class="w-full max-w-sm bg-y-surface rounded-2xl p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
     <h2 class="text-white text-xl font-bold mb-6">Create your account</h2>
 
     <form phx-submit="submit" phx-change="validate" class="space-y-4">
       <div>
-        <label for="username" class="block text-body-text text-sm font-semibold mb-1">Username</label>
+        <label for="username" class="block text-y-text text-sm font-medium mb-1">Username</label>
         <input
           type="text"
           id="username"
@@ -17,29 +17,29 @@
           maxlength="30"
           value={@username}
           placeholder="e.g. voidwalker"
-          class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-body-text outline-none focus:ring-2 focus:ring-accent transition-all duration-150"
+          class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-y-text outline-none focus:ring-1 focus:ring-white/30 focus:outline-none transition-all duration-150 placeholder:text-y-placeholder"
           required
         />
-        <p class="text-muted text-xs mt-1 text-right">
+        <p class="text-y-muted text-xs mt-1 text-right">
           <%= String.length(@username) %>/30
         </p>
       </div>
 
       <div>
-        <label for="password" class="block text-body-text text-sm font-semibold mb-1">Password</label>
+        <label for="password" class="block text-y-text text-sm font-medium mb-1">Password</label>
         <div class="relative">
           <input
             type={if @show_password, do: "text", else: "password"}
             id="password"
             name="password"
-            class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-body-text outline-none focus:ring-2 focus:ring-accent transition-all duration-150"
+            class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-y-text outline-none focus:ring-1 focus:ring-white/30 focus:outline-none transition-all duration-150 placeholder:text-y-placeholder"
             required
           />
           <button
             type="button"
             phx-click="toggle_password"
             phx-value-field="password"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-body-text transition-colors"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-y-faint hover:text-y-text transition-colors"
           >
             <span class={"hero-eye#{if @show_password, do: "-slash", else: ""} size-5"}></span>
           </button>
@@ -47,20 +47,20 @@
       </div>
 
       <div>
-        <label for="confirm_password" class="block text-body-text text-sm font-semibold mb-1">Confirm password</label>
+        <label for="confirm_password" class="block text-y-text text-sm font-medium mb-1">Confirm password</label>
         <div class="relative">
           <input
             type={if @show_confirm_password, do: "text", else: "password"}
             id="confirm_password"
             name="confirm_password"
-            class="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-body-text outline-none focus:ring-2 focus:ring-accent transition-all duration-150"
+            class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-y-text outline-none focus:ring-1 focus:ring-white/30 focus:outline-none transition-all duration-150 placeholder:text-y-placeholder"
             required
           />
           <button
             type="button"
             phx-click="toggle_password"
             phx-value-field="confirm"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-body-text transition-colors"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-y-faint hover:text-y-text transition-colors"
           >
             <span class={"hero-eye#{if @show_confirm_password, do: "-slash", else: ""} size-5"}></span>
           </button>
@@ -69,7 +69,7 @@
 
       <button
         type="submit"
-        class="w-full bg-accent hover:bg-[#CE35E0] active:scale-[0.98] text-white font-bold rounded-full py-3 mt-4 transition-all duration-150"
+        class="w-full bg-white hover:bg-[#E5E5E7] active:scale-[0.98] text-black font-bold rounded-full py-3 mt-4 transition-all duration-150"
       >
         Create account
       </button>
@@ -77,16 +77,16 @@
       <div class="mt-4 text-center">
         <.link
           patch={~p"/login"}
-          class="text-accent2 text-sm font-medium hover:underline"
+          class="text-y-muted text-sm font-medium hover:text-white hover:underline transition-colors"
         >
           Already have an account? Sign in
         </.link>
       </div>
     </form>
 
-    <div class="mt-8 bg-brand-bg/50 border border-brand-border rounded-xl p-4 flex gap-3">
-      <span class="hero-shield-check size-6 text-accent shrink-0"></span>
-      <p class="text-muted text-xs leading-relaxed">
+    <div class="mt-8 bg-y-bg rounded-xl p-4 flex gap-3">
+      <span class="hero-shield-check size-6 text-y-muted shrink-0"></span>
+      <p class="text-y-muted text-xs leading-relaxed">
         You'll receive a 12-word recovery phrase after signing up. Store it somewhere safe — it's the only way to recover your account.
       </p>
     </div>

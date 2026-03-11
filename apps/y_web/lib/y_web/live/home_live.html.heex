@@ -1,10 +1,10 @@
 <!-- Sticky Header -->
-<header class="sticky top-0 z-40 bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 py-4">
-  <h2 class="text-white text-xl font-bold">Home</h2>
+<header class="sticky top-0 z-40 backdrop-blur-xl bg-black/70 border-b border-y-border px-4 py-4">
+  <h2 class="text-white text-xl font-semibold">Home</h2>
 </header>
 
 <!-- Compose Box -->
-<div class="px-4 py-4 border-b border-brand-border flex gap-4">
+<div class="px-4 py-4 border-b border-y-border flex gap-4">
   <YWeb.Layouts.bitmoji user={YWeb.DummyData.current_user()} size="md" />
   
   <form phx-submit="post_take" phx-change="validate_compose" class="flex-1">
@@ -13,18 +13,18 @@
       value={@compose_body}
       maxlength="250"
       placeholder="What's your take?"
-      class="w-full bg-transparent border-none outline-none text-body-text text-lg resize-none placeholder:text-muted focus:ring-0 min-h-[80px]"
+      class="w-full bg-transparent border-none outline-none text-y-text text-xl resize-none placeholder:text-y-placeholder focus:ring-0 min-h-[80px]"
     ></textarea>
     
-    <div class="flex items-center justify-between pt-2 border-t border-brand-border/10">
-      <div class="flex gap-2 text-accent">
-        <button type="button" class="p-2 hover:bg-accent/10 rounded-full transition-colors">
+    <div class="flex items-center justify-between pt-2 border-t border-y-border/10">
+      <div class="flex gap-2 text-y-faint">
+        <button type="button" class="p-2 hover:bg-y-opinion/10 hover:text-y-opinion rounded-full transition-colors">
           <span class="hero-photo size-5"></span>
         </button>
-        <button type="button" class="p-2 hover:bg-accent/10 rounded-full transition-colors">
+        <button type="button" class="p-2 hover:bg-y-opinion/10 hover:text-y-opinion rounded-full transition-colors">
           <span class="hero-list-bullet size-5"></span>
         </button>
-        <button type="button" class="p-2 hover:bg-accent/10 rounded-full transition-colors">
+        <button type="button" class="p-2 hover:bg-y-opinion/10 hover:text-y-opinion rounded-full transition-colors">
           <span class="hero-face-smile size-5"></span>
         </button>
       </div>
@@ -32,14 +32,14 @@
       <div class="flex items-center gap-4">
         <span class={[
           "text-xs font-medium",
-          if(String.length(@compose_body) > 230, do: "text-error", else: "text-muted")
+          if(String.length(@compose_body) > 230, do: "text-y-agree", else: "text-y-muted")
         ]}>
           <%= String.length(@compose_body) %>/250
         </span>
         <button
           type="submit"
           disabled={String.length(@compose_body) == 0}
-          class="bg-accent hover:bg-[#CE35E0] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-full px-6 py-2 transition-all"
+          class="bg-white hover:bg-[#E5E5E7] disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-full px-6 py-2 transition-all"
         >
           Post
         </button>
@@ -49,30 +49,30 @@
 </div>
 
 <!-- Feed -->
-<div class="divide-y divide-brand-border">
+<div class="divide-y divide-y-border">
   <%= for {take, index} <- Enum.with_index(@takes) do %>
     <%= if index == 3 do %>
       <!-- Who to Follow Widget -->
-      <div class="px-4 py-4 bg-brand-surface/30">
-        <div class="bg-brand-surface border border-brand-border rounded-xl p-4">
-          <h3 class="text-white font-bold text-lg mb-4">Who to follow</h3>
-          <div class="space-y-4">
+      <div class="px-4 py-4">
+        <div class="bg-y-surface rounded-2xl overflow-hidden">
+          <h3 class="text-white font-bold text-lg px-4 pt-4 pb-3">Who to follow</h3>
+          <div>
             <%= for user <- @who_to_follow do %>
-              <div class="flex items-center justify-between group">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-y-border last:border-b-0 group">
                 <div class="flex items-center gap-3">
                   <YWeb.Layouts.bitmoji user={user} size="sm" />
                   <div class="min-w-0">
-                    <p class="text-white font-bold text-sm truncate hover:underline cursor-pointer"><%= user.username %></p>
-                    <p class="text-muted text-xs truncate"><%= user.handle %></p>
+                    <p class="text-y-text font-medium text-sm truncate hover:underline cursor-pointer"><%= user.username %></p>
+                    <p class="text-y-muted text-xs truncate"><%= user.handle %></p>
                   </div>
                 </div>
-                <button class="border border-accent text-accent hover:bg-accent/10 text-sm font-bold rounded-full px-4 py-1.5 transition-all">
+                <button class="border border-y-white text-y-white hover:bg-white/10 text-sm font-bold rounded-full px-4 py-1.5 transition-all">
                   Follow
                 </button>
               </div>
             <% end %>
           </div>
-          <button class="text-accent2 text-sm font-medium mt-4 hover:underline">Show more</button>
+          <button class="text-y-opinion text-sm font-medium px-4 py-3 hover:bg-y-hover transition-colors w-full text-left rounded-b-2xl">Show more</button>
         </div>
       </div>
     <% end %>

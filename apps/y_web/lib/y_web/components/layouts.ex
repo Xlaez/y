@@ -11,7 +11,7 @@ defmodule YWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <main class="min-h-screen bg-brand-bg">
+    <main class="min-h-screen bg-y-bg">
       <YWeb.Layouts.toast_group flash={@flash} />
       {@inner_content}
     </main>
@@ -34,13 +34,13 @@ defmodule YWeb.Layouts do
       |> Map.put_new(:flash, %{})
 
     ~H"""
-    <div class="flex min-h-screen bg-brand-bg text-body-text font-inter antialiased">
+    <div class="flex min-h-screen bg-y-bg text-y-text font-inter antialiased">
       <YWeb.Layouts.toast_group flash={@flash} />
       <!-- Left Sidebar - Desktop -->
-      <aside class="fixed inset-y-0 left-0 hidden w-20 xl:w-64 border-r border-brand-border lg:block bg-brand-bg z-50">
+      <aside class="fixed inset-y-0 left-0 hidden w-20 xl:w-64 border-r border-y-border lg:block bg-y-bg z-50">
         <div class="flex flex-col h-full px-2 xl:px-4 py-6">
           <div class="px-4 mb-8">
-            <h1 class="text-accent text-3xl xl:text-4xl font-black text-center xl:text-left select-none">y</h1>
+            <h1 class="text-y-white text-3xl xl:text-4xl font-black text-center xl:text-left select-none">y</h1>
           </div>
 
           <nav class="flex-1 space-y-2">
@@ -63,12 +63,12 @@ defmodule YWeb.Layouts do
             <.nav_item to="/settings" icon="hero-cog-6-tooth" label="Settings" active={@active_tab == :settings} />
           </nav>
 
-          <button class="w-full bg-accent hover:bg-[#CE35E0] text-white font-bold rounded-full py-3 mt-4 shadow-lg shadow-accent/20 transition-all duration-150 active:scale-[0.98] flex items-center justify-center">
+          <button class="w-full bg-white text-black font-bold rounded-full py-3 mt-4 hover:bg-[#E5E5E7] transition-all duration-150 active:scale-[0.98] flex items-center justify-center">
             <span class="xl:hidden hero-pencil size-6"></span>
             <span class="hidden xl:block">New Take</span>
           </button>
 
-          <div class="mt-auto pt-6 border-t border-brand-border">
+          <div class="mt-auto pt-6 border-t border-y-border">
             <.user_row user={@current_user} />
           </div>
         </div>
@@ -76,13 +76,13 @@ defmodule YWeb.Layouts do
 
       <!-- Main Content Area -->
       <main class="flex-1 lg:ml-20 xl:ml-64 min-h-screen pb-20 lg:pb-0">
-        <div class="max-w-[600px] mx-auto min-h-screen border-x border-brand-border/30 bg-brand-bg shadow-2xl shadow-black/50">
+        <div class="max-w-[600px] mx-auto min-h-screen border-x border-y-border">
           {@inner_content}
         </div>
       </main>
 
       <!-- Mobile Bottom Nav -->
-      <nav class="fixed bottom-0 inset-x-0 h-16 bg-brand-bg/80 backdrop-blur-md border-t border-brand-border flex items-center justify-around lg:hidden z-50">
+      <nav class="fixed bottom-0 inset-x-0 h-16 bg-y-bg/80 backdrop-blur-md border-t border-y-border flex items-center justify-around lg:hidden z-50">
         <.mobile_nav_item to="/home" icon="hero-home" active={@active_tab == :home} />
         <.mobile_nav_item to="/explore" icon="hero-magnifying-glass" active={@active_tab == :explore} />
         <.mobile_nav_item
@@ -103,13 +103,13 @@ defmodule YWeb.Layouts do
       patch={@to}
       class={[
         "flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-150 group",
-        if(@active, do: "text-accent font-bold", else: "text-body-text hover:bg-brand-surface")
+        if(@active, do: "text-white font-semibold", else: "text-y-text hover:bg-y-hover")
       ]}
     >
       <div class="relative">
-        <span class={[@icon, "size-7 transition-transform group-hover:scale-110", if(@active, do: "text-accent", else: "text-body-text")]}></span>
+        <span class={[@icon, "size-7 transition-transform group-hover:scale-110", if(@active, do: "text-white", else: "text-y-text")]}></span>
         <%= if assigns[:badge] && @badge > 0 do %>
-          <span class="absolute -top-1.5 -right-1.5 bg-error text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 border border-brand-bg">
+          <span class="absolute -top-1.5 -right-1.5 bg-y-agree text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 border border-y-bg">
             <%= @badge %>
           </span>
         <% end %>
@@ -125,12 +125,12 @@ defmodule YWeb.Layouts do
       patch={@to}
       class={[
         "relative p-2 rounded-full transition-all duration-150 active:scale-90",
-        if(@active, do: "text-accent", else: "text-body-text")
+        if(@active, do: "text-white", else: "text-y-text")
       ]}
     >
       <span class={[@icon, "size-7"]}></span>
       <%= if assigns[:badge] && @badge > 0 do %>
-        <span class="absolute top-1 right-1 bg-error text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 border border-brand-bg">
+        <span class="absolute top-1 right-1 bg-y-agree text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 border border-y-bg">
           <%= @badge %>
         </span>
       <% end %>
@@ -140,13 +140,13 @@ defmodule YWeb.Layouts do
 
   defp user_row(assigns) do
     ~H"""
-    <div class="flex items-center gap-3 px-3 py-3 rounded-full hover:bg-brand-surface cursor-pointer transition-all duration-150 group">
+    <div class="flex items-center gap-3 px-3 py-3 rounded-full hover:bg-y-hover cursor-pointer transition-all duration-150 group">
       <.bitmoji user={@user} size="sm" />
       <div class="flex-1 min-w-0 hidden xl:block">
-        <p class="text-white font-bold truncate text-sm"><%= @user.username %></p>
-        <p class="text-muted text-xs truncate"><%= @user.handle %></p>
+        <p class="text-y-text font-medium truncate text-sm"><%= @user.username %></p>
+        <p class="text-y-muted text-xs truncate"><%= @user.handle %></p>
       </div>
-      <span class="hero-ellipsis-horizontal size-5 text-muted group-hover:text-body-text ml-auto hidden xl:block">
+      <span class="hero-ellipsis-horizontal size-5 text-y-muted group-hover:text-y-text ml-auto hidden xl:block">
       </span>
     </div>
     """
@@ -167,7 +167,7 @@ defmodule YWeb.Layouts do
 
     ~H"""
     <div
-      class={["shrink-0 rounded-full flex items-center justify-center font-bold text-white shadow-inner", @size_class]}
+      class={["shrink-0 rounded-full flex items-center justify-center font-bold text-[#E5E5E7] shadow-inner", @size_class]}
       style={"background-color: #{@user.bitmoji_color};"}
     >
       <%= YWeb.Helpers.Bitmoji.initials(@user.username) %>
@@ -182,35 +182,35 @@ defmodule YWeb.Layouts do
 
   def take_card(assigns) do
     ~H"""
-    <div class="px-4 py-4 hover:bg-brand-surface/40 transition-colors cursor-pointer group">
+    <div class="px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group">
       <div class="flex gap-3">
         <.bitmoji user={@take.user} size="md" />
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1.5 mb-0.5">
-            <span class="text-white font-bold text-sm hover:underline"><%= @take.user.username %></span>
-            <span class="text-muted text-sm"><%= @take.user.handle %></span>
-            <span class="text-muted text-sm">· <%= @take.inserted_at %></span>
+            <span class="text-y-text font-medium text-sm hover:underline"><%= @take.user.username %></span>
+            <span class="text-y-muted text-sm"><%= @take.user.handle %></span>
+            <span class="text-y-muted text-sm">· <%= @take.inserted_at %></span>
           </div>
 
           <%= if @take.type == :opinion do %>
-            <p class="text-accent2 text-sm mb-1">
+            <p class="text-y-opinion text-sm mb-1">
               Replying to <span class="hover:underline cursor-pointer"><%= @take.parent.user.handle %></span>
             </p>
           <% end %>
 
-          <p class="text-body-text text-base leading-relaxed break-words">
+          <p class="text-y-text text-[15px] leading-relaxed break-words mt-1">
             <%= @take.body %>
           </p>
 
           <%= if @take.type in [:retake, :opinion] do %>
-            <div class="mt-3 border border-brand-border rounded-xl p-3 bg-brand-bg/50 hover:bg-brand-bg transition-colors">
+            <div class="mt-3 border border-y-border rounded-2xl p-3 bg-y-surface hover:bg-y-hover transition-colors">
               <div class="flex items-center gap-2 mb-1">
                 <.bitmoji user={@take.parent.user} size="sm" />
-                <span class="text-white font-bold text-sm"><%= @take.parent.user.username %></span>
-                <span class="text-muted text-sm"><%= @take.parent.user.handle %></span>
+                <span class="text-y-text font-medium text-sm"><%= @take.parent.user.username %></span>
+                <span class="text-y-muted text-sm"><%= @take.parent.user.handle %></span>
               </div>
-              <p class="text-body-text text-sm leading-relaxed truncate">
+              <p class="text-y-text text-sm leading-relaxed truncate">
                 <%= @take.parent.body %>
               </p>
             </div>
@@ -220,21 +220,21 @@ defmodule YWeb.Layouts do
             <.action_button
               icon="hero-chat-bubble-left"
               count={@take.opinion_count}
-              hover_class="hover:text-accent hover:bg-accent/10"
+              hover_class="hover:text-y-opinion hover:bg-y-opinion/10"
             />
             <.action_button
               icon="hero-arrow-path"
               count={@take.retake_count}
-              hover_class="hover:text-accent2 hover:bg-accent2/10"
+              hover_class="hover:text-y-retake hover:bg-y-retake/10"
             />
             <.action_button
               icon="hero-heart"
               count={@take.agreed_count}
-              hover_class="hover:text-error hover:bg-error/10"
+              hover_class="hover:text-y-agree hover:bg-y-agree/10"
             />
             <.action_button
               icon="hero-bookmark"
-              hover_class="hover:text-warning hover:bg-warning/10"
+              hover_class="hover:text-y-bookmark hover:bg-y-bookmark/10"
             />
           </div>
         </div>
@@ -245,12 +245,12 @@ defmodule YWeb.Layouts do
 
   defp action_button(assigns) do
     ~H"""
-    <div class={["flex items-center gap-2 group/btn transition-colors text-muted", assigns[:hover_class]]}>
+    <div class={["flex items-center gap-2 group/btn transition-colors text-y-faint", assigns[:hover_class]]}>
       <div class="p-2 rounded-full group-hover/btn:bg-current/10">
         <span class={[assigns.icon, "size-5"]}></span>
       </div>
       <%= if assigns[:count] do %>
-        <span class="text-xs font-medium"><%= assigns.count %></span>
+        <span class="text-y-muted text-sm font-medium"><%= assigns.count %></span>
       <% end %>
     </div>
     """
@@ -276,9 +276,9 @@ defmodule YWeb.Layouts do
     message = assigns.message
 
     {icon, color} = case kind do
-      "info" -> {"hero-information-circle", "text-accent2"}
-      "error" -> {"hero-x-circle", "text-error"}
-      _ -> {"hero-bell", "text-accent"}
+      "info" -> {"hero-information-circle", "text-y-opinion"}
+      "error" -> {"hero-x-circle", "text-y-agree"}
+      _ -> {"hero-bell", "text-y-white"}
     end
 
     assigns = 
@@ -290,11 +290,11 @@ defmodule YWeb.Layouts do
     ~H"""
     <div 
       phx-mounted={show("#toast")}
-      class="pointer-events-auto bg-brand-surface border border-brand-border rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right-10 duration-300"
+      class="pointer-events-auto bg-y-border rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right-10 duration-300"
     >
       <span class={[@icon, @color, "size-5"]}></span>
-      <span class="text-body-text text-sm font-medium"><%= @message %></span>
-      <button class="ml-2 text-muted hover:text-white transition-colors">
+      <span class="text-y-text text-sm font-medium"><%= @message %></span>
+      <button class="ml-2 text-y-muted hover:text-white transition-colors">
         <span class="hero-x-mark size-4"></span>
       </button>
     </div>

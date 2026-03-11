@@ -12,11 +12,11 @@ defmodule YWeb.SettingsLive do
      |> assign(show_delete_modal: false)
      |> assign(lock_account: user.is_locked)
      |> assign(colors: [
-       "#E040FB", "#00E5FF", "#FF5252", "#FFB300", 
-       "#00E676", "#FF6D00", "#40C4FF", "#F50057",
-       "#7C4DFF", "#64FFDA", "#FF4081", "#FFD740",
-       "#B2FF59", "#FFAB40", "#448AFF", "#FF1744"
-     ]),
+        "#3A3A3C", "#48484A", "#636366", "#2C2C2E",
+        "#1C1C1E", "#3A3A3C", "#48484A", "#636366",
+        "#2C2C2E", "#1C1C1E", "#3A3A3C", "#48484A",
+        "#636366", "#2C2C2E", "#1C1C1E", "#3A3A3C"
+      ]),
      layout: {YWeb.Layouts, :authenticated}}
   end
 

@@ -1,8 +1,8 @@
-<header class="sticky top-0 z-40 bg-brand-bg/80 backdrop-blur-md border-b border-brand-border px-4 py-4">
-  <h2 class="text-white text-xl font-bold">Notifications</h2>
+<header class="sticky top-0 z-40 backdrop-blur-xl bg-black/70 border-b border-y-border px-4 py-4">
+  <h2 class="text-white text-xl font-semibold">Notifications</h2>
 </header>
 
-<div class="divide-y divide-brand-border">
+<div class="divide-y divide-y-border">
   <%= for notification <- @notifications do %>
     <div
       phx-click="mark_read"
@@ -10,22 +10,22 @@
       class={[
         "px-4 py-4 transition-all duration-200 cursor-pointer group flex items-start gap-3",
         if(notification.unread, 
-          do: "bg-brand-surface/20 border-l-2 border-accent", 
-          else: "hover:bg-brand-surface/40")
+          do: "bg-y-surface/20 border-l-2 border-y-agree", 
+          else: "hover:bg-y-hover")
       ]}
     >
       <div class="shrink-0 mt-1">
         <%= case notification.type do %>
           <% :agreed -> %>
-            <div class="size-8 rounded-full flex items-center justify-center text-error">
+            <div class="size-8 rounded-full flex items-center justify-center text-y-agree">
               <span class="hero-heart-solid size-6"></span>
             </div>
           <% :opinion -> %>
-            <div class="size-8 rounded-full flex items-center justify-center text-accent">
+            <div class="size-8 rounded-full flex items-center justify-center text-y-opinion">
               <span class="hero-chat-bubble-left-solid size-6"></span>
             </div>
           <% :retake -> %>
-            <div class="size-8 rounded-full flex items-center justify-center text-accent2">
+            <div class="size-8 rounded-full flex items-center justify-center text-y-retake">
               <span class="hero-arrow-path-solid size-6"></span>
             </div>
           <% :followed -> %>
@@ -38,15 +38,15 @@
           <%= if notification.type != :followed do %>
             <YWeb.Layouts.bitmoji user={notification.actor} size="sm" />
           <% end %>
-          <p class="text-white text-sm">
-            <span class="font-bold hover:underline"><%= notification.actor.username %></span>
-            <span class="text-muted"><%= notification.text %></span>
+          <p class="text-y-text text-sm">
+            <span class="font-medium hover:underline"><%= notification.actor.username %></span>
+            <span class="text-y-muted"><%= notification.text %></span>
           </p>
-          <span class="text-muted text-xs ml-auto"><%= notification.timestamp %></span>
+          <span class="text-y-muted text-xs ml-auto"><%= notification.timestamp %></span>
         </div>
 
         <%= if notification.excerpt do %>
-          <p class="text-muted text-sm italic truncate pl-2 border-l border-brand-border/50">
+          <p class="text-y-muted text-sm italic truncate pl-2 border-l border-y-border">
             "<%= notification.excerpt %>"
           </p>
         <% end %>
