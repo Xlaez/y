@@ -12,6 +12,6 @@ defmodule YWeb.Plugs.SecurityHeaders do
     |> put_resp_header("x-content-type-options", "nosniff")
     |> put_resp_header("x-xss-protection", "1; mode=block")
     |> put_resp_header("referrer-policy", "no-referrer-when-downgrade")
-    |> put_resp_header("content-security-policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';")
+    |> put_resp_header("content-security-policy", "default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';")
   end
 end

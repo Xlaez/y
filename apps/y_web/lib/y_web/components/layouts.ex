@@ -37,14 +37,14 @@ defmodule YWeb.Layouts do
     <div class="flex min-h-screen bg-y-bg text-y-text font-inter antialiased">
       <YWeb.Layouts.toast_group flash={@flash} />
       <!-- Left Sidebar - Desktop -->
-      <aside class="fixed inset-y-0 left-0 hidden w-20 xl:w-64 border-r border-y-border lg:block bg-y-bg z-50">
-        <div class="flex flex-col h-full px-2 xl:px-4 py-6">
+      <aside class="fixed inset-y-0 left-0 hidden w-64 border-r border-y-border lg:block bg-y-bg z-50">
+        <div class="flex flex-col h-full px-4 py-6">
           <div class="px-4 mb-8">
-            <h1 class="text-y-white text-3xl xl:text-4xl font-black text-center xl:text-left select-none">y</h1>
+            <h1 class="text-y-white text-4xl font-black text-left select-none">y</h1>
           </div>
 
           <nav class="flex-1 space-y-2">
-            <.nav_item to="/home" icon="hero-home" label="Home" active={@active_tab == :home} />
+            <.nav_item to="/home" icon="hero-home" label="Feed" active={@active_tab == :home} />
             <.nav_item to="/explore" icon="hero-magnifying-glass" label="Explore" active={@active_tab == :explore} />
             <.nav_item
               to="/notifications"
@@ -53,19 +53,19 @@ defmodule YWeb.Layouts do
               active={@active_tab == :notifications}
               badge={12}
             />
-            <.nav_item to="/bookmarks" icon="hero-bookmark" label="Bookmarks" active={@active_tab == :bookmarks} />
+            <.nav_item to="/bookmarks" icon="hero-bookmark" label="Saves" active={@active_tab == :bookmarks} />
             <.nav_item
               to={"/#{@current_user.username}"}
               icon="hero-user"
               label="Profile"
               active={@active_tab == :profile}
             />
-            <.nav_item to="/settings" icon="hero-cog-6-tooth" label="Settings" active={@active_tab == :settings} />
+            <.nav_item to="/settings" icon="hero-cog-6-tooth" label="Preferences" active={@active_tab == :settings} />
           </nav>
 
           <button class="w-full bg-white text-black font-bold rounded-full py-3 mt-4 hover:bg-[#E5E5E7] transition-all duration-150 active:scale-[0.98] flex items-center justify-center">
-            <span class="xl:hidden hero-pencil size-6"></span>
-            <span class="hidden xl:block">New Take</span>
+            <span class="lg:hidden hero-pencil size-6"></span>
+            <span class="hidden lg:block">Share a take</span>
           </button>
 
           <div class="mt-auto pt-6 border-t border-y-border">
@@ -75,8 +75,8 @@ defmodule YWeb.Layouts do
       </aside>
 
       <!-- Main Content Area -->
-      <main class="flex-1 lg:ml-20 xl:ml-64 min-h-screen pb-20 lg:pb-0">
-        <div class="max-w-[600px] mx-auto min-h-screen border-x border-y-border">
+      <main class="flex-1 lg:ml-64 min-h-screen pb-20 lg:pb-0">
+        <div class="w-full max-w-[600px] mx-auto lg:mx-0 min-h-screen border-x border-y-border">
           {@inner_content}
         </div>
       </main>
@@ -114,7 +114,7 @@ defmodule YWeb.Layouts do
           </span>
         <% end %>
       </div>
-      <span class="text-xl hidden xl:block"><%= @label %></span>
+      <span class="text-xl hidden lg:block"><%= @label %></span>
     </.link>
     """
   end
