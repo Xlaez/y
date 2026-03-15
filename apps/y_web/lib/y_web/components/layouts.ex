@@ -287,21 +287,25 @@ defmodule YWeb.Layouts do
             <.action_button
               icon="hero-chat-bubble-left"
               count={@take.opinion_count}
-              hover_class="hover:text-y-opinion hover:bg-y-opinion/10"
+              hover_text="group-hover/btn:text-y-opinion"
+              hover_bg="group-hover/btn:bg-y-opinion/10"
             />
             <.action_button
               icon="hero-arrow-path"
               count={@take.retake_count}
-              hover_class="hover:text-y-retake hover:bg-y-retake/10"
+              hover_text="group-hover/btn:text-y-retake"
+              hover_bg="group-hover/btn:bg-y-retake/10"
             />
             <.action_button
               icon="hero-heart"
               count={@take.agreed_count}
-              hover_class="hover:text-y-agree hover:bg-y-agree/10"
+              hover_text="group-hover/btn:text-y-agree"
+              hover_bg="group-hover/btn:bg-y-agree/10"
             />
             <.action_button
               icon="hero-bookmark"
-              hover_class="hover:text-y-bookmark hover:bg-y-bookmark/10"
+              hover_text="group-hover/btn:text-y-bookmark"
+              hover_bg="group-hover/btn:bg-y-bookmark/10"
             />
           </div>
         </div>
@@ -312,12 +316,12 @@ defmodule YWeb.Layouts do
 
   defp action_button(assigns) do
     ~H"""
-    <div class={["flex items-center gap-2 group/btn transition-colors text-y-faint", assigns[:hover_class]]}>
-      <div class="p-2 rounded-full group-hover/btn:bg-current/10">
-        <span class={[assigns.icon, "size-5"]}></span>
+    <div class={["flex items-center gap-1 group/btn transition-colors text-y-faint", @hover_text]}>
+      <div class={["p-2 rounded-full transition-colors", @hover_bg]}>
+        <span class={[@icon, "size-5"]}></span>
       </div>
       <%= if assigns[:count] do %>
-        <span class="text-y-muted text-sm font-medium"><%= assigns.count %></span>
+        <span class="text-xs font-medium pr-1"><%= assigns.count %></span>
       <% end %>
     </div>
     """
