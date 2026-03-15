@@ -25,11 +25,73 @@ import {LiveSocket} from "phoenix_live_view"
 // import {hooks as colocatedHooks} from "phoenix-colocated/y_web"
 import topbar from "../vendor/topbar"
 
+const Hooks = {
+  TakeComposer: {
+    mounted() {
+      const textarea = this.el.querySelector("textarea")
+      const counter = this.el.querySelector("[data-counter]")
+      const progressCircle = this.el.querySelector("[data-progress-circle]")
+      const shareButton = this.el.querySelector("[data-share-button]")
+      const limit = 250
+
+      const updateUI = () => {
+        const count = textarea.value.length
+        const remaining = limit - count
+        const percent = Math.min((count / limit) * 100, 100)
+        
+        // Update counter text
+        if (counter) {
+          if (remaining <= 20) {
+            counter.innerText = remaining
+            counter.classList.remove("hidden")
+            counter.classList.toggle("text-red-500", remaining < 0)
+            counter.classList.toggle("text-white/60", remaining >= 0)
+          } else {
+            counter.innerText = ""
+            counter.classList.add("hidden")
+          }
+        }
+
+        // Update progress ring
+        if (progressCircle) {
+          const radius = progressCircle.r.baseVal.value
+          const circumference = 2 * Math.PI * radius
+          const offset = circumference - (percent / 100) * circumference
+          progressCircle.style.strokeDasharray = `${circumference} ${circumference}`
+          progressCircle.style.strokeDashoffset = offset
+          
+          if (count >= limit) {
+            progressCircle.style.stroke = "#ef4444" // red
+          } else if (count >= limit * 0.9) {
+            progressCircle.style.stroke = "#f59e0b" // orange/yellow
+          } else {
+            progressCircle.style.stroke = "#F5F5F5" // accent color (near-white)
+          }
+
+          // Hide circle if over limit (replaced by red counter)
+          progressCircle.parentElement.classList.toggle("opacity-0", count > limit)
+        }
+
+        // Toggle button state
+        if (shareButton) {
+          shareButton.disabled = count === 0 || count > limit
+          shareButton.classList.toggle("opacity-50", shareButton.disabled)
+          shareButton.classList.toggle("cursor-not-allowed", shareButton.disabled)
+        }
+      }
+
+      textarea.addEventListener("input", updateUI)
+      // Initial check
+      updateUI()
+    }
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {},
+  hooks: Hooks,
 })
 
 // Show progress bar on live navigation and form submits

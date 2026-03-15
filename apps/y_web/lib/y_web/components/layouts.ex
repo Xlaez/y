@@ -106,7 +106,7 @@ defmodule YWeb.Layouts do
       </nav>
 
       <.modal id="create-take-modal">
-        <div class="px-6 py-4 flex flex-col min-h-[250px]">
+        <div id="take-composer" phx-hook="TakeComposer" class="px-6 py-4 flex flex-col min-h-[250px]">
           <div class="flex items-center justify-between mb-4">
             <button 
               type="button" 
@@ -149,7 +149,33 @@ defmodule YWeb.Layouts do
                 </div>
 
                 <div class="flex items-center gap-4">
+                  <div class="relative size-8 flex items-center justify-center">
+                    <svg class="size-full -rotate-90" viewBox="0 0 32 32">
+                      <circle
+                        class="text-y-border stroke-current"
+                        stroke-width="2"
+                        fill="transparent"
+                        r="14"
+                        cx="16"
+                        cy="16"
+                      />
+                      <circle
+                        data-progress-circle
+                        class="transition-all duration-200"
+                        stroke="#F5F5F5"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        fill="transparent"
+                        r="14"
+                        cx="16"
+                        cy="16"
+                      />
+                    </svg>
+                    <span data-counter class="absolute text-[10px] font-medium hidden"></span>
+                  </div>
+
                   <button 
+                    data-share-button
                     phx-click={YWeb.CoreComponents.hide_modal("create-take-modal") |> JS.push("share_take")}
                     class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50"
                   >
