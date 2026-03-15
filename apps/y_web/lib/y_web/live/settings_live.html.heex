@@ -78,20 +78,20 @@
     <p class="text-y-muted text-xs uppercase tracking-wider px-4 mb-2 font-medium">Content</p>
     <section class="bg-y-surface rounded-2xl overflow-hidden">
       <div class="divide-y divide-y-border text-sm">
-        <div class="px-4 py-4 flex justify-between items-center hover:bg-y-hover cursor-pointer transition-colors">
+        <.link patch={~p"/settings/muted"} class="px-4 py-4 flex justify-between items-center hover:bg-y-hover cursor-pointer transition-colors group">
           <span class="text-y-text font-medium">Muted accounts</span>
           <div class="flex items-center gap-2">
             <span class="text-y-faint text-xs bg-y-bg px-2 py-0.5 rounded-full">0</span>
-            <span class="text-y-opinion font-medium">Manage</span>
+            <span class="text-y-opinion font-medium group-hover:underline">Manage</span>
           </div>
-        </div>
-        <div class="px-4 py-4 flex justify-between items-center hover:bg-y-hover cursor-pointer transition-colors">
+        </.link>
+        <.link patch={~p"/settings/blocked"} class="px-4 py-4 flex justify-between items-center hover:bg-y-hover cursor-pointer transition-colors group">
           <span class="text-y-text font-medium">Blocked accounts</span>
           <div class="flex items-center gap-2">
             <span class="text-y-faint text-xs bg-y-bg px-2 py-0.5 rounded-full">12</span>
-            <span class="text-y-opinion font-medium">Manage</span>
+            <span class="text-y-opinion font-medium group-hover:underline">Manage</span>
           </div>
-        </div>
+        </.link>
       </div>
     </section>
   </div>

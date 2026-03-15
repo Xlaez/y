@@ -45,14 +45,14 @@
     </div>
 
     <div class="flex items-center gap-4 text-sm">
-      <div class="hover:underline cursor-pointer">
+      <.link patch={~p"/#{@user.username}/followers"} class="hover:underline cursor-pointer">
         <span class="text-white font-bold"><%= @user.follower_count %></span>
         <span class="text-y-muted">Followers</span>
-      </div>
-      <div class="hover:underline cursor-pointer">
+      </.link>
+      <.link patch={~p"/#{@user.username}/following"} class="hover:underline cursor-pointer">
         <span class="text-white font-bold"><%= @user.following_count %></span>
         <span class="text-y-muted">Following</span>
-      </div>
+      </.link>
     </div>
 
     <%= if @user.is_locked do %>

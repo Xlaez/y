@@ -3,6 +3,7 @@ defmodule YWeb.Layouts do
 
   embed_templates "layouts/*"
 
+  @spec app(map()) :: Phoenix.LiveView.Rendered.t()
   @doc """
   Renders the standard app layout (for unauthenticated pages).
   """
@@ -18,6 +19,7 @@ defmodule YWeb.Layouts do
     """
   end
 
+  @spec authenticated(map()) :: Phoenix.LiveView.Rendered.t()
   @doc """
   Renders the authenticated shell layout.
   """
@@ -36,7 +38,7 @@ defmodule YWeb.Layouts do
     ~H"""
     <div class="flex min-h-screen bg-y-bg text-y-text font-inter antialiased">
       <YWeb.Layouts.toast_group flash={@flash} />
-      
+
       <!-- Left Sidebar: Fixed 256px -->
       <aside class="fixed inset-y-0 left-0 hidden w-64 border-r border-y-border md:flex flex-col bg-y-bg z-50">
         <div class="flex flex-col h-full px-4 py-6">
@@ -352,14 +354,14 @@ defmodule YWeb.Layouts do
       _ -> {"hero-bell", "text-y-white"}
     end
 
-    assigns = 
-      assigns 
+    assigns =
+      assigns
       |> assign(:icon, icon)
       |> assign(:color, color)
       |> assign(:message, message)
 
     ~H"""
-    <div 
+    <div
       phx-mounted={show("#toast")}
       class="pointer-events-auto bg-y-border rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right-10 duration-300"
     >

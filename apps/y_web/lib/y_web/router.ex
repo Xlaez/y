@@ -42,7 +42,11 @@ defmodule YWeb.Router do
     live "/notifications", NotificationsLive, :index
     live "/bookmarks", BookmarksLive, :index
     live "/settings", SettingsLive, :index
+    live "/settings/muted", MutedAccountsLive, :index
+    live "/settings/blocked", BlockedAccountsLive, :index
     live "/:username", ProfileLive, :show
+    live "/:username/followers", ConnectionsLive, :followers
+    live "/:username/following", ConnectionsLive, :following
   end
 
   # Other scopes may use custom stacks.

@@ -145,4 +145,46 @@ defmodule YWeb.DummyData do
       %{name: "#broken_timeline", count: 312}
     ]
   end
+
+  def muted_users do
+    all_users = users()
+    [
+      Enum.at(all_users, 7),
+      Enum.at(all_users, 8)
+    ]
+  end
+
+  def blocked_users do
+    all_users = users()
+    [
+      Enum.at(all_users, 1),
+      Enum.at(all_users, 3),
+      Enum.at(all_users, 4),
+      Enum.at(all_users, 9)
+    ]
+  end
+
+  def followers(_user_id) do
+    all_users = users()
+    # Random-ish subset for demo
+    [
+      Enum.at(all_users, 1),
+      Enum.at(all_users, 2),
+      Enum.at(all_users, 5),
+      Enum.at(all_users, 6),
+      Enum.at(all_users, 7)
+    ]
+  end
+
+  def following(_user_id) do
+    all_users = users()
+    # Random-ish subset for demo
+    [
+      Enum.at(all_users, 2),
+      Enum.at(all_users, 3),
+      Enum.at(all_users, 4),
+      Enum.at(all_users, 8),
+      Enum.at(all_users, 9)
+    ]
+  end
 end
