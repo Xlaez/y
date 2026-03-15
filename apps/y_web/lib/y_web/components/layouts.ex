@@ -36,8 +36,9 @@ defmodule YWeb.Layouts do
     ~H"""
     <div class="flex min-h-screen bg-y-bg text-y-text font-inter antialiased">
       <YWeb.Layouts.toast_group flash={@flash} />
-      <!-- Left Sidebar - Desktop -->
-      <aside class="fixed inset-y-0 left-0 hidden w-64 border-r border-y-border lg:block bg-y-bg z-50">
+      
+      <!-- Left Sidebar: Fixed 256px -->
+      <aside class="fixed inset-y-0 left-0 hidden w-64 border-r border-y-border md:flex flex-col bg-y-bg z-50">
         <div class="flex flex-col h-full px-4 py-6">
           <div class="px-4 mb-8">
             <h1 class="text-y-white text-4xl font-black text-left select-none">y</h1>
@@ -74,12 +75,17 @@ defmodule YWeb.Layouts do
         </div>
       </aside>
 
-      <!-- Main Content Area -->
-      <main class="flex-1 lg:ml-64 min-h-screen pb-20 lg:pb-0">
-        <div class="w-full max-w-[600px] mx-auto lg:mx-0 min-h-screen border-x border-y-border">
+      <!-- Centre Feed: fluid, constrained -->
+      <main class="flex-1 md:ml-64 lg:mr-[300px] min-h-screen pb-20 md:pb-0 lg:border-r lg:border-y-border">
+        <div class="w-full max-w-[600px] mx-auto min-h-screen border-x border-y-border lg:border-x-0">
           {@inner_content}
         </div>
       </main>
+
+      <!-- Right Panel: fixed 300px -->
+      <aside class="fixed right-0 top-0 hidden lg:block h-screen w-[300px] px-4 py-6 overflow-y-auto z-10">
+        <.right_panel />
+      </aside>
 
       <!-- Mobile Bottom Nav -->
       <nav class="fixed bottom-0 inset-x-0 h-16 bg-y-bg/80 backdrop-blur-md border-t border-y-border flex items-center justify-around lg:hidden z-50">
@@ -148,6 +154,67 @@ defmodule YWeb.Layouts do
       </div>
       <span class="hero-ellipsis-horizontal size-5 text-y-muted group-hover:text-y-text ml-auto hidden xl:block">
       </span>
+    </div>
+    """
+  end
+
+  defp right_panel(assigns) do
+    ~H"""
+    <div class="flex flex-col gap-6 pt-2">
+      <.who_to_follow_widget />
+      <.trending_widget />
+    </div>
+    """
+  end
+
+  defp who_to_follow_widget(assigns) do
+    assigns = assign(assigns, :users, Enum.take(YWeb.DummyData.users(), 3))
+
+    ~H"""
+    <div class="bg-y-surface rounded-2xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-y-border">
+        <h3 class="text-y-text font-semibold text-[15px]">Who to follow</h3>
+      </div>
+      <div class="divide-y divide-y-border">
+        <%= for user <- @users do %>
+          <div class="px-4 py-3 flex items-center gap-3 hover:bg-y-hover transition-colors duration-100 group cursor-pointer">
+            <YWeb.Layouts.bitmoji user={user} size="sm" />
+            <div class="flex-1 min-w-0">
+              <p class="text-y-text font-medium text-sm truncate"><%= user.username %></p>
+              <p class="text-y-muted text-xs truncate"><%= user.handle %></p>
+            </div>
+            <button class="border border-y-white text-y-white rounded-full px-3 py-1 text-xs font-semibold hover:bg-white/10 transition-colors">
+              Follow
+            </button>
+          </div>
+        <% end %>
+      </div>
+      <div class="px-4 py-3 text-y-opinion text-sm font-medium hover:underline cursor-pointer">
+        Show more
+      </div>
+    </div>
+    """
+  end
+
+  defp trending_widget(assigns) do
+    assigns = assign(assigns, :hashtags, Enum.take(YWeb.DummyData.trending_hashtags(), 5))
+
+    ~H"""
+    <div class="bg-y-surface rounded-2xl overflow-hidden">
+      <div class="px-4 py-3 border-b border-y-border">
+        <h3 class="text-y-text font-semibold text-[15px]">Trending</h3>
+      </div>
+      <div class="divide-y divide-y-border">
+        <%= for tag <- @hashtags do %>
+          <div class="px-4 py-3 hover:bg-y-hover transition-colors duration-100 group cursor-pointer">
+            <p class="text-y-text font-semibold text-sm hover:underline"><%= tag.name %></p>
+            <p class="text-y-muted text-xs truncate"><%= Float.round(tag.count / 1000, 1) %>K Takes</p>
+          </div>
+        <% end %>
+      </div>
+      <div class="px-4 py-3 text-y-opinion text-sm font-medium hover:underline cursor-pointer">
+        Show more
+      </div>
     </div>
     """
   end

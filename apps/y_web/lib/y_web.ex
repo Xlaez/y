@@ -19,6 +19,7 @@ defmodule YWeb do
 
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
+  @spec router() :: {:__block__, [], [{:import, [...], [...]} | {:use, [...], [...]}, ...]}
   def router do
     quote do
       use Phoenix.Router, helpers: false
@@ -30,12 +31,18 @@ defmodule YWeb do
     end
   end
 
+  @spec channel() ::
+          {:use, [{:context, YWeb} | {:end_of_expression, [...]} | {:imports, [...]}, ...],
+           [{:__aliases__, [...], [...]}, ...]}
   def channel do
     quote do
       use Phoenix.Channel
     end
   end
 
+  @spec controller() ::
+          {:use, [{:context, YWeb} | {:end_of_expression, [...]} | {:imports, [...]}, ...],
+           [{:__aliases__, [...], [...]}, ...]}
   def controller do
     quote do
       use Phoenix.Controller,
@@ -48,6 +55,9 @@ defmodule YWeb do
     end
   end
 
+  @spec live_view() ::
+          {:use, [{:context, YWeb} | {:end_of_expression, [...]} | {:imports, [...]}, ...],
+           [{:__aliases__, [...], [...]}, ...]}
   def live_view do
     quote do
       use Phoenix.LiveView
