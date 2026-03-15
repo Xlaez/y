@@ -66,7 +66,10 @@ defmodule YWeb.Layouts do
             <.nav_item to="/settings" icon="hero-cog-6-tooth" label="Preferences" active={@active_tab == :settings} />
           </nav>
 
-          <button class="w-full bg-white text-black font-bold rounded-full py-3 mt-4 hover:bg-[#E5E5E7] transition-all duration-150 active:scale-[0.98] flex items-center justify-center">
+          <button 
+            phx-click={YWeb.CoreComponents.show_modal("create-take-modal")}
+            class="w-full bg-white text-black font-bold rounded-full py-3 mt-4 hover:bg-[#E5E5E7] transition-all duration-150 active:scale-[0.98] flex items-center justify-center"
+          >
             <span class="lg:hidden hero-pencil size-6"></span>
             <span class="hidden lg:block">Share a take</span>
           </button>
@@ -101,6 +104,63 @@ defmodule YWeb.Layouts do
         />
         <.mobile_nav_item to="/settings" icon="hero-cog-6-tooth" active={@active_tab == :settings} />
       </nav>
+
+      <.modal id="create-take-modal">
+        <div class="px-6 py-4 flex flex-col min-h-[250px]">
+          <div class="flex items-center justify-between mb-4">
+            <button 
+              type="button" 
+              phx-click={YWeb.CoreComponents.hide_modal("create-take-modal")}
+              class="p-2 hover:bg-y-hover rounded-full transition-colors"
+            >
+              <span class="hero-x-mark size-5 text-white"></span>
+            </button>
+            <button class="text-y-opinion font-bold text-sm hover:underline px-2">Drafts</button>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="shrink-0 pt-1">
+              <.bitmoji user={@current_user} size="md" />
+            </div>
+            <div class="flex-1">
+              <textarea 
+                placeholder="What is happening?!"
+                class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted h-32"
+                autofocus
+              ></textarea>
+              
+              <div class="border-t border-y-border mt-4 pt-4 flex items-center justify-between">
+                <div class="flex items-center gap-1">
+                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group">
+                    <span class="hero-photo size-5 text-y-opinion"></span>
+                  </button>
+                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
+                    <span class="hero-list-bullet size-5"></span>
+                  </button>
+                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
+                    <span class="hero-face-smile size-5"></span>
+                  </button>
+                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                    <span class="hero-calendar-days size-5"></span>
+                  </button>
+                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                    <span class="hero-map-pin size-5"></span>
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-4">
+                  <button 
+                    phx-click={YWeb.CoreComponents.hide_modal("create-take-modal") |> JS.push("share_take")}
+                    class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50"
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </.modal>
     </div>
     """
   end
