@@ -3,8 +3,8 @@
     <span class="hero-arrow-left size-5 text-white"></span>
   </.link>
   <div>
-    <h2 class="text-white text-lg font-bold leading-tight"><%= @user.username %></h2>
-    <p class="text-y-muted text-xs"><%= @user.take_count %> Takes</p>
+    <h2 class="text-white text-lg font-bold leading-tight"><%= @profile.user.username %></h2>
+    <p class="text-y-muted text-xs"><%= @profile.take_count %> Takes</p>
   </div>
 </header>
 
@@ -13,71 +13,86 @@
   <div class="px-6 py-6 border-b border-y-border space-y-4">
     <div class="flex justify-between items-start">
       <div class="p-1 bg-y-bg rounded-full -mt-2">
-        <YWeb.Layouts.bitmoji user={@user} size="xl" />
+        <YWeb.Layouts.bitmoji user={@profile.user} size="xl" />
       </div>
       
-      <button 
-        phx-click="toggle_follow"
-        class={[
-          "px-6 py-2 rounded-full font-bold transition-all duration-200",
-          if(@following, 
-            do: "bg-transparent border border-y-border text-white hover:border-y-agree hover:text-y-agree hover:bg-y-agree/5 group", 
-            else: "bg-white text-black hover:bg-[#E5E5E7]")
-        ]}
-      >
-        <%= if @following do %>
-          <span class="block group-hover:hidden">Following</span>
-          <span class="hidden group-hover:block">Unfollow</span>
-        <% else %>
-          Follow
-        <% end %>
-      </button>
+      <%= if @current_user && @current_user.id != @profile.user.id do %>
+        <button 
+          phx-click={if @profile.is_following, do: "unfollow", else: "follow"}
+          class={[
+            "px-6 py-2 rounded-full font-bold transition-all duration-200",
+            if(@profile.is_following, 
+              do: "bg-transparent border border-y-border text-white hover:border-y-agree hover:text-y-agree hover:bg-y-agree/5 group", 
+              else: "bg-white text-black hover:bg-[#E5E5E7]")
+          ]}
+        >
+          <%= if @profile.is_following do %>
+            <span class="block group-hover:hidden">Following</span>
+            <span class="hidden group-hover:block">Unfollow</span>
+          <% else %>
+            Follow
+          <% end %>
+        </button>
+      <% else %>
+        <button class="bg-transparent border border-y-border text-white font-bold rounded-full px-6 py-2 hover:bg-y-hover transition-all">
+          Edit profile
+        </button>
+      <% end %>
     </div>
 
     <div class="space-y-1">
       <div class="flex items-center gap-1.5">
-        <h3 class="text-white text-2xl font-black"><%= @user.username %></h3>
-        <%= if @user.is_locked do %>
-          <span class="hero-lock-closed-micro size-4 text-y-muted"></span>
+        <h3 class="text-white text-2xl font-black"><%= @profile.user.username %></h3>
+        <%= if @profile.user.is_locked do %>
+          <span class="hero-lock-closed-micro size-4 text-y-muted" title="Locked account"></span>
         <% end %>
       </div>
-      <p class="text-y-muted text-base"><%= @user.handle %></p>
+      <p class="text-y-muted text-base"><%= @profile.user.handle %></p>
     </div>
 
     <div class="flex items-center gap-4 text-sm">
-      <.link patch={~p"/#{@user.username}/followers"} class="hover:underline cursor-pointer">
-        <span class="text-white font-bold"><%= @user.follower_count %></span>
+      <.link patch={~p"/#{@profile.user.username}/followers"} class="hover:underline cursor-pointer">
+        <span class="text-white font-bold"><%= @profile.follower_count %></span>
         <span class="text-y-muted">Followers</span>
       </.link>
-      <.link patch={~p"/#{@user.username}/following"} class="hover:underline cursor-pointer">
-        <span class="text-white font-bold"><%= @user.following_count %></span>
+      <.link patch={~p"/#{@profile.user.username}/following"} class="hover:underline cursor-pointer">
+        <span class="text-white font-bold"><%= @profile.following_count %></span>
         <span class="text-y-muted">Following</span>
       </.link>
     </div>
 
-    <%= if @user.is_locked do %>
-      <div class="flex items-center gap-2 text-y-muted text-sm bg-y-surface p-3 rounded-xl">
-        <span class="hero-lock-closed size-5 text-y-muted"></span>
-        <p>This account is locked. Only followers can see their takes.</p>
+    <%= if !@profile.can_view_content do %>
+      <%= if @profile.viewer_is_blocked do %>
+        <div class="flex flex-col items-center justify-center py-10 px-6 text-center space-y-2">
+          <h4 class="text-white text-xl font-bold">You are blocked</h4>
+          <p class="text-y-muted">You cannot follow or see <%= @profile.user.username %>'s Takes.</p>
+        </div>
+      <% else %>
+        <div class="flex items-center gap-2 text-y-muted text-sm bg-y-surface p-3 rounded-xl border border-y-border">
+          <span class="hero-lock-closed size-5 text-y-muted"></span>
+          <p>This account is locked. Only followers can see their takes.</p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%= if @profile.can_view_content do %>
+    <!-- Tabs (Static) — Only Takes and Replies -->
+    <div class="flex border-b border-y-border h-14">
+      <div class="flex-1 flex flex-col items-center justify-center relative cursor-pointer group hover:bg-y-hover transition-colors">
+        <span class="text-white font-semibold text-sm">Takes</span>
+        <div class="absolute bottom-0 w-16 h-1 bg-y-white rounded-full"></div>
       </div>
-    <% end %>
-  </div>
-
-  <!-- Tabs (Static) — Only Takes and Replies -->
-  <div class="flex border-b border-y-border h-14">
-    <div class="flex-1 flex flex-col items-center justify-center relative cursor-pointer group hover:bg-y-hover transition-colors">
-      <span class="text-white font-semibold text-sm">Takes</span>
-      <div class="absolute bottom-0 w-16 h-1 bg-y-white rounded-full"></div>
+      <div class="flex-1 flex items-center justify-center cursor-pointer text-y-muted font-medium hover:bg-y-hover transition-colors">
+        Replies
+      </div>
     </div>
-    <div class="flex-1 flex items-center justify-center cursor-pointer text-y-muted font-medium hover:bg-y-hover transition-colors">
-      Replies
-    </div>
-  </div>
 
-  <!-- Profile Feed -->
-  <div class="divide-y divide-y-border">
-    <%= for take <- @takes do %>
-      <YWeb.Layouts.take_card take={take} />
-    <% end %>
-  </div>
+    <!-- Profile Feed -->
+    <div class="divide-y divide-y-border">
+      <%= for take <- @takes do %>
+        <YWeb.Layouts.take_card take={take} />
+      <% end %>
+    </div>
+  <% end %>
 </div>

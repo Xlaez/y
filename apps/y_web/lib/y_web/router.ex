@@ -63,6 +63,13 @@ defmodule YWeb.Router do
       live "/:username/take/:id", TakeLive, :show
       live "/:username/followers", ConnectionsLive, :followers
       live "/:username/following", ConnectionsLive, :following
+
+      post "/follows", FollowController, :create
+      delete "/follows/:followee_id", FollowController, :delete
+      post "/blocks", BlockController, :create
+      delete "/blocks/:blocked_id", BlockController, :delete
+      post "/mutes", MuteController, :create
+      delete "/mutes/:muted_id", MuteController, :delete
     end
   end
 

@@ -5,11 +5,11 @@ defmodule YRepo.Repo.Migrations.CreateUsers do
     execute "CREATE EXTENSION IF NOT EXISTS \"pgcrypto\""
 
     create table(:users, primary_key: false) do
-      add :id, :binary, primary_key: true
+      add :id, :uuid, primary_key: true, default: fragment("gen_random_uuid()")
       add :username, :text, null: false
       add :password_hash, :text, null: false
       add :seed_phrase_hash, :text, null: false
-      add :bitmoji_id, :binary, null: false
+      add :bitmoji_id, :uuid, null: false
       add :is_locked, :boolean, default: false, null: false
 
       timestamps(type: :utc_datetime_usec)

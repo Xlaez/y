@@ -10,18 +10,15 @@ defmodule YRepo.Schemas.User do
     field :password_hash, :string
     field :seed_phrase_hash, :string
     field :bitmoji_id, :binary
+    field :bitmoji_color, :string, default: "#3A3A3C"
     field :is_locked, :boolean, default: false
 
     timestamps(type: :utc_datetime_usec)
   end
 
-  @doc """
-  Changeset for initial user creation.
-  Hash values arrive pre-computed from domain services.
-  """
   def creation_changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, [:id, :username, :password_hash, :seed_phrase_hash, :bitmoji_id])
+    |> cast(attrs, [:id, :username, :password_hash, :seed_phrase_hash, :bitmoji_id, :bitmoji_color])
     |> validate_required([:username, :password_hash, :seed_phrase_hash, :bitmoji_id])
     |> ensure_id()
     |> validate_username_format()
@@ -40,6 +37,17 @@ defmodule YRepo.Schemas.User do
     |> validate_required([:is_locked])
   end
 
+  def bitmoji_color_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:bitmoji_color])
+    |> validate_required([:bitmoji_color])
+  end
+
+  def update_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:password_hash, :bitmoji_color, :is_locked])
+  end
+
   defp ensure_id(changeset) do
     if get_field(changeset, :id) do
       changeset
@@ -49,7 +57,6 @@ defmodule YRepo.Schemas.User do
   end
 
   defp validate_username_format(changeset) do
-    # Replicating Value Object logic in database changeset for layered defense
     validate_format(changeset, :username, ~r/^[a-z0-9_]+$/,
       message: "can only contain alphanumeric characters and underscores"
     )

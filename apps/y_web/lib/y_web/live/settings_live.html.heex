@@ -15,7 +15,7 @@
             <p class="text-y-muted text-xs">Change your unique monogram color</p>
           </div>
           <div class="flex items-center gap-3">
-            <YWeb.Layouts.bitmoji user={@user} size="sm" />
+            <YWeb.Layouts.bitmoji user={@current_user} size="sm" />
             <span class="hero-chevron-right size-4 text-y-faint group-hover:text-white transition-colors"></span>
           </div>
         </div>
@@ -29,11 +29,22 @@
           
           <%= if @show_password_form do %>
             <div class="pt-2 space-y-4 animate-in slide-in-from-top-2 duration-200">
-              <input type="password" placeholder="Current password" class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-sm text-y-text outline-none focus:ring-1 focus:ring-white/30 placeholder:text-y-placeholder" />
-              <input type="password" placeholder="New password" class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-sm text-y-text outline-none focus:ring-1 focus:ring-white/30 placeholder:text-y-placeholder" />
-              <button class="bg-white hover:bg-[#E5E5E7] text-black text-sm font-bold rounded-full px-4 py-2 transition-all">
-                Update password
-              </button>
+              <form phx-submit="change_password" class="space-y-4">
+                <input type="password" name="current_password" required placeholder="Current password" class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-sm text-y-text outline-none focus:ring-1 focus:ring-white/30 placeholder:text-y-placeholder" />
+                <input type="password" name="new_password" required placeholder="New password" class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-sm text-y-text outline-none focus:ring-1 focus:ring-white/30 placeholder:text-y-placeholder" />
+                
+                <%= if @password_error do %>
+                  <p class="text-y-agree text-xs px-1"><%= @password_error %></p>
+                <% end %>
+                
+                <%= if @password_success do %>
+                  <p class="text-y-retake text-xs px-1">Password updated!</p>
+                <% end %>
+
+                <button type="submit" class="bg-white hover:bg-[#E5E5E7] text-black text-sm font-bold rounded-full px-4 py-2 transition-all">
+                  Update password
+                </button>
+              </form>
             </div>
           <% end %>
         </div>
@@ -49,21 +60,21 @@
         <div class="px-4 py-4 flex justify-between items-start">
           <div class="flex-1">
             <p class="text-y-text text-sm font-medium">Lock account</p>
-            <p class="text-y-muted text-xs pr-4">Only your followers can see your takes. New followers must be approved.</p>
+            <p class="text-y-muted text-xs pr-4">Only your followers can see your takes.</p>
           </div>
           
           <button 
             phx-click="toggle_lock"
             class={[
               "relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out shrink-0",
-              if(@lock_account, do: "bg-y-retake", else: "bg-[#3A3A3C]")
+              if(@current_user.is_locked, do: "bg-y-retake", else: "bg-[#3A3A3C]")
             ]}
           >
             <div class={[
               "absolute top-1 left-1 bg-white size-4 rounded-full transition-transform duration-200 ease-in-out flex items-center justify-center",
-              if(@lock_account, do: "translate-x-5")
+              if(@current_user.is_locked, do: "translate-x-5")
             ]}>
-               <%= if @lock_account do %>
+               <%= if @current_user.is_locked do %>
                   <span class="hero-check size-2.5 text-y-retake"></span>
                <% end %>
             </div>
@@ -81,14 +92,14 @@
         <.link patch={~p"/settings/muted"} class="px-4 py-4 flex justify-between items-center hover:bg-y-hover cursor-pointer transition-colors group">
           <span class="text-y-text font-medium">Muted accounts</span>
           <div class="flex items-center gap-2">
-            <span class="text-y-faint text-xs bg-y-bg px-2 py-0.5 rounded-full">0</span>
+            <span class="text-y-faint text-xs bg-y-bg px-2 py-0.5 rounded-full"><%= length(@muted_users) %></span>
             <span class="text-y-opinion font-medium group-hover:underline">Manage</span>
           </div>
         </.link>
         <.link patch={~p"/settings/blocked"} class="px-4 py-4 flex justify-between items-center hover:bg-y-hover cursor-pointer transition-colors group">
           <span class="text-y-text font-medium">Blocked accounts</span>
           <div class="flex items-center gap-2">
-            <span class="text-y-faint text-xs bg-y-bg px-2 py-0.5 rounded-full">12</span>
+            <span class="text-y-faint text-xs bg-y-bg px-2 py-0.5 rounded-full"><%= length(@blocked_users) %></span>
             <span class="text-y-opinion font-medium group-hover:underline">Manage</span>
           </div>
         </.link>
@@ -136,7 +147,7 @@
             class="size-12 rounded-full border-2 border-transparent hover:scale-110 transition-transform flex items-center justify-center"
             style={"background-color: #{color};"}
           >
-            <%= if @user.bitmoji_color == color do %>
+            <%= if @current_user.bitmoji_color == color do %>
               <span class="hero-check size-6 text-[#E5E5E7] drop-shadow"></span>
             <% end %>
           </button>
@@ -161,14 +172,18 @@
       <h3 class="text-white text-xl font-bold mb-2 text-center">Delete account?</h3>
       <p class="text-y-muted text-sm text-center mb-8">This will permanently delete your username, takes, and all data. There is no going back.</p>
       
-      <div class="space-y-3">
-        <button phx-click="confirm_delete" class="w-full bg-y-agree hover:bg-y-agree/80 text-white font-bold rounded-full py-3 transition-all">
-          Yes, delete everything
-        </button>
-        <button phx-click="close_modal" class="w-full bg-y-bg border border-y-border text-white font-bold rounded-full py-3 hover:bg-y-hover transition-colors">
-          I changed my mind
-        </button>
-      </div>
+      <form phx-submit="confirm_delete" class="space-y-4">
+        <input type="password" name="password" required placeholder="Enter your password to confirm" class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-sm text-y-text outline-none focus:ring-1 focus:ring-white/30 placeholder:text-y-placeholder" />
+        
+        <div class="space-y-3 pt-4">
+          <button type="submit" class="w-full bg-y-agree hover:bg-y-agree/80 text-white font-bold rounded-full py-3 transition-all">
+            Yes, delete everything
+          </button>
+          <button type="button" phx-click="close_modal" class="w-full bg-y-bg border border-y-border text-white font-bold rounded-full py-3 hover:bg-y-hover transition-colors">
+            I changed my mind
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 <% end %>

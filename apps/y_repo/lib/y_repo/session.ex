@@ -34,6 +34,22 @@ defmodule YRepo.Session do
     Redix.command(:redix, ["DEL", key])
   end
 
+  def delete_all_for_user(user_id) do
+    case Redix.command(:redix, ["KEYS", "#{@redis_key_prefix}*"]) do
+      {:ok, keys} ->
+        Enum.each(keys, fn key ->
+          case Redix.command(:redix, ["GET", key]) do
+            {:ok, ^user_id} -> Redix.command(:redix, ["DEL", key])
+            _ -> :ok
+          end
+        end)
+        :ok
+
+      {:error, _} ->
+        :ok
+    end
+  end
+
   defp generate_token do
     :crypto.strong_rand_bytes(32) |> Base.url_encode64()
   end

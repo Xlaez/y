@@ -8,7 +8,7 @@ defmodule YRepo.Schemas.Follow do
     belongs_to :follower, YRepo.Schemas.User
     belongs_to :followee, YRepo.Schemas.User
 
-    timestamps(type: :utc_datetime_usec)
+    field :inserted_at, :utc_datetime_usec, read_after_writes: true
   end
 
   def changeset(follow, attrs) do
@@ -16,5 +16,6 @@ defmodule YRepo.Schemas.Follow do
     |> cast(attrs, [:follower_id, :followee_id])
     |> validate_required([:follower_id, :followee_id])
     |> unique_constraint([:follower_id, :followee_id])
+    |> check_constraint(:follower_id, name: :no_self_follow, message: "cannot follow yourself")
   end
 end

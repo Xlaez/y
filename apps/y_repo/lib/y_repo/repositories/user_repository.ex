@@ -1,9 +1,4 @@
 defmodule YRepo.Repositories.UserRepository do
-  @moduledoc """
-  Implementation of YCore.Accounts.UserRepository behaviour using Ecto.
-  Handles mapping between Ecto schemas and domain entities.
-  """
-
   @behaviour YCore.Accounts.UserRepository
 
   import Ecto.Query
@@ -23,7 +18,6 @@ defmodule YRepo.Repositories.UserRepository do
 
   @impl true
   def get_by_username(username) do
-    # Case-insensitive lookup using LOWER() index
     SchemaUser
     |> where([u], fragment("LOWER(?)", u.username) == fragment("LOWER(?)", ^username))
     |> Repo.one()
@@ -47,10 +41,22 @@ defmodule YRepo.Repositories.UserRepository do
   @impl true
   def update(%DomainUser{id: id}, attrs) do
     case Repo.get(SchemaUser, id) do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       schema_user ->
-        schema_user
-        |> SchemaUser.password_update_changeset(attrs)
+        changeset = cond do
+          Map.has_key?(attrs, :password_hash) ->
+            SchemaUser.password_update_changeset(schema_user, attrs)
+          Map.has_key?(attrs, :bitmoji_color) ->
+            SchemaUser.bitmoji_color_changeset(schema_user, attrs)
+          Map.has_key?(attrs, :is_locked) ->
+            SchemaUser.lock_changeset(schema_user, attrs)
+          true ->
+            SchemaUser.update_changeset(schema_user, attrs)
+        end
+
+        changeset
         |> Repo.update()
         |> case do
           {:ok, user} -> {:ok, to_domain(user)}
@@ -69,7 +75,6 @@ defmodule YRepo.Repositories.UserRepository do
     end
   end
 
-  # Private helper: mapping every YRepo.Schemas.User field to YCore.Accounts.User struct
   defp to_domain(%SchemaUser{} = schema) do
     %DomainUser{
       id: schema.id,
@@ -77,7 +82,7 @@ defmodule YRepo.Repositories.UserRepository do
       password_hash: schema.password_hash,
       seed_phrase_hash: schema.seed_phrase_hash,
       bitmoji_id: schema.bitmoji_id,
-      bitmoji_color: YRepo.Helpers.Color.from_id(schema.bitmoji_id),
+      bitmoji_color: schema.bitmoji_color || YRepo.Helpers.Color.from_id(schema.bitmoji_id),
       handle: "@#{schema.username}",
       follower_count: 0,
       following_count: 0,

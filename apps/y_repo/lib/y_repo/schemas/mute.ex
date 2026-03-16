@@ -6,9 +6,9 @@ defmodule YRepo.Schemas.Mute do
   @foreign_key_type :binary_id
   schema "mutes" do
     belongs_to :muter, YRepo.Schemas.User
-    belongs_to :muted, YRepo.Schemas.User
+    belongs_to :muted_user, YRepo.Schemas.User, foreign_key: :muted_id
 
-    timestamps(type: :utc_datetime_usec)
+    field :inserted_at, :utc_datetime_usec, read_after_writes: true
   end
 
   def changeset(mute, attrs) do
@@ -16,5 +16,6 @@ defmodule YRepo.Schemas.Mute do
     |> cast(attrs, [:muter_id, :muted_id])
     |> validate_required([:muter_id, :muted_id])
     |> unique_constraint([:muter_id, :muted_id])
+    |> check_constraint(:muter_id, name: :no_self_mute, message: "cannot mute yourself")
   end
 end

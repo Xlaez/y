@@ -159,7 +159,7 @@ defmodule YWeb.Layouts do
               data-take-input
               name="body"
               placeholder={@placeholder}
-              class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted h-32"
+              class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 focus:outline-none p-0 placeholder-y-muted h-32"
               autofocus
               value={@value}
             ><%= @value %></textarea>
