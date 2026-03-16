@@ -7,8 +7,12 @@ defmodule YRepo.Application do
 
   @impl true
   def start(_type, _args) do
+    redis_config = Application.get_env(:y_repo, :redis)
+    redis_url = redis_config[:url] || "redis://localhost:6379/0"
+
     children = [
-      YRepo.Repo
+      YRepo.Repo,
+      {Redix, {redis_url, [name: :redix]}}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -11,7 +11,7 @@ defmodule YWeb.Router do
     plug :put_secure_browser_headers
     plug YWeb.Plugs.SecurityHeaders
     plug YWeb.Plugs.SanitiseParams
-    plug YWeb.Plugs.LoadUser
+    plug YWeb.Plugs.Auth
   end
 
   pipeline :api do
@@ -24,29 +24,44 @@ defmodule YWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    live "/login", SessionLive, :index
-    live "/signup", RegistrationLive, :index
-    live "/forgot-password", PasswordResetLive, :index
+    
+    live_session :redirect_if_authenticated,
+      on_mount: [{YWeb.Plugs.Auth, :redirect_if_authenticated}] do
+      live "/login", SessionLive, :index
+      live "/signup", RegistrationLive, :index
+      live "/forgot-password", PasswordResetLive, :index
+    end
+    
+    post "/login", AuthController, :create
+    delete "/logout", AuthController, :delete
+    post "/register_complete", AuthController, :register_complete
   end
 
   scope "/onboarding", YWeb do
     pipe_through :browser
-    live "/seed-phrase", SeedPhraseLive, :index
+    
+    live_session :onboarding,
+      on_mount: [{YWeb.Plugs.Auth, :mount_current_user}] do
+      live "/seed-phrase", SeedPhraseLive, :index
+    end
   end
 
   scope "/", YWeb do
     pipe_through :browser
 
-    live "/home", HomeLive, :index
-    live "/explore", ExploreLive, :index
-    live "/notifications", NotificationsLive, :index
-    live "/bookmarks", BookmarksLive, :index
-    live "/settings", SettingsLive, :index
-    live "/settings/muted", MutedAccountsLive, :index
-    live "/settings/blocked", BlockedAccountsLive, :index
-    live "/:username", ProfileLive, :show
-    live "/:username/followers", ConnectionsLive, :followers
-    live "/:username/following", ConnectionsLive, :following
+    live_session :require_authenticated_user,
+      on_mount: [{YWeb.Plugs.Auth, :ensure_authenticated}] do
+      live "/home", HomeLive, :index
+      live "/explore", ExploreLive, :index
+      live "/notifications", NotificationsLive, :index
+      live "/bookmarks", BookmarksLive, :index
+      live "/settings", SettingsLive, :index
+      live "/settings/muted", MutedAccountsLive, :index
+      live "/settings/blocked", BlockedAccountsLive, :index
+      live "/:username", ProfileLive, :show
+      live "/:username/followers", ConnectionsLive, :followers
+      live "/:username/following", ConnectionsLive, :following
+    end
   end
 
   # Other scopes may use custom stacks.

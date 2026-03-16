@@ -1,5 +1,4 @@
 defmodule YRepo.DebugSchema do
-  import Ecto.Query
   alias YRepo.Repo
 
   def run do

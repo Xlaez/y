@@ -1,13 +1,14 @@
 defmodule YWeb.SeedPhraseLive do
   use YWeb, :live_view
 
-  def mount(_params, _session, socket) do
-    words = [
-      "abandon", "ability", "able", "about", 
-      "above", "absent", "absorb", "abstract", 
-      "absurd", "abuse", "access", "accident"
-    ]
-    {:ok, assign(socket, words: words, confirmed: false)}
+  def mount(params, _session, socket) do
+    words = (params["words"] || "") |> String.split("-", trim: true)
+    
+    if Enum.count(words) != 12 do
+      {:ok, push_navigate(socket, to: ~p"/signup")}
+    else
+      {:ok, assign(socket, words: words, confirmed: false)}
+    end
   end
 
   def handle_event("toggle_confirm", %{"value" => "on"}, socket) do

@@ -20,7 +20,7 @@ defmodule YWeb.ConnectionsLive do
     {:noreply, socket}
   end
 
-  def handle_event("toggle_follow", %{"id" => id}, socket) do
+  def handle_event("toggle_follow", %{"id" => _id}, socket) do
     # Currently just toggles a visual state in the lists if we were tracking it per-user.
     # For now, just a dummy event.
     {:noreply, put_flash(socket, :info, "Action updated")}

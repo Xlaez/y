@@ -1,20 +1,36 @@
 defmodule YWeb.AuthController do
   use YWeb, :controller
 
-  def new(conn, _params) do
-    render(conn, :new)
+  alias YWeb.Plugs.Auth
+  alias YCore.Accounts.AuthenticationService
+
+  def create(conn, %{"username" => username, "password" => password}) do
+    user_repo = Application.get_env(:y_core, :repositories)[:user]
+    
+    case AuthenticationService.authenticate(username, password, user_repo) do
+      {:ok, user} ->
+        conn
+        |> put_flash(:info, "Welcome back!")
+        |> Auth.login_user(user.id)
+        |> redirect(to: "/home")
+
+      {:error, :invalid_credentials} ->
+        conn
+        |> put_flash(:error, "Invalid username or password")
+        |> redirect(to: "/login")
+    end
   end
 
-  def create(conn, %{"username" => _username, "password" => _password}) do
-    # Placeholder for authentication logic
+  def register_complete(conn, %{"user_id" => user_id, "words" => words}) do
     conn
-    |> put_flash(:info, "Welcome back!")
-    |> redirect(to: "/feed")
+    |> Auth.login_user(user_id)
+    |> redirect(to: ~p"/onboarding/seed-phrase?words=#{words}")
   end
 
   def delete(conn, _params) do
     conn
-    |> configure_session(drop: true)
-    |> redirect(to: "/")
+    |> Auth.logout_user()
+    |> put_flash(:info, "Logged out successfully.")
+    |> redirect(to: "/login")
   end
 end

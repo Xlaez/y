@@ -41,6 +41,7 @@ defmodule YRepo.MixProject do
       {:y_core, in_umbrella: true},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
+      {:redix, "~> 1.1"},
       {:ex_machina, "~> 2.7", only: :test},
       {:faker, "~> 0.18", only: :test}
     ]

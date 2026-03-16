@@ -9,6 +9,10 @@ config :y_repo, YRepo.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+# Redis configuration
+config :y_repo, :redis,
+  url: "redis://localhost:6379/1"
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :y_web, YWeb.Endpoint,

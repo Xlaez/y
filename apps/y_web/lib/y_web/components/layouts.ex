@@ -234,14 +234,32 @@ defmodule YWeb.Layouts do
 
   defp user_row(assigns) do
     ~H"""
-    <div class="flex items-center gap-3 px-3 py-3 rounded-full hover:bg-y-hover cursor-pointer transition-all duration-150 group">
-      <.bitmoji user={@user} size="sm" />
-      <div class="flex-1 min-w-0 hidden xl:block">
-        <p class="text-y-text font-medium truncate text-sm"><%= @user.username %></p>
-        <p class="text-y-muted text-xs truncate"><%= @user.handle %></p>
+    <div class="flex items-center justify-between px-3 py-3 rounded-full hover:bg-y-hover transition-all duration-150 group px-3">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <.bitmoji user={@user} size="sm" />
+        <div class="flex-1 min-w-0 hidden xl:block text-left">
+          <p class="text-y-text font-medium truncate text-sm"><%= @user.username %></p>
+          <p class="text-y-muted text-xs truncate"><%= @user.handle %></p>
+        </div>
       </div>
-      <span class="hero-ellipsis-horizontal size-5 text-y-muted group-hover:text-y-text ml-auto hidden xl:block">
-      </span>
+      <.link
+        href={~p"/logout"}
+        method="delete"
+        class="text-y-muted hover:text-y-agree transition-colors xl:block hidden"
+        title="Sign out"
+      >
+        <span class="hero-arrow-right-start-on-rectangle size-5"></span>
+      </.link>
+    </div>
+    <div class="xl:hidden flex justify-center py-2">
+       <.link
+          href={~p"/logout"}
+          method="delete"
+          class="text-y-muted hover:text-y-agree transition-colors"
+          title="Sign out"
+        >
+          <span class="hero-arrow-right-start-on-rectangle size-6"></span>
+        </.link>
     </div>
     """
   end
