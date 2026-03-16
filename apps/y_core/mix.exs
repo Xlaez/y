@@ -38,7 +38,9 @@ defmodule YCore.MixProject do
     [
       {:dns_cluster, "~> 0.2.0"},
       {:phoenix_pubsub, "~> 2.1"},
-      {:argon2_elixir, "~> 4.0"}
+      {:argon2_elixir, "~> 4.0"},
+      {:bcrypt_elixir, "~> 3.0"},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 
