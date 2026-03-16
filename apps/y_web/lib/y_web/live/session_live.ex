@@ -2,7 +2,11 @@ defmodule YWeb.SessionLive do
   use YWeb, :live_view
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, show_password: false, error: nil, trigger_submit: false)}
+    {:ok, assign(socket, username: "", password: "", show_password: false, error: nil, trigger_submit: false)}
+  end
+
+  def handle_event("validate", %{"username" => username, "password" => password}, socket) do
+    {:noreply, assign(socket, username: username, password: password)}
   end
 
   def handle_event("toggle_password", _, socket) do

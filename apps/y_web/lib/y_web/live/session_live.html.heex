@@ -7,7 +7,7 @@
   <div class="w-full max-w-sm bg-y-surface rounded-2xl p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
     <h2 class="text-white text-xl font-bold mb-6">Sign in</h2>
 
-    <form phx-submit="submit" phx-trigger-action={@trigger_submit} action={~p"/login"} method="POST" class="space-y-4">
+    <form phx-submit="submit" phx-change="validate" phx-trigger-action={@trigger_submit} action={~p"/login"} method="POST" class="space-y-4">
       <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
       <div>
         <label for="username" class="block text-y-text text-sm font-medium mb-1">Username</label>
@@ -15,6 +15,7 @@
           type="text"
           id="username"
           name="username"
+          value={@username}
           placeholder="e.g. voidwalker"
           class={[
             "w-full bg-y-bg border rounded-xl px-4 py-3 text-y-text outline-none transition-all duration-150 placeholder:text-y-placeholder",
@@ -35,6 +36,7 @@
             type={if @show_password, do: "text", else: "password"}
             id="password"
             name="password"
+            value={@password}
             class="w-full bg-y-bg border border-y-border rounded-xl px-4 py-3 text-y-text outline-none focus:ring-1 focus:ring-white/30 focus:outline-none transition-all duration-150 placeholder:text-y-placeholder"
             required
           />
