@@ -77,6 +77,11 @@ defmodule YRepo.Repositories.UserRepository do
       password_hash: schema.password_hash,
       seed_phrase_hash: schema.seed_phrase_hash,
       bitmoji_id: schema.bitmoji_id,
+      bitmoji_color: YRepo.Helpers.Color.from_id(schema.bitmoji_id),
+      handle: "@#{schema.username}",
+      follower_count: 0,
+      following_count: 0,
+      take_count: 0,
       is_locked: schema.is_locked,
       inserted_at: schema.inserted_at,
       updated_at: schema.updated_at

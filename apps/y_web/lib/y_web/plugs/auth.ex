@@ -5,7 +5,12 @@ defmodule YWeb.Plugs.Auth do
   alias YRepo.Session
 
   @session_cookie "_y_session"
-  @cookie_options [http_only: true, secure: true, same_site: "Lax", max_age: 30 * 24 * 60 * 60]
+  @cookie_options [
+    http_only: true, 
+    secure: Mix.env() == :prod, 
+    same_site: "Lax", 
+    max_age: 30 * 24 * 60 * 60
+  ]
 
   def init(opts), do: opts
 
@@ -45,6 +50,7 @@ defmodule YWeb.Plugs.Auth do
       {:ok, token} ->
         conn
         |> put_resp_cookie(@session_cookie, token, @cookie_options)
+        |> put_session(:user_token, token)
         |> assign(:current_user, %{id: user_id}) # Temporary assign for the current request
       {:error, _} ->
         conn

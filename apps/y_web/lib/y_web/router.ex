@@ -5,6 +5,7 @@ defmodule YWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
+    plug :fetch_flash
     plug :put_root_layout, html: {YWeb.Layouts, :root}
     plug :put_layout, html: {YWeb.Layouts, :app}
     plug :protect_from_forgery
@@ -26,7 +27,7 @@ defmodule YWeb.Router do
     get "/", PageController, :home
     
     live_session :redirect_if_authenticated,
-      on_mount: [{YWeb.Plugs.Auth, :redirect_if_authenticated}] do
+      on_mount: [{YWeb.Plugs.Auth, :mount_current_user}, {YWeb.Plugs.Auth, :redirect_if_authenticated}] do
       live "/login", SessionLive, :index
       live "/signup", RegistrationLive, :index
       live "/forgot-password", PasswordResetLive, :index
@@ -50,7 +51,7 @@ defmodule YWeb.Router do
     pipe_through :browser
 
     live_session :require_authenticated_user,
-      on_mount: [{YWeb.Plugs.Auth, :ensure_authenticated}] do
+      on_mount: [{YWeb.Plugs.Auth, :mount_current_user}, {YWeb.Plugs.Auth, :ensure_authenticated}] do
       live "/home", HomeLive, :index
       live "/explore", ExploreLive, :index
       live "/notifications", NotificationsLive, :index

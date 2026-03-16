@@ -45,34 +45,3 @@ defmodule YCore.Accounts.SeedPhrase do
   end
 end
 
-defmodule YCore.Accounts.User do
-  defstruct [
-    :id,
-    :username,
-    :password_hash,
-    :seed_phrase_hash,
-    :bitmoji_id,
-    :is_locked,
-    :inserted_at,
-    :updated_at
-  ]
-
-  @type t :: %__MODULE__{
-          id: String.t(),
-          username: String.t(),
-          password_hash: String.t(),
-          seed_phrase_hash: String.t(),
-          bitmoji_id: String.t() | nil,
-          is_locked: boolean(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
-        }
-end
-
-defmodule YCore.Accounts.UserRepository do
-  @callback get_by_id(id :: String.t()) :: {:ok, YCore.Accounts.User.t()} | {:error, :not_found}
-  @callback get_by_username(username :: String.t()) :: {:ok, YCore.Accounts.User.t()} | {:error, :not_found}
-  @callback create(params :: map()) :: {:ok, YCore.Accounts.User.t()} | {:error, any()}
-  @callback update(user :: YCore.Accounts.User.t(), params :: map()) :: {:ok, YCore.Accounts.User.t()} | {:error, any()}
-  @callback delete(user :: YCore.Accounts.User.t()) :: :ok | {:error, any()}
-end
