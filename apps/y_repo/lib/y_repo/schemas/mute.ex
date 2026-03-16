@@ -2,8 +2,8 @@ defmodule YRepo.Schemas.Mute do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
+  @primary_key {:id, Ecto.UUID, autogenerate: true}
+  @foreign_key_type Ecto.UUID
   schema "mutes" do
     belongs_to :muter, YRepo.Schemas.User
     belongs_to :muted_user, YRepo.Schemas.User, foreign_key: :muted_id

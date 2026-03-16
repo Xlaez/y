@@ -2,15 +2,17 @@ defmodule YRepo.Schemas.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary, autogenerate: false}
-  @foreign_key_type :binary
+  @primary_key {:id, Ecto.UUID, autogenerate: true}
+  @foreign_key_type Ecto.UUID
 
   schema "users" do
     field :username, :string
     field :password_hash, :string
     field :seed_phrase_hash, :string
-    field :bitmoji_id, :binary
+    field :bitmoji_id, Ecto.UUID
     field :bitmoji_color, :string, default: "#3A3A3C"
+    field :display_name, :string
+    field :profile_picture_base64, :string
     field :is_locked, :boolean, default: false
 
     timestamps(type: :utc_datetime_usec)
@@ -18,7 +20,7 @@ defmodule YRepo.Schemas.User do
 
   def creation_changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, [:id, :username, :password_hash, :seed_phrase_hash, :bitmoji_id, :bitmoji_color])
+    |> cast(attrs, [:id, :username, :password_hash, :seed_phrase_hash, :bitmoji_id, :bitmoji_color, :display_name, :profile_picture_base64])
     |> validate_required([:username, :password_hash, :seed_phrase_hash, :bitmoji_id])
     |> ensure_id()
     |> validate_username_format()
@@ -41,6 +43,12 @@ defmodule YRepo.Schemas.User do
     user
     |> cast(attrs, [:bitmoji_color])
     |> validate_required([:bitmoji_color])
+  end
+
+  def update_profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:display_name, :profile_picture_base64])
+    |> validate_length(:display_name, max: 50)
   end
 
   def update_changeset(user, attrs) do

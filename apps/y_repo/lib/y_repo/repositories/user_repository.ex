@@ -52,6 +52,8 @@ defmodule YRepo.Repositories.UserRepository do
             SchemaUser.bitmoji_color_changeset(schema_user, attrs)
           Map.has_key?(attrs, :is_locked) ->
             SchemaUser.lock_changeset(schema_user, attrs)
+          Map.has_key?(attrs, :display_name) or Map.has_key?(attrs, :profile_picture_base64) ->
+            SchemaUser.update_profile_changeset(schema_user, attrs)
           true ->
             SchemaUser.update_changeset(schema_user, attrs)
         end
@@ -83,6 +85,8 @@ defmodule YRepo.Repositories.UserRepository do
       seed_phrase_hash: schema.seed_phrase_hash,
       bitmoji_id: schema.bitmoji_id,
       bitmoji_color: schema.bitmoji_color || YRepo.Helpers.Color.from_id(schema.bitmoji_id),
+      display_name: schema.display_name,
+      profile_picture_base64: schema.profile_picture_base64,
       handle: "@#{schema.username}",
       follower_count: 0,
       following_count: 0,

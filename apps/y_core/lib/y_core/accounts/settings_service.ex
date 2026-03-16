@@ -52,16 +52,16 @@ defmodule YCore.Accounts.SettingsService do
     end
   end
 
-  @spec delete_account(String.t(), String.t(), module()) ::
+  @spec delete_account(String.t(), String.t(), module(), module()) ::
           :ok | {:error, :invalid_password} | {:error, term()}
-  def delete_account(user_id, password_confirmation, user_repo) do
+  def delete_account(user_id, password_confirmation, user_repo, session_repo) do
     case user_repo.get_by_id(user_id) do
       {:error, :not_found} ->
         {:error, :not_found}
 
       {:ok, user} ->
         if Bcrypt.verify_pass(password_confirmation, user.password_hash) do
-          YRepo.Session.delete_all_for_user(user_id)
+          session_repo.delete_all_for_user(user_id)
           user_repo.delete(user_id)
         else
           {:error, :invalid_password}

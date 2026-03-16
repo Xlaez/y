@@ -3,7 +3,7 @@
     <span class="hero-arrow-left size-5 text-white"></span>
   </.link>
   <div>
-    <h2 class="text-white text-lg font-bold leading-tight"><%= @profile.user.username %></h2>
+    <h2 class="text-white text-lg font-bold leading-tight"><%= @profile.user.display_name || @profile.user.username %></h2>
     <p class="text-y-muted text-xs"><%= @profile.take_count %> Takes</p>
   </div>
 </header>
@@ -34,7 +34,10 @@
           <% end %>
         </button>
       <% else %>
-        <button class="bg-transparent border border-y-border text-white font-bold rounded-full px-6 py-2 hover:bg-y-hover transition-all">
+        <button 
+          phx-click="open_edit_modal"
+          class="bg-transparent border border-y-border text-white font-bold rounded-full px-6 py-2 hover:bg-y-hover transition-all"
+        >
           Edit profile
         </button>
       <% end %>
@@ -42,7 +45,7 @@
 
     <div class="space-y-1">
       <div class="flex items-center gap-1.5">
-        <h3 class="text-white text-2xl font-black"><%= @profile.user.username %></h3>
+        <h3 class="text-white text-2xl font-black"><%= @profile.user.display_name || @profile.user.username %></h3>
         <%= if @profile.user.is_locked do %>
           <span class="hero-lock-closed-micro size-4 text-y-muted" title="Locked account"></span>
         <% end %>
@@ -96,3 +99,89 @@
     </div>
   <% end %>
 </div>
+
+<%= if @show_edit_modal do %>
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm">
+    <div class="bg-black border border-y-border w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+      <div class="px-4 py-3 border-b border-y-border flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <button 
+            phx-click="close_modal"
+            class="p-2 hover:bg-y-hover rounded-full transition-colors"
+          >
+            <span class="hero-x-mark size-5 text-white"></span>
+          </button>
+          <h3 class="text-white text-xl font-bold">Edit profile</h3>
+        </div>
+        <button 
+          form="edit-profile-form"
+          type="submit"
+          class="bg-white text-black px-4 py-1.5 rounded-full font-bold hover:bg-[#E5E5E7] transition-all"
+        >
+          Save
+        </button>
+      </div>
+
+      <div class="p-4 space-y-6">
+        <!-- Banner Upload (Placeholder for now) -->
+        <div class="relative h-40 bg-y-surface rounded-xl overflow-hidden">
+          <div class="absolute inset-0 flex items-center justify-center bg-black/20">
+            <button class="p-3 bg-black/40 hover:bg-black/60 rounded-full transition-colors text-white">
+              <span class="hero-camera size-6"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Avatar Upload -->
+        <div class="relative -mt-12 ml-4">
+          <div class="relative size-24 rounded-full border-4 border-black overflow-hidden bg-y-surface">
+             <%= if @profile.user.profile_picture_base64 do %>
+                <img src={@profile.user.profile_picture_base64} class="size-full object-cover opacity-50" />
+             <% else %>
+                <div class="size-full flex items-center justify-center bg-y-surface opacity-50">
+                  <span class="text-2xl text-white font-bold"><%= YWeb.Helpers.Bitmoji.initials(@profile.user.username) %></span>
+                </div>
+             <% end %>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <label class="p-2.5 bg-black/40 hover:bg-black/60 rounded-full transition-colors text-white cursor-pointer">
+                <span class="hero-camera size-5"></span>
+                <.live_file_input upload={@uploads.profile_picture} class="hidden" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <form id="edit-profile-form" phx-submit="save_profile" phx-change="validate_profile" class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="text-y-muted text-xs font-semibold px-4">Name</label>
+            <input 
+              type="text" 
+              name="display_name" 
+              value={@display_name}
+              placeholder="Display name"
+              class="w-full bg-transparent border border-y-border rounded-xl px-4 py-3 text-white focus:ring-1 focus:ring-y-opinion focus:border-y-opinion outline-none"
+              maxlength="50"
+            />
+          </div>
+
+          <%= for entry <- @uploads.profile_picture.entries do %>
+            <div class="px-4 py-2 bg-y-surface rounded-xl flex items-center justify-between border border-y-border animate-pulse">
+              <div class="flex items-center gap-3">
+                <span class="hero-photo size-5 text-y-opinion"></span>
+                <span class="text-white text-sm truncate max-w-[200px]"><%= entry.client_name %></span>
+              </div>
+              <button 
+                type="button" 
+                phx-click="cancel-upload" 
+                phx-value-ref={entry.ref}
+                class="text-y-muted hover:text-white transition-colors"
+              >
+                <span class="hero-x-mark size-4"></span>
+              </button>
+            </div>
+          <% end %>
+        </form>
+      </div>
+    </div>
+  </div>
+<% end %>

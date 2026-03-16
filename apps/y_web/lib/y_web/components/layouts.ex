@@ -374,10 +374,14 @@ defmodule YWeb.Layouts do
 
     ~H"""
     <div
-      class={["shrink-0 rounded-full flex items-center justify-center font-bold text-[#E5E5E7] shadow-inner", @size_class]}
+      class={["shrink-0 rounded-full flex items-center justify-center font-bold text-[#E5E5E7] shadow-inner overflow-hidden", @size_class]}
       style={"background-color: #{@user.bitmoji_color};"}
     >
-      <%= YWeb.Helpers.Bitmoji.initials(@user.username) %>
+      <%= if @user[:profile_picture_base64] && @user.profile_picture_base64 != "" do %>
+        <img src={@user.profile_picture_base64} class="size-full object-cover" alt={@user.username} />
+      <% else %>
+        <%= YWeb.Helpers.Bitmoji.initials(@user.username) %>
+      <% end %>
     </div>
     """
   end

@@ -10,6 +10,9 @@ defmodule YRepo.Repo.Migrations.CreateUsers do
       add :password_hash, :text, null: false
       add :seed_phrase_hash, :text, null: false
       add :bitmoji_id, :uuid, null: false
+      add :bitmoji_color, :text, default: "#3A3A3C", null: false
+      add :display_name, :text
+      add :profile_picture_base64, :text
       add :is_locked, :boolean, default: false, null: false
 
       timestamps(type: :utc_datetime_usec)

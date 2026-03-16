@@ -2,6 +2,7 @@ defmodule YWeb.SettingsLive do
   use YWeb, :live_view
 
   @user_repo YRepo.Repositories.UserRepository
+  @session_repo YRepo.Repositories.SessionRepository
   @block_repo YRepo.Repositories.BlockRepository
   @mute_repo YRepo.Repositories.MuteRepository
 
@@ -143,7 +144,8 @@ defmodule YWeb.SettingsLive do
     case YCore.Accounts.SettingsService.delete_account(
            socket.assigns.current_user.id,
            password,
-           @user_repo
+           @user_repo,
+           @session_repo
          ) do
       :ok ->
         {:noreply,

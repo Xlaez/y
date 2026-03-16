@@ -2,8 +2,8 @@ defmodule YRepo.Schemas.Block do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
+  @primary_key {:id, Ecto.UUID, autogenerate: true}
+  @foreign_key_type Ecto.UUID
   schema "blocks" do
     belongs_to :blocker, YRepo.Schemas.User
     belongs_to :blocked, YRepo.Schemas.User
