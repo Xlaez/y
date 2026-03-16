@@ -5,7 +5,8 @@ defmodule YRepo.Factory do
     %YRepo.Schemas.User{
       username: sequence(:username, &"user_#{&1}"),
       password_hash: "hashed_password",
-      seed_phrase_hash: "hashed_seed"
+      seed_phrase_hash: "hashed_seed",
+      bitmoji_id: Ecto.UUID.generate()
     }
   end
 

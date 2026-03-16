@@ -1,54 +1,74 @@
 defmodule YRepo.Repositories.UserRepository do
+  @moduledoc """
+  Implementation of YCore.Accounts.UserRepository behaviour using Ecto.
+  Handles mapping between Ecto schemas and domain entities.
+  """
+
   @behaviour YCore.Accounts.UserRepository
 
+  import Ecto.Query
   alias YRepo.Repo
-  alias YRepo.Schemas.User
+  alias YRepo.Schemas.User, as: SchemaUser
   alias YCore.Accounts.User, as: DomainUser
 
+  @impl true
   def get_by_id(id) do
-    case Repo.get(User, id) do
+    case Repo.get(SchemaUser, id) do
       nil -> {:error, :not_found}
-      schema -> {:ok, to_domain(schema)}
+      user -> {:ok, to_domain(user)}
     end
   end
 
+  @impl true
   def get_by_username(username) do
-    case Repo.get_by(User, username: username) do
+    # Case-insensitive lookup using LOWER() index
+    SchemaUser
+    |> where([u], fragment("LOWER(?)", u.username) == fragment("LOWER(?)", ^username))
+    |> Repo.one()
+    |> case do
       nil -> {:error, :not_found}
-      schema -> {:ok, to_domain(schema)}
+      user -> {:ok, to_domain(user)}
     end
   end
 
-  def create(params) do
-    %User{}
-    |> User.changeset(params)
+  @impl true
+  def create(attrs) do
+    attrs
+    |> SchemaUser.creation_changeset()
     |> Repo.insert()
     |> case do
-      {:ok, schema} -> {:ok, to_domain(schema)}
+      {:ok, user} -> {:ok, to_domain(user)}
       {:error, changeset} -> {:error, changeset}
     end
   end
 
-  def update(user, params) do
-    Repo.get(User, user.id)
-    |> User.changeset(params)
-    |> Repo.update()
-    |> case do
-      {:ok, schema} -> {:ok, to_domain(schema)}
-      {:error, changeset} -> {:error, changeset}
-    end
-  end
-
-  def delete(user) do
-    case Repo.get(User, user.id) do
+  @impl true
+  def update(%DomainUser{id: id} = domain_user, attrs) do
+    case Repo.get(SchemaUser, id) do
       nil -> {:error, :not_found}
-      schema ->
-        Repo.delete(schema)
+      schema_user ->
+        schema_user
+        |> SchemaUser.password_update_changeset(attrs)
+        |> Repo.update()
+        |> case do
+          {:ok, user} -> {:ok, to_domain(user)}
+          {:error, changeset} -> {:error, changeset}
+        end
+    end
+  end
+
+  @impl true
+  def delete(id) do
+    case Repo.get(SchemaUser, id) do
+      nil -> {:error, :not_found}
+      user ->
+        Repo.delete(user)
         :ok
     end
   end
 
-  defp to_domain(schema) do
+  # Private helper: mapping every YRepo.Schemas.User field to YCore.Accounts.User struct
+  defp to_domain(%SchemaUser{} = schema) do
     %DomainUser{
       id: schema.id,
       username: schema.username,
