@@ -3,6 +3,7 @@ defmodule YRepo.Factory do
 
   def user_factory do
     %YRepo.Schemas.User{
+      id: Ecto.UUID.generate(),
       username: sequence(:username, &"user_#{&1}"),
       password_hash: "hashed_password",
       seed_phrase_hash: "hashed_seed",

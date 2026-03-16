@@ -2,14 +2,14 @@ defmodule YRepo.Schemas.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :string, autogenerate: false}
-  @foreign_key_type :string
+  @primary_key {:id, :binary, autogenerate: false}
+  @foreign_key_type :binary
 
   schema "users" do
     field :username, :string
     field :password_hash, :string
     field :seed_phrase_hash, :string
-    field :bitmoji_id, :string
+    field :bitmoji_id, :binary
     field :is_locked, :boolean, default: false
 
     timestamps(type: :utc_datetime_usec)

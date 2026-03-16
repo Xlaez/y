@@ -43,7 +43,7 @@ defmodule YRepo.Repositories.UserRepository do
   end
 
   @impl true
-  def update(%DomainUser{id: id} = domain_user, attrs) do
+  def update(%DomainUser{id: id}, attrs) do
     case Repo.get(SchemaUser, id) do
       nil -> {:error, :not_found}
       schema_user ->

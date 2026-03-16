@@ -3,8 +3,8 @@ defmodule YRepo.Repo.Migrations.CreateTakes do
 
   def change do
     create table(:takes, primary_key: false) do
-      add :id, :binary_id, primary_key: true
-      add :user_id, references(:users, type: :binary_id, on_delete: :delete_all), null: false
+      add :id, :binary, primary_key: true
+      add :user_id, references(:users, type: :binary, on_delete: :delete_all), null: false
       add :body, :string, size: 250, null: false
 
       timestamps(type: :utc_datetime_usec)
