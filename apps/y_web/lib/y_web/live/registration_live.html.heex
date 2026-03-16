@@ -8,6 +8,7 @@
     <h2 class="text-white text-xl font-bold mb-6">Create your account</h2>
 
     <form phx-submit="submit" phx-change="validate" phx-trigger-action={@trigger_submit} action={~p"/register_complete"} method="POST" class="space-y-4">
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
       <input type="hidden" name="user_id" value={assigns[:user_id]} />
       <input type="hidden" name="words" value={assigns[:words]} />
       <div>

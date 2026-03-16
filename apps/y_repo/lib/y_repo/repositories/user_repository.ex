@@ -19,6 +19,8 @@ defmodule YRepo.Repositories.UserRepository do
     end
   end
 
+  def get(id), do: get_by_id(id)
+
   @impl true
   def get_by_username(username) do
     # Case-insensitive lookup using LOWER() index

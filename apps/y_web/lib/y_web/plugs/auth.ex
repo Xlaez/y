@@ -16,7 +16,7 @@ defmodule YWeb.Plugs.Auth do
       case Session.get_user_id(user_token) do
         {:ok, user_id} ->
           user_repo = Application.get_env(:y_core, :repositories)[:user]
-          case user_repo.get(user_id) do
+          case user_repo.get_by_id(user_id) do
             {:ok, user} ->
               conn
               |> assign(:current_user, user)
@@ -89,7 +89,7 @@ defmodule YWeb.Plugs.Auth do
       case Session.get_user_id(user_token) do
         {:ok, user_id} ->
           user_repo = Application.get_env(:y_core, :repositories)[:user]
-          case user_repo.get(user_id) do
+          case user_repo.get_by_id(user_id) do
             {:ok, user} -> Phoenix.Component.assign(socket, :current_user, user)
             _ -> Phoenix.Component.assign(socket, :current_user, nil)
           end

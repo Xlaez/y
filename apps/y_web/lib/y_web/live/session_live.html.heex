@@ -8,6 +8,7 @@
     <h2 class="text-white text-xl font-bold mb-6">Sign in</h2>
 
     <form phx-submit="submit" phx-trigger-action={@trigger_submit} action={~p"/login"} method="POST" class="space-y-4">
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
       <div>
         <label for="username" class="block text-y-text text-sm font-medium mb-1">Username</label>
         <input
