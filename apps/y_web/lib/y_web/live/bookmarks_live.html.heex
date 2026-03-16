@@ -4,7 +4,7 @@
 </header>
 
 <div class="divide-y divide-y-border min-h-[400px]">
-  <%= if Enum.empty?(@bookmarks) do %>
+  <%= if Enum.empty?(@feed) do %>
     <div class="flex flex-col items-center justify-center py-20 px-8 text-center">
       <div class="size-20 bg-y-surface rounded-full flex items-center justify-center mb-6">
         <span class="hero-bookmark size-10 text-y-bookmark"></span>
@@ -15,8 +15,8 @@
       </p>
     </div>
   <% else %>
-    <%= for take <- @bookmarks do %>
-      <YWeb.Layouts.take_card take={take} />
+    <%= for item <- @feed do %>
+      <YWeb.Components.FeedCard.feed_card item={item} current_user={@current_user} />
     <% end %>
   <% end %>
 </div>

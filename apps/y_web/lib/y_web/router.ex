@@ -60,7 +60,7 @@ defmodule YWeb.Router do
       live "/settings/muted", MutedAccountsLive, :index
       live "/settings/blocked", BlockedAccountsLive, :index
       live "/:username", ProfileLive, :show
-      live "/:username/take/:id", TakeLive, :show
+      live "/takes/:id", TakeLive, :show
       live "/:username/followers", ConnectionsLive, :followers
       live "/:username/following", ConnectionsLive, :following
 

@@ -3,30 +3,13 @@ defmodule YRepo.Repositories.OpinionRepository do
 
   import Ecto.Query
   alias YRepo.Repo
-  alias YRepo.Schemas.Opinion
+  alias YRepo.Schemas.Opinion, as: SchemaOpinion
   alias YCore.Content.Opinion, as: DomainOpinion
 
-  def list_by_take(take_id) do
-    Opinion
-    |> where(parent_take_id: ^take_id)
-    |> order_by(asc: :inserted_at)
-    |> preload(:user)
-    |> Repo.all()
-    |> Enum.map(&to_domain/1)
-  end
-
-  def list_by_opinion(opinion_id) do
-    Opinion
-    |> where(parent_opinion_id: ^opinion_id)
-    |> order_by(asc: :inserted_at)
-    |> preload(:user)
-    |> Repo.all()
-    |> Enum.map(&to_domain/1)
-  end
-
-  def create(params) do
-    %Opinion{}
-    |> Opinion.changeset(params)
+  @impl true
+  def create(attrs) do
+    %SchemaOpinion{}
+    |> SchemaOpinion.changeset(attrs)
     |> Repo.insert()
     |> case do
       {:ok, schema} -> {:ok, to_domain(schema)}
@@ -34,28 +17,53 @@ defmodule YRepo.Repositories.OpinionRepository do
     end
   end
 
-  defp to_domain(schema) do
-    user = 
-      if Ecto.assoc_loaded?(schema.user) and schema.user != nil do
-        %{
-          id: schema.user.id,
-          username: schema.user.username,
-          bitmoji_id: schema.user.bitmoji_id,
-          bitmoji_color: YRepo.Helpers.Color.from_id(schema.user.bitmoji_id),
-          handle: "@#{schema.user.username}"
-        }
-      else
-        nil
-      end
+  @impl true
+  def get_by_id(id) do
+    case Repo.get(SchemaOpinion, id) do
+      nil -> {:error, :not_found}
+      schema -> {:ok, to_domain(schema)}
+    end
+  end
 
+  @impl true
+  def delete(id, requesting_user_id) do
+    case Repo.get(SchemaOpinion, id) do
+      nil -> {:error, :not_found}
+      schema ->
+        if schema.user_id == requesting_user_id do
+          Repo.delete!(schema)
+          :ok
+        else
+          {:error, :forbidden}
+        end
+    end
+  end
+
+  @impl true
+  def list_for_take(take_id) do
+    SchemaOpinion
+    |> where(take_id: ^take_id)
+    |> order_by(asc: :inserted_at)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
+  def count_for_take(take_id) do
+    SchemaOpinion
+    |> where(take_id: ^take_id)
+    |> Repo.aggregate(:count, :id)
+  end
+
+  defp to_domain(%SchemaOpinion{} = schema) do
     %DomainOpinion{
       id: schema.id,
       user_id: schema.user_id,
-      parent_take_id: schema.parent_take_id,
+      take_id: schema.take_id,
       parent_opinion_id: schema.parent_opinion_id,
       body: schema.body,
+      depth: schema.depth,
       inserted_at: schema.inserted_at
     }
-    |> Map.put(:user, user)
   end
 end

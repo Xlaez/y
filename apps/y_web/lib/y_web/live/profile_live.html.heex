@@ -93,8 +93,8 @@
 
     <!-- Profile Feed -->
     <div class="divide-y divide-y-border">
-      <%= for take <- @takes do %>
-        <YWeb.Layouts.take_card take={take} />
+      <%= for item <- @feed do %>
+        <YWeb.Components.FeedCard.feed_card item={item} current_user={@current_user} show_delete={@current_user && @current_user.id == @profile.user.id} />
       <% end %>
     </div>
   <% end %>

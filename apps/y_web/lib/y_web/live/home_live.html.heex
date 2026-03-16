@@ -18,33 +18,11 @@
 
 <!-- Feed -->
 <div class="divide-y divide-y-border">
-  <%= for {take, index} <- Enum.with_index(@takes) do %>
-    <%= if index == 3 do %>
-      <!-- Who to Follow Widget (Mobile/Tablet only) -->
-      <div class="px-4 py-4 lg:hidden">
-        <div class="bg-y-surface rounded-2xl overflow-hidden">
-          <h3 class="text-white font-bold text-lg px-4 pt-4 pb-3">Who to follow</h3>
-          <div class="divide-y divide-y-border">
-            <%= for user <- @who_to_follow do %>
-              <div class="flex items-center justify-between px-4 py-3 group hover:bg-y-hover transition-colors">
-                <div class="flex items-center gap-3">
-                  <YWeb.Layouts.bitmoji user={user} size="sm" />
-                  <div class="min-w-0">
-                    <p class="text-y-text font-medium text-sm truncate cursor-pointer hover:underline"><%= user.username %></p>
-                    <p class="text-y-muted text-xs truncate"><%= user.handle %></p>
-                  </div>
-                </div>
-                <button class="border border-y-white text-y-white hover:bg-white/10 text-xs font-semibold rounded-full px-3 py-1 transition-all">
-                  Follow
-                </button>
-              </div>
-            <% end %>
-          </div>
-          <button class="text-y-opinion text-sm font-medium px-4 py-3 hover:bg-y-hover transition-colors w-full text-left rounded-b-2xl">Show more</button>
-        </div>
-      </div>
-    <% end %>
-
-    <YWeb.Layouts.take_card take={take} />
+  <%= for item <- @feed do %>
+    <YWeb.Components.FeedCard.feed_card item={item} current_user={@current_user} />
   <% end %>
 </div>
+
+<%= if @retake_modal do %>
+  <!-- Retake Modal Implementation -->
+<% end %>

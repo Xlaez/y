@@ -2,33 +2,37 @@ defmodule YCore.Content.TakeBody do
   defstruct [:value]
   @type t :: %__MODULE__{value: String.t()}
 
+  @spec new(String.t()) :: {:ok, String.t()} | {:error, String.t()}
   def new(value) when is_binary(value) do
     trimmed = String.trim(value)
-    if valid?(trimmed) do
-      {:ok, %__MODULE__{value: trimmed}}
-    else
-      {:error, :invalid_take_body}
-    end
-  end
+    len = String.length(trimmed)
 
-  defp valid?(value) do
-    len = String.length(value)
-    len > 0 and len <= 250
+    cond do
+      len == 0 -> {:error, "Body cannot be empty"}
+      len > 250 -> {:error, "Body is too long (max 250 characters)"}
+      true -> {:ok, trimmed}
+    end
   end
 end
 
 defmodule YCore.Content.Take do
-  defstruct [:id, :user_id, :body, :inserted_at]
+  @enforce_keys [:id, :user_id, :body, :inserted_at]
+  defstruct [:id, :user_id, :body, :inserted_at, opinion_count: 0, retake_count: 0]
+
   @type t :: %__MODULE__{
           id: String.t(),
           user_id: String.t(),
           body: String.t(),
-          inserted_at: DateTime.t()
+          inserted_at: DateTime.t(),
+          opinion_count: non_neg_integer(),
+          retake_count: non_neg_integer()
         }
 end
 
 defmodule YCore.Content.Retake do
+  @enforce_keys [:id, :user_id, :original_take_id, :inserted_at]
   defstruct [:id, :user_id, :original_take_id, :comment, :inserted_at]
+
   @type t :: %__MODULE__{
           id: String.t(),
           user_id: String.t(),
@@ -39,30 +43,47 @@ defmodule YCore.Content.Retake do
 end
 
 defmodule YCore.Content.Opinion do
-  defstruct [:id, :user_id, :parent_take_id, :parent_opinion_id, :body, :inserted_at]
+  @enforce_keys [:id, :user_id, :take_id, :body, :depth, :inserted_at]
+  defstruct [:id, :user_id, :take_id, :parent_opinion_id, :body, :depth, :inserted_at]
+
   @type t :: %__MODULE__{
           id: String.t(),
           user_id: String.t(),
-          parent_take_id: String.t() | nil,
+          take_id: String.t(),
           parent_opinion_id: String.t() | nil,
           body: String.t(),
+          depth: non_neg_integer(),
           inserted_at: DateTime.t()
         }
 end
 
 defmodule YCore.Content.TakeRepository do
-  @callback get_by_id(id :: String.t()) :: {:ok, YCore.Content.Take.t()} | {:error, :not_found}
-  @callback get_with_user(id :: String.t()) :: {:ok, map()} | {:error, :not_found}
-  @callback create(params :: map()) :: {:ok, YCore.Content.Take.t()} | {:error, any()}
-  @callback delete(take :: YCore.Content.Take.t()) :: :ok | {:error, any()}
+  alias YCore.Content.Take
+
+  @callback create(map()) :: {:ok, Take.t()} | {:error, term()}
+  @callback get_by_id(String.t()) :: {:ok, Take.t()} | {:error, :not_found}
+  @callback delete(String.t(), String.t()) :: :ok | {:error, :not_found | :forbidden}
+  @callback list_for_feed(user_ids :: [String.t()], opts :: keyword()) :: [Take.t()]
+  @callback list_for_user(user_id :: String.t(), opts :: keyword()) :: [Take.t()]
+  @callback count_for_user(user_id :: String.t()) :: non_neg_integer()
 end
 
 defmodule YCore.Content.RetakeRepository do
-  @callback create(params :: map()) :: {:ok, YCore.Content.Retake.t()} | {:error, any()}
+  alias YCore.Content.Retake
+
+  @callback create(map()) :: {:ok, Retake.t()} | {:error, :already_retook | term()}
+  @callback get_by_id(String.t()) :: {:ok, Retake.t()} | {:error, :not_found}
+  @callback delete(String.t(), String.t()) :: :ok | {:error, :not_found | :forbidden}
+  @callback already_retook?(user_id :: String.t(), take_id :: String.t()) :: boolean()
+  @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
 end
 
 defmodule YCore.Content.OpinionRepository do
-  @callback list_by_take(take_id :: String.t()) :: [map()]
-  @callback list_by_opinion(opinion_id :: String.t()) :: [map()]
-  @callback create(params :: map()) :: {:ok, YCore.Content.Opinion.t()} | {:error, any()}
+  alias YCore.Content.Opinion
+
+  @callback create(map()) :: {:ok, Opinion.t()} | {:error, term()}
+  @callback get_by_id(String.t()) :: {:ok, Opinion.t()} | {:error, :not_found}
+  @callback delete(String.t(), String.t()) :: :ok | {:error, :not_found | :forbidden}
+  @callback list_for_take(take_id :: String.t()) :: [Opinion.t()]
+  @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
 end

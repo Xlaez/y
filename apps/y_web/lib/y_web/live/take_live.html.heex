@@ -14,19 +14,14 @@
     <!-- Main Take Hero Section -->
     <div class="px-4 py-4 border-b border-y-border">
       <div class="flex items-center gap-3 mb-4">
-        <YWeb.Layouts.bitmoji user={@take.user} size="md" />
+        <.bitmoji user={@author} size="md" />
         <div class="flex flex-col">
           <span class="text-y-white font-bold text-[15px] hover:underline cursor-pointer leading-tight">
-            <%= @take.user.username %>
+            <%= @author.username %>
           </span>
           <span class="text-y-muted text-sm leading-tight">
-            <%= @take.user.handle %>
+            <%= @author.handle %>
           </span>
-        </div>
-        <div class="ml-auto">
-          <button class="p-2 hover:bg-y-hover rounded-full transition-colors text-y-faint">
-            <span class="hero-ellipsis-horizontal size-5"></span>
-          </button>
         </div>
       </div>
 
@@ -35,20 +30,37 @@
       </p>
 
       <div class="mt-4 py-4 border-b border-y-border flex items-center gap-1.5 text-y-muted text-[15px]">
-        <span><%= @take.inserted_at %></span>
-        <span>·</span>
-        <span class="font-bold text-y-white">124K</span>
-        <span>Views</span>
+        <span><%= YWeb.Helpers.Time.relative(@take.inserted_at) %></span>
       </div>
 
       <div class="flex items-center justify-around py-2 border-b border-y-border">
-        <.action_button_hero icon="hero-chat-bubble-left" count={12} label="Opinions" />
-        <.action_button_hero icon="hero-arrow-path" count={45} label="Retakes" />
-        <.action_button_hero icon="hero-heart" count={892} label="Agrees" />
-        <.action_button_hero icon="hero-bookmark" count={34} label="Saves" />
-        <button class="p-2.5 hover:bg-y-hover rounded-full transition-colors text-y-faint">
-          <span class="hero-share size-5"></span>
-        </button>
+        <.action_button_hero 
+          icon="hero-chat-bubble-left" 
+          count={Enum.count(@opinion_tree)} 
+          label="Opinions" 
+        />
+        <.action_button_hero 
+          icon="hero-arrow-path" 
+          count={@retake_count} 
+          label="Retakes" 
+        />
+        <.action_button_hero 
+          icon="hero-heart" 
+          count={@agree_count} 
+          label="Agrees" 
+          active={@viewer_agreed}
+          phx_click="toggle_agree"
+          phx_value_target_type="take"
+          phx_value_target_id={@take.id}
+        />
+        <.action_button_hero 
+          icon="hero-bookmark" 
+          label="Saves" 
+          active={@viewer_bookmarked}
+          phx_click="toggle_bookmark"
+          phx_value_target_type="take"
+          phx_value_target_id={@take.id}
+        />
       </div>
     </div>
 
@@ -65,17 +77,17 @@
       />
     </div>
 
-    <!-- Opinions Section -->
+    <!-- Opinions Section (Threaded) -->
     <div class="divide-y divide-y-border">
-      <%= for opinion <- @opinions do %>
-        <YWeb.Layouts.take_card take={opinion_to_take_adapter(opinion)} />
+      <%= for node <- @opinion_tree do %>
+        <.opinion_node node={node} current_user={@current_user} />
       <% end %>
       
-      <%= if Enum.empty?(@opinions) do %>
+      <%= if Enum.empty?(@opinion_tree) do %>
         <div class="py-20 text-center">
           <p class="text-y-muted text-lg">No opinions yet. Be the first to share one!</p>
         </div>
       <% end %>
-    </div>
   </div>
+</div>
 </div>

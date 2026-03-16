@@ -3,31 +3,14 @@ defmodule YRepo.Repositories.TakeRepository do
 
   import Ecto.Query
   alias YRepo.Repo
-  alias YRepo.Schemas.Take
-  alias YRepo.Schemas.Take
+  alias YRepo.Schemas.Take, as: SchemaTake
   alias YCore.Content.Take, as: DomainTake
+  alias YRepo.Queries.FeedQuery
 
-  def get_by_id(id) do
-    case Repo.get(Take, id) do
-      nil -> {:error, :not_found}
-      schema -> {:ok, to_domain(schema)}
-    end
-  end
-
-  def get_with_user(id) do
-    Take
-    |> where(id: ^id)
-    |> preload(:user)
-    |> Repo.one()
-    |> case do
-      nil -> {:error, :not_found}
-      schema -> {:ok, to_domain(schema)}
-    end
-  end
-
-  def create(params) do
-    %Take{}
-    |> Take.changeset(params)
+  @impl true
+  def create(attrs) do
+    %SchemaTake{}
+    |> SchemaTake.changeset(attrs)
     |> Repo.insert()
     |> case do
       {:ok, schema} -> {:ok, to_domain(schema)}
@@ -35,39 +18,86 @@ defmodule YRepo.Repositories.TakeRepository do
     end
   end
 
-  def delete(%DomainTake{id: id}) do
-    case Repo.get(Take, id) do
+  @impl true
+  def get_by_id(id) do
+    case Repo.get(SchemaTake, id) do
       nil -> {:error, :not_found}
-      schema ->
-        Repo.delete(schema)
-        :ok
+      schema -> {:ok, to_domain(schema)}
     end
   end
 
-  defp to_domain(schema) do
-    user = 
-      if Ecto.assoc_loaded?(schema.user) and schema.user != nil do
-        # Mapping user schema to domain in a way that respects the UserRepository structure
-        # We can't easily call UserRepository.to_domain because it's private.
-        # But we can replicate the logic or make it public.
-        # For now, let's replicate the basic fields needed for the UI.
-        %{
-          id: schema.user.id,
-          username: schema.user.username,
-          bitmoji_id: schema.user.bitmoji_id,
-          bitmoji_color: YRepo.Helpers.Color.from_id(schema.user.bitmoji_id),
-          handle: "@#{schema.user.username}"
-        }
-      else
-        nil
-      end
+  @impl true
+  def delete(id, requesting_user_id) do
+    case Repo.get(SchemaTake, id) do
+      nil -> {:error, :not_found}
+      schema ->
+        if schema.user_id == requesting_user_id do
+          Repo.delete!(schema)
+          :ok
+        else
+          {:error, :forbidden}
+        end
+    end
+  end
 
+  @impl true
+  def list_for_feed(user_ids, opts) do
+    user_ids
+    |> FeedQuery.scored_feed(opts)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
+  def list_for_user(user_id, opts) do
+    limit = Keyword.get(opts, :limit, 20)
+    
+    SchemaTake
+    |> where(user_id: ^user_id)
+    |> order_by(desc: :inserted_at)
+    |> limit(^limit)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
+  def count_for_user(user_id) do
+    SchemaTake
+    |> where(user_id: ^user_id)
+    |> Repo.aggregate(:count, :id)
+  end
+
+  def list_by_ids(ids) do
+    SchemaTake
+    |> where([t], t.id in ^ids)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
+  def increment_opinion_count(id) do
+    SchemaTake
+    |> where(id: ^id)
+    |> Repo.update_all(inc: [opinion_count: 1])
+    :ok
+  end
+
+  @impl true
+  def increment_retake_count(id) do
+    SchemaTake
+    |> where(id: ^id)
+    |> Repo.update_all(inc: [retake_count: 1])
+    :ok
+  end
+
+  defp to_domain(%SchemaTake{} = schema) do
     %DomainTake{
       id: schema.id,
       user_id: schema.user_id,
       body: schema.body,
-      inserted_at: schema.inserted_at
-    } 
-    |> Map.put(:user, user)
+      inserted_at: schema.inserted_at,
+      opinion_count: schema.opinion_count,
+      retake_count: schema.retake_count
+    }
   end
 end

@@ -37,20 +37,25 @@ defmodule YCore.Accounts.RegistrationService do
   def register(%{username: username_raw, password: password_raw}, repo) do
     with {:ok, username} <- Username.new(username_raw),
          :ok <- Password.validate(password_raw),
-         {:error, :not_found} <- repo.get_by_username(username.value),
-         password_hash <- Bcrypt.hash_pwd_salt(password_raw, log_rounds: 12),
-         seed_words <- SeedPhrase.generate(),
-         seed_phrase_str <- SeedPhrase.to_phrase(seed_words),
-         # Argon2id with specific t_cost and m_cost as requested
-         seed_phrase_hash <- Argon2.hash_pwd_salt(seed_phrase_str, t_cost: 8, m_cost: 17),
-         bitmoji_id <- Enum.random(@bitmoji_pool),
-         {:ok, user} <- repo.create(%{
-           username: username.value,
-           password_hash: password_hash,
-           seed_phrase_hash: seed_phrase_hash,
-           bitmoji_id: bitmoji_id
-         }) do
-      {:ok, %{user: user, seed_phrase: seed_words}}
+         {:error, :not_found} <- repo.get_by_username(username.value) do
+      password_hash = Bcrypt.hash_pwd_salt(password_raw, log_rounds: 12)
+      seed_words = SeedPhrase.generate()
+      seed_phrase_str = SeedPhrase.to_phrase(seed_words)
+      seed_phrase_hash = Argon2.hash_pwd_salt(seed_phrase_str, t_cost: 8, m_cost: 17)
+      bitmoji_id = Enum.random(@bitmoji_pool)
+
+      attrs = %{
+        username: username.value,
+        password_hash: password_hash,
+        seed_phrase_hash: seed_phrase_hash,
+        bitmoji_id: bitmoji_id
+      }
+      IO.inspect(attrs, label: "REGISTRATION ATTRS")
+
+      case repo.create(attrs) do
+        {:ok, user} -> {:ok, %{user: user, seed_phrase: seed_words}}
+        {:error, changeset} -> {:error, changeset}
+      end
     else
       {:ok, _user} -> {:error, :username_taken}
       error -> error

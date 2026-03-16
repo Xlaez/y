@@ -9,7 +9,7 @@ defmodule YRepo.Schemas.Retake do
     belongs_to :user, YRepo.Schemas.User
     belongs_to :original_take, YRepo.Schemas.Take
 
-    timestamps(type: :utc_datetime_usec)
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
   def changeset(retake, attrs) do
@@ -17,5 +17,6 @@ defmodule YRepo.Schemas.Retake do
     |> cast(attrs, [:comment, :user_id, :original_take_id])
     |> validate_required([:user_id, :original_take_id])
     |> validate_length(:comment, max: 250)
+    |> unique_constraint([:user_id, :original_take_id])
   end
 end
