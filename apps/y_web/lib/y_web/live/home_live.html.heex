@@ -4,48 +4,16 @@
 </header>
 
 <!-- Compose Box -->
-<div class="px-4 py-4 border-b border-y-border flex gap-4">
-  <YWeb.Layouts.bitmoji user={YWeb.DummyData.current_user()} size="md" />
-  
-  <form phx-submit="post_take" phx-change="validate_compose" class="flex-1">
-    <textarea
-      name="body"
-      value={@compose_body}
-      maxlength="250"
-      placeholder="What's your take?"
-      class="w-full bg-transparent border-none outline-none text-y-text text-xl resize-none placeholder:text-y-placeholder focus:ring-0 min-h-[80px]"
-    ></textarea>
-    
-    <div class="flex items-center justify-between pt-2 border-t border-y-border/10">
-      <div class="flex gap-2 text-y-faint">
-        <button type="button" class="p-2 hover:bg-y-opinion/10 hover:text-y-opinion rounded-full transition-colors">
-          <span class="hero-photo size-5"></span>
-        </button>
-        <button type="button" class="p-2 hover:bg-y-opinion/10 hover:text-y-opinion rounded-full transition-colors">
-          <span class="hero-list-bullet size-5"></span>
-        </button>
-        <button type="button" class="p-2 hover:bg-y-opinion/10 hover:text-y-opinion rounded-full transition-colors">
-          <span class="hero-face-smile size-5"></span>
-        </button>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <span class={[
-          "text-xs font-medium",
-          if(String.length(@compose_body) > 230, do: "text-y-agree", else: "text-y-muted")
-        ]}>
-          <%= String.length(@compose_body) %>/250
-        </span>
-        <button
-          type="submit"
-          disabled={String.length(@compose_body) == 0}
-          class="bg-white hover:bg-[#E5E5E7] disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-full px-6 py-2 transition-all"
-        >
-          Post
-        </button>
-      </div>
-    </div>
-  </form>
+<div class="border-b border-y-border">
+  <YWeb.Layouts.take_composer 
+    id="home-composer"
+    current_user={@current_user}
+    placeholder="What's your take?"
+    submit_label="Post"
+    submit_event="post_take"
+    change_event="validate_compose"
+    value={@compose_body}
+  />
 </div>
 
 <!-- Feed -->

@@ -53,31 +53,16 @@
     </div>
 
     <!-- Inline Reply Composer -->
-    <div class="px-4 py-4 border-b border-y-border flex gap-3">
-      <div class="shrink-0 pt-1">
-        <YWeb.Layouts.bitmoji user={@current_user} size="md" />
-      </div>
-      <div class="flex-1">
-        <form phx-submit="post_reply" phx-change="validate_reply">
-          <textarea
-            name="body"
-            placeholder="Post your opinion"
-            class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted min-h-[48px]"
-            rows="1"
-            value={@reply_body}
-          ><%= @reply_body %></textarea>
-          
-          <div class="flex justify-end mt-3">
-            <button
-              type="submit"
-              disabled={String.length(@reply_body) == 0}
-              class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50 active:scale-[0.98]"
-            >
-              Reply
-            </button>
-          </div>
-        </form>
-      </div>
+    <div class="border-b border-y-border">
+      <YWeb.Layouts.take_composer 
+        id="reply-composer"
+        current_user={@current_user}
+        placeholder="Post your opinion"
+        submit_label="Reply"
+        submit_event="post_reply"
+        change_event="validate_reply"
+        value={@reply_body}
+      />
     </div>
 
     <!-- Opinions Section -->

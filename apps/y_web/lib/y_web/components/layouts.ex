@@ -66,7 +66,7 @@ defmodule YWeb.Layouts do
             <.nav_item to="/settings" icon="hero-cog-6-tooth" label="Preferences" active={@active_tab == :settings} />
           </nav>
 
-          <button 
+          <button
             phx-click={YWeb.CoreComponents.show_modal("create-take-modal")}
             class="w-full bg-white text-black font-bold rounded-full py-3 mt-4 hover:bg-[#E5E5E7] transition-all duration-150 active:scale-[0.98] flex items-center justify-center"
           >
@@ -106,18 +106,32 @@ defmodule YWeb.Layouts do
       </nav>
 
       <.modal id="create-take-modal">
-        <.take_composer 
+        <.take_composer
           id="take-composer-modal"
           current_user={@current_user}
           placeholder="What is happening?!"
           submit_label="Share"
           submit_event="share_take"
-        />
+        >
+          <:header>
+            <div class="flex items-center justify-between mb-4">
+              <button
+                type="button"
+                phx-click={YWeb.CoreComponents.hide_modal("create-take-modal")}
+                class="p-2 hover:bg-y-hover rounded-full transition-colors"
+              >
+                <span class="hero-x-mark size-5 text-white"></span>
+              </button>
+              <button class="text-y-opinion font-bold text-sm hover:underline px-2">Drafts</button>
+            </div>
+          </:header>
+        </.take_composer>
       </.modal>
     </div>
     """
   end
 
+  @spec take_composer(map()) :: Phoenix.LiveView.Rendered.t()
   @doc """
   Renders the interactive take composer.
   """
@@ -126,79 +140,85 @@ defmodule YWeb.Layouts do
   attr :placeholder, :string, default: "What is happening?!"
   attr :submit_label, :string, default: "Share"
   attr :submit_event, :string, default: "share_take"
+  attr :change_event, :string, default: nil
   attr :value, :string, default: ""
+
+  slot :header
 
   def take_composer(assigns) do
     ~H"""
     <div id={@id} phx-hook="TakeComposer" class="px-6 py-4 flex flex-col min-h-[150px]">
+      <%= render_slot(@header) %>
       <div class="flex gap-4">
         <div class="shrink-0 pt-1">
           <.bitmoji user={@current_user} size="md" />
         </div>
         <div class="flex-1">
-          <textarea
-            data-take-input
-            name="body"
-            placeholder={@placeholder}
-            class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted h-32"
-            autofocus
-            value={@value}
-          ><%= @value %></textarea>
-          
-          <div class="border-t border-y-border mt-4 pt-4 flex items-center justify-between">
-            <div class="flex items-center gap-1">
-              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group">
-                <span class="hero-photo size-5 text-y-opinion"></span>
-              </button>
-              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
-                <span class="hero-list-bullet size-5"></span>
-              </button>
-              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
-                <span class="hero-face-smile size-5"></span>
-              </button>
-              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
-                <span class="hero-calendar-days size-5"></span>
-              </button>
-              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
-                <span class="hero-map-pin size-5"></span>
-              </button>
-            </div>
+          <form phx-submit={@submit_event} phx-change={@change_event}>
+            <textarea
+              data-take-input
+              name="body"
+              placeholder={@placeholder}
+              class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted h-32"
+              autofocus
+              value={@value}
+            ><%= @value %></textarea>
 
-            <div class="flex items-center gap-4">
-              <div class="relative size-8 flex items-center justify-center">
-                <svg class="size-full -rotate-90" viewBox="0 0 32 32">
-                  <circle
-                    class="text-y-border stroke-current"
-                    stroke-width="2"
-                    fill="transparent"
-                    r="14"
-                    cx="16"
-                    cy="16"
-                  />
-                  <circle
-                    data-progress-circle
-                    class="transition-all duration-200"
-                    stroke="#F5F5F5"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    fill="transparent"
-                    r="14"
-                    cx="16"
-                    cy="16"
-                  />
-                </svg>
-                <span data-counter class="absolute text-[10px] font-medium hidden"></span>
+            <div class="border-t border-y-border mt-4 pt-4 flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group">
+                  <span class="hero-photo size-5 text-y-opinion"></span>
+                </button>
+                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
+                  <span class="hero-list-bullet size-5"></span>
+                </button>
+                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
+                  <span class="hero-face-smile size-5"></span>
+                </button>
+                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                  <span class="hero-calendar-days size-5"></span>
+                </button>
+                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                  <span class="hero-map-pin size-5"></span>
+                </button>
               </div>
 
-              <button 
-                data-share-button
-                phx-click={JS.push(@submit_event)}
-                class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50"
-              >
-                <%= @submit_label %>
-              </button>
+              <div class="flex items-center gap-4">
+                <div class="relative size-8 flex items-center justify-center">
+                  <svg class="size-full -rotate-90" viewBox="0 0 32 32">
+                    <circle
+                      class="text-y-border stroke-current"
+                      stroke-width="2"
+                      fill="transparent"
+                      r="14"
+                      cx="16"
+                      cy="16"
+                    />
+                    <circle
+                      data-progress-circle
+                      class="transition-all duration-200"
+                      stroke="#F5F5F5"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      fill="transparent"
+                      r="14"
+                      cx="16"
+                      cy="16"
+                    />
+                  </svg>
+                  <span data-counter class="absolute text-[10px] font-medium hidden"></span>
+                </div>
+
+                <button
+                  data-share-button
+                  type="submit"
+                  class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50"
+                >
+                  <%= @submit_label %>
+                </button>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
