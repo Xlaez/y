@@ -26,7 +26,7 @@ defmodule YWeb.ProfileLive do
          |> assign(profile: profile)
          |> assign(takes: takes)
          |> assign(show_edit_modal: false)
-         |> assign(display_name: profile.user.display_name || profile.user.username)
+         |> assign(display_name: Map.get(profile.user, :display_name) || profile.user.username)
          |> allow_upload(:profile_picture,
            accept: ~w(.jpg .jpeg .png),
            max_entries: 1,
@@ -131,7 +131,7 @@ defmodule YWeb.ProfileLive do
       {:ok, profile} ->
         socket
         |> assign(profile: profile)
-        |> assign(display_name: profile.user.display_name || profile.user.username)
+        |> assign(display_name: Map.get(profile.user, :display_name) || profile.user.username)
 
       _ ->
         socket
