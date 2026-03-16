@@ -106,87 +106,101 @@ defmodule YWeb.Layouts do
       </nav>
 
       <.modal id="create-take-modal">
-        <div id="take-composer" phx-hook="TakeComposer" class="px-6 py-4 flex flex-col min-h-[250px]">
-          <div class="flex items-center justify-between mb-4">
-            <button 
-              type="button" 
-              phx-click={YWeb.CoreComponents.hide_modal("create-take-modal")}
-              class="p-2 hover:bg-y-hover rounded-full transition-colors"
-            >
-              <span class="hero-x-mark size-5 text-white"></span>
-            </button>
-            <button class="text-y-opinion font-bold text-sm hover:underline px-2">Drafts</button>
-          </div>
+        <.take_composer 
+          id="take-composer-modal"
+          current_user={@current_user}
+          placeholder="What is happening?!"
+          submit_label="Share"
+          submit_event="share_take"
+        />
+      </.modal>
+    </div>
+    """
+  end
 
-          <div class="flex gap-4">
-            <div class="shrink-0 pt-1">
-              <.bitmoji user={@current_user} size="md" />
+  @doc """
+  Renders the interactive take composer.
+  """
+  attr :id, :string, required: true
+  attr :current_user, :map, required: true
+  attr :placeholder, :string, default: "What is happening?!"
+  attr :submit_label, :string, default: "Share"
+  attr :submit_event, :string, default: "share_take"
+  attr :value, :string, default: ""
+
+  def take_composer(assigns) do
+    ~H"""
+    <div id={@id} phx-hook="TakeComposer" class="px-6 py-4 flex flex-col min-h-[150px]">
+      <div class="flex gap-4">
+        <div class="shrink-0 pt-1">
+          <.bitmoji user={@current_user} size="md" />
+        </div>
+        <div class="flex-1">
+          <textarea
+            data-take-input
+            name="body"
+            placeholder={@placeholder}
+            class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted h-32"
+            autofocus
+            value={@value}
+          ><%= @value %></textarea>
+          
+          <div class="border-t border-y-border mt-4 pt-4 flex items-center justify-between">
+            <div class="flex items-center gap-1">
+              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group">
+                <span class="hero-photo size-5 text-y-opinion"></span>
+              </button>
+              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
+                <span class="hero-list-bullet size-5"></span>
+              </button>
+              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
+                <span class="hero-face-smile size-5"></span>
+              </button>
+              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                <span class="hero-calendar-days size-5"></span>
+              </button>
+              <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                <span class="hero-map-pin size-5"></span>
+              </button>
             </div>
-            <div class="flex-1">
-              <textarea 
-                placeholder="What is happening?!"
-                class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted h-32"
-                autofocus
-              ></textarea>
-              
-              <div class="border-t border-y-border mt-4 pt-4 flex items-center justify-between">
-                <div class="flex items-center gap-1">
-                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group">
-                    <span class="hero-photo size-5 text-y-opinion"></span>
-                  </button>
-                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
-                    <span class="hero-list-bullet size-5"></span>
-                  </button>
-                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
-                    <span class="hero-face-smile size-5"></span>
-                  </button>
-                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
-                    <span class="hero-calendar-days size-5"></span>
-                  </button>
-                  <button class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
-                    <span class="hero-map-pin size-5"></span>
-                  </button>
-                </div>
 
-                <div class="flex items-center gap-4">
-                  <div class="relative size-8 flex items-center justify-center">
-                    <svg class="size-full -rotate-90" viewBox="0 0 32 32">
-                      <circle
-                        class="text-y-border stroke-current"
-                        stroke-width="2"
-                        fill="transparent"
-                        r="14"
-                        cx="16"
-                        cy="16"
-                      />
-                      <circle
-                        data-progress-circle
-                        class="transition-all duration-200"
-                        stroke="#F5F5F5"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        fill="transparent"
-                        r="14"
-                        cx="16"
-                        cy="16"
-                      />
-                    </svg>
-                    <span data-counter class="absolute text-[10px] font-medium hidden"></span>
-                  </div>
-
-                  <button 
-                    data-share-button
-                    phx-click={YWeb.CoreComponents.hide_modal("create-take-modal") |> JS.push("share_take")}
-                    class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50"
-                  >
-                    Share
-                  </button>
-                </div>
+            <div class="flex items-center gap-4">
+              <div class="relative size-8 flex items-center justify-center">
+                <svg class="size-full -rotate-90" viewBox="0 0 32 32">
+                  <circle
+                    class="text-y-border stroke-current"
+                    stroke-width="2"
+                    fill="transparent"
+                    r="14"
+                    cx="16"
+                    cy="16"
+                  />
+                  <circle
+                    data-progress-circle
+                    class="transition-all duration-200"
+                    stroke="#F5F5F5"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    fill="transparent"
+                    r="14"
+                    cx="16"
+                    cy="16"
+                  />
+                </svg>
+                <span data-counter class="absolute text-[10px] font-medium hidden"></span>
               </div>
+
+              <button 
+                data-share-button
+                phx-click={JS.push(@submit_event)}
+                class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50"
+              >
+                <%= @submit_label %>
+              </button>
             </div>
           </div>
         </div>
-      </.modal>
+      </div>
     </div>
     """
   end
@@ -355,68 +369,70 @@ defmodule YWeb.Layouts do
 
   def take_card(assigns) do
     ~H"""
-    <div class="px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group">
-      <div class="flex gap-3">
-        <.bitmoji user={@take.user} size="md" />
+    <.link navigate={~p"/#{@take.user.username}/take/#{@take.id}"} class="block">
+      <div class="px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group">
+        <div class="flex gap-3">
+          <.bitmoji user={@take.user} size="md" />
 
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5 mb-0.5">
-            <span class="text-y-text font-medium text-sm hover:underline"><%= @take.user.username %></span>
-            <span class="text-y-muted text-sm"><%= @take.user.handle %></span>
-            <span class="text-y-muted text-sm">· <%= @take.inserted_at %></span>
-          </div>
-
-          <%= if @take.type == :opinion do %>
-            <p class="text-y-opinion text-sm mb-1">
-              Replying to <span class="hover:underline cursor-pointer"><%= @take.parent.user.handle %></span>
-            </p>
-          <% end %>
-
-          <p class="text-y-text text-[15px] leading-relaxed break-words mt-1">
-            <%= @take.body %>
-          </p>
-
-          <%= if @take.type in [:retake, :opinion] do %>
-            <div class="mt-3 border border-y-border rounded-2xl p-3 bg-y-surface hover:bg-y-hover transition-colors">
-              <div class="flex items-center gap-2 mb-1">
-                <.bitmoji user={@take.parent.user} size="sm" />
-                <span class="text-y-text font-medium text-sm"><%= @take.parent.user.username %></span>
-                <span class="text-y-muted text-sm"><%= @take.parent.user.handle %></span>
-              </div>
-              <p class="text-y-text text-sm leading-relaxed truncate">
-                <%= @take.parent.body %>
-              </p>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="text-y-text font-medium text-sm hover:underline"><%= @take.user.username %></span>
+              <span class="text-y-muted text-sm"><%= @take.user.handle %></span>
+              <span class="text-y-muted text-sm">· <%= @take.inserted_at %></span>
             </div>
-          <% end %>
 
-          <div class="flex items-center justify-between mt-4 max-w-sm">
-            <.action_button
-              icon="hero-chat-bubble-left"
-              count={@take.opinion_count}
-              hover_text="group-hover/btn:text-y-opinion"
-              hover_bg="group-hover/btn:bg-y-opinion/10"
-            />
-            <.action_button
-              icon="hero-arrow-path"
-              count={@take.retake_count}
-              hover_text="group-hover/btn:text-y-retake"
-              hover_bg="group-hover/btn:bg-y-retake/10"
-            />
-            <.action_button
-              icon="hero-heart"
-              count={@take.agreed_count}
-              hover_text="group-hover/btn:text-y-agree"
-              hover_bg="group-hover/btn:bg-y-agree/10"
-            />
-            <.action_button
-              icon="hero-bookmark"
-              hover_text="group-hover/btn:text-y-bookmark"
-              hover_bg="group-hover/btn:bg-y-bookmark/10"
-            />
+            <%= if @take.type == :opinion do %>
+              <p class="text-y-opinion text-sm mb-1">
+                Replying to <span class="hover:underline cursor-pointer"><%= @take.parent.user.handle %></span>
+              </p>
+            <% end %>
+
+            <p class="text-y-text text-[15px] leading-relaxed break-words mt-1">
+              <%= @take.body %>
+            </p>
+
+            <%= if @take.type in [:retake, :opinion] && @take[:parent] do %>
+              <div class="mt-3 border border-y-border rounded-2xl p-3 bg-y-surface hover:bg-y-hover transition-colors">
+                <div class="flex items-center gap-2 mb-1">
+                  <.bitmoji user={@take.parent.user} size="sm" />
+                  <span class="text-y-text font-medium text-sm"><%= @take.parent.user.username %></span>
+                  <span class="text-y-muted text-sm"><%= @take.parent.user.handle %></span>
+                </div>
+                <p class="text-y-text text-sm leading-relaxed truncate">
+                  <%= @take.parent.body %>
+                </p>
+              </div>
+            <% end %>
+
+            <div class="flex items-center justify-between mt-4 max-w-sm">
+              <.action_button
+                icon="hero-chat-bubble-left"
+                count={@take.opinion_count}
+                hover_text="group-hover/btn:text-y-opinion"
+                hover_bg="group-hover/btn:bg-y-opinion/10"
+              />
+              <.action_button
+                icon="hero-arrow-path"
+                count={@take.retake_count}
+                hover_text="group-hover/btn:text-y-retake"
+                hover_bg="group-hover/btn:bg-y-retake/10"
+              />
+              <.action_button
+                icon="hero-heart"
+                count={@take.agreed_count}
+                hover_text="group-hover/btn:text-y-agree"
+                hover_bg="group-hover/btn:bg-y-agree/10"
+              />
+              <.action_button
+                icon="hero-bookmark"
+                hover_text="group-hover/btn:text-y-bookmark"
+                hover_bg="group-hover/btn:bg-y-bookmark/10"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </.link>
     """
   end
 

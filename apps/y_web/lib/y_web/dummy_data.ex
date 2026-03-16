@@ -5,16 +5,16 @@ defmodule YWeb.DummyData do
 
   def users do
     [
-      %{id: 1, username: "voidwalker", handle: "@voidwalker", bitmoji_color: "#3A3A3C", is_locked: false, follower_count: 1204, following_count: 840, take_count: 42},
-      %{id: 2, username: "npcenergy", handle: "@npcenergy", bitmoji_color: "#48484A", is_locked: false, follower_count: 231, following_count: 45, take_count: 156},
-      %{id: 3, username: "contrarianhq", handle: "@contrarianhq", bitmoji_color: "#636366", is_locked: true, follower_count: 8900, following_count: 12, take_count: 1205},
-      %{id: 4, username: "hottakes99", handle: "@hottakes99", bitmoji_color: "#2C2C2E", is_locked: false, follower_count: 45, following_count: 200, take_count: 8},
-      %{id: 5, username: "shadowban_survivor", handle: "@survivor", bitmoji_color: "#1C1C1E", is_locked: false, follower_count: 15, following_count: 300, take_count: 12},
-      %{id: 6, username: "elixir_wizard", handle: "@beam_me_up", bitmoji_color: "#3A3A3C", is_locked: false, follower_count: 450, following_count: 450, take_count: 89},
-      %{id: 7, username: "crypto_skeptic", handle: "@fiat_only", bitmoji_color: "#48484A", is_locked: false, follower_count: 120, following_count: 120, take_count: 56},
-      %{id: 8, username: "anon_ops", handle: "@anon", bitmoji_color: "#636366", is_locked: true, follower_count: 0, following_count: 0, take_count: 3},
-      %{id: 9, username: "maincharacter", handle: "@it_is_me", bitmoji_color: "#2C2C2E", is_locked: false, follower_count: 99000, following_count: 1, take_count: 500},
-      %{id: 10, username: "doom_scroller", handle: "@endless", bitmoji_color: "#48484A", is_locked: false, follower_count: 5, following_count: 5000, take_count: 0}
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d471", username: "voidwalker", handle: "@voidwalker", bitmoji_color: "#3A3A3C", is_locked: false, follower_count: 1204, following_count: 840, take_count: 42},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d472", username: "npcenergy", handle: "@npcenergy", bitmoji_color: "#48484A", is_locked: false, follower_count: 231, following_count: 45, take_count: 156},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d473", username: "contrarianhq", handle: "@contrarianhq", bitmoji_color: "#636366", is_locked: true, follower_count: 8900, following_count: 12, take_count: 1205},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d474", username: "hottakes99", handle: "@hottakes99", bitmoji_color: "#2C2C2E", is_locked: false, follower_count: 45, following_count: 200, take_count: 8},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d475", username: "shadowban_survivor", handle: "@survivor", bitmoji_color: "#1C1C1E", is_locked: false, follower_count: 15, following_count: 300, take_count: 12},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d476", username: "elixir_wizard", handle: "@beam_me_up", bitmoji_color: "#3A3A3C", is_locked: false, follower_count: 450, following_count: 450, take_count: 89},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d477", username: "crypto_skeptic", handle: "@fiat_only", bitmoji_color: "#48484A", is_locked: false, follower_count: 120, following_count: 120, take_count: 56},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d478", username: "anon_ops", handle: "@anon", bitmoji_color: "#636366", is_locked: true, follower_count: 0, following_count: 0, take_count: 3},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d479", username: "maincharacter", handle: "@it_is_me", bitmoji_color: "#2C2C2E", is_locked: false, follower_count: 99000, following_count: 1, take_count: 500},
+      %{id: "f47ac10b-58cc-4372-a567-0e02b2c3d480", username: "doom_scroller", handle: "@endless", bitmoji_color: "#48484A", is_locked: false, follower_count: 5, following_count: 5000, take_count: 0}
     ]
   end
 
@@ -27,7 +27,7 @@ defmodule YWeb.DummyData do
     
     [
       %{
-        id: 1,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a1",
         user: Enum.at(all_users, 2),
         body: "I actually think PHP is better than Elixir for scaling. There, I said it. Come at me.",
         agreed_count: 142,
@@ -37,7 +37,7 @@ defmodule YWeb.DummyData do
         type: :take
       },
       %{
-        id: 2,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a2",
         user: Enum.at(all_users, 1),
         body: "Just saw a guy eating a banana with a fork. Humanity is doomed.",
         agreed_count: 89,
@@ -47,7 +47,7 @@ defmodule YWeb.DummyData do
         type: :take
       },
       %{
-        id: 3,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a3",
         user: Enum.at(all_users, 5),
         body: "The BEAM is not just a virtual machine, it's a lifestyle. If you don't dream in processes, you're doing it wrong.",
         agreed_count: 450,
@@ -57,7 +57,7 @@ defmodule YWeb.DummyData do
         type: :take
       },
       %{
-        id: 4,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a4",
         user: Enum.at(all_users, 0),
         body: "Wait, so 'y' is just a dark-mode mockery of X? I love it already.",
         agreed_count: 10,
@@ -67,7 +67,7 @@ defmodule YWeb.DummyData do
         type: :take
       },
       %{
-        id: 5,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a5",
         user: Enum.at(all_users, 6),
         body: "Crypto is just multi-level marketing for people who are good at math. Change my mind.",
         agreed_count: 1500,
@@ -77,7 +77,7 @@ defmodule YWeb.DummyData do
         type: :take
       },
       %{
-        id: 6,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a6",
         user: Enum.at(all_users, 3), # retake
         body: "This is a cold take but someone has to say it.",
         agreed_count: 5,
@@ -91,7 +91,7 @@ defmodule YWeb.DummyData do
         }
       },
       %{
-        id: 7,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a7",
         user: Enum.at(all_users, 4), # opinion/reply
         body: "Hard agree. The banana industry is lobbying for fork usage anyway.",
         agreed_count: 12,
@@ -105,7 +105,7 @@ defmodule YWeb.DummyData do
         }
       },
       %{
-        id: 8,
+        id: "f47ac10b-58cc-4372-a567-0e02b2c3d4a8",
         user: Enum.at(all_users, 8),
         body: "I am once again asking for your attention. Look at me.",
         agreed_count: 0,

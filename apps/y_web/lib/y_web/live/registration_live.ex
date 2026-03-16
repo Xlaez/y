@@ -48,6 +48,7 @@ defmodule YWeb.RegistrationLive do
     end
   end
 
-  defp msg_error(reason) when is_atom(reason), do: String.capitalize(to_string(reason))
+  defp msg_error(reason) when is_binary(reason), do: reason
+  defp msg_error(reason) when is_atom(reason), do: String.capitalize(to_string(reason) |> String.replace("_", " "))
   defp msg_error(_), do: "Something went wrong"
 end

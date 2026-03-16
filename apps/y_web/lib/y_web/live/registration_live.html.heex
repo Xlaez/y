@@ -72,6 +72,10 @@
         </div>
       </div>
 
+      <%= if @error do %>
+        <p class="text-y-agree text-sm font-medium"><%= @error %></p>
+      <% end %>
+
       <button
         type="submit"
         class="w-full bg-white hover:bg-[#E5E5E7] active:scale-[0.98] text-black font-bold rounded-full py-3 mt-4 transition-all duration-150"

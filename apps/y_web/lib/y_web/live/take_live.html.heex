@@ -1,0 +1,96 @@
+<div class="flex flex-col min-h-screen bg-y-bg">
+  <!-- Header: Back button and Title -->
+  <div class="sticky top-0 z-20 flex items-center gap-8 px-4 py-3 bg-y-bg/80 backdrop-blur-md border-b border-y-border">
+    <.link
+      navigate={~p"/home"}
+      class="p-2 hover:bg-y-hover rounded-full transition-colors text-y-text"
+    >
+      <span class="hero-arrow-left size-5"></span>
+    </.link>
+    <h2 class="text-xl font-bold text-y-white">Take</h2>
+  </div>
+
+  <div class="flex-1">
+    <!-- Main Take Hero Section -->
+    <div class="px-4 py-4 border-b border-y-border">
+      <div class="flex items-center gap-3 mb-4">
+        <YWeb.Layouts.bitmoji user={@take.user} size="md" />
+        <div class="flex flex-col">
+          <span class="text-y-white font-bold text-[15px] hover:underline cursor-pointer leading-tight">
+            <%= @take.user.username %>
+          </span>
+          <span class="text-y-muted text-sm leading-tight">
+            <%= @take.user.handle %>
+          </span>
+        </div>
+        <div class="ml-auto">
+          <button class="p-2 hover:bg-y-hover rounded-full transition-colors text-y-faint">
+            <span class="hero-ellipsis-horizontal size-5"></span>
+          </button>
+        </div>
+      </div>
+
+      <p class="text-y-white text-2xl leading-normal break-words selection:bg-y-opinion/30">
+        <%= @take.body %>
+      </p>
+
+      <div class="mt-4 py-4 border-b border-y-border flex items-center gap-1.5 text-y-muted text-[15px]">
+        <span><%= @take.inserted_at %></span>
+        <span>·</span>
+        <span class="font-bold text-y-white">124K</span>
+        <span>Views</span>
+      </div>
+
+      <div class="flex items-center justify-around py-2 border-b border-y-border">
+        <.action_button_hero icon="hero-chat-bubble-left" count={12} label="Opinions" />
+        <.action_button_hero icon="hero-arrow-path" count={45} label="Retakes" />
+        <.action_button_hero icon="hero-heart" count={892} label="Agrees" />
+        <.action_button_hero icon="hero-bookmark" count={34} label="Saves" />
+        <button class="p-2.5 hover:bg-y-hover rounded-full transition-colors text-y-faint">
+          <span class="hero-share size-5"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Inline Reply Composer -->
+    <div class="px-4 py-4 border-b border-y-border flex gap-3">
+      <div class="shrink-0 pt-1">
+        <YWeb.Layouts.bitmoji user={@current_user} size="md" />
+      </div>
+      <div class="flex-1">
+        <form phx-submit="post_reply" phx-change="validate_reply">
+          <textarea
+            name="body"
+            placeholder="Post your opinion"
+            class="w-full bg-transparent border-none text-y-text text-xl resize-none focus:ring-0 p-0 placeholder-y-muted min-h-[48px]"
+            rows="1"
+            value={@reply_body}
+          ><%= @reply_body %></textarea>
+          
+          <div class="flex justify-end mt-3">
+            <button
+              type="submit"
+              disabled={String.length(@reply_body) == 0}
+              class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-[#E5E5E7] transition-all disabled:opacity-50 active:scale-[0.98]"
+            >
+              Reply
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Opinions Section -->
+    <div class="divide-y divide-y-border">
+      <%= for opinion <- @opinions do %>
+        <YWeb.Layouts.take_card take={opinion_to_take_adapter(opinion)} />
+      <% end %>
+      
+      <%= if Enum.empty?(@opinions) do %>
+        <div class="py-20 text-center">
+          <p class="text-y-muted text-lg">No opinions yet. Be the first to share one!</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

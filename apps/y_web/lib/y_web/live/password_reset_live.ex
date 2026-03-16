@@ -55,8 +55,8 @@ defmodule YWeb.PasswordResetLive do
           {:noreply, assign(socket, success: true, error: nil)}
         {:error, :invalid_credentials} ->
           {:noreply, assign(socket, error: "Identity verification failed. Please start over.", step: :verify)}
-        {:error, :invalid_password} ->
-          {:noreply, assign(socket, error: "Password does not meet security requirements")}
+        {:error, msg} when is_binary(msg) ->
+          {:noreply, assign(socket, error: msg)}
         {:error, _} ->
           {:noreply, assign(socket, error: "Something went wrong. Please try again.")}
       end

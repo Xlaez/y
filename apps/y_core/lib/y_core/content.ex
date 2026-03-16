@@ -52,6 +52,7 @@ end
 
 defmodule YCore.Content.TakeRepository do
   @callback get_by_id(id :: String.t()) :: {:ok, YCore.Content.Take.t()} | {:error, :not_found}
+  @callback get_with_user(id :: String.t()) :: {:ok, map()} | {:error, :not_found}
   @callback create(params :: map()) :: {:ok, YCore.Content.Take.t()} | {:error, any()}
   @callback delete(take :: YCore.Content.Take.t()) :: :ok | {:error, any()}
 end
@@ -61,5 +62,7 @@ defmodule YCore.Content.RetakeRepository do
 end
 
 defmodule YCore.Content.OpinionRepository do
+  @callback list_by_take(take_id :: String.t()) :: [map()]
+  @callback list_by_opinion(opinion_id :: String.t()) :: [map()]
   @callback create(params :: map()) :: {:ok, YCore.Content.Opinion.t()} | {:error, any()}
 end
