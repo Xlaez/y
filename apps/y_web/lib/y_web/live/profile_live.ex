@@ -19,11 +19,12 @@ defmodule YWeb.ProfileLive do
            @block_repo
          ) do
       {:ok, profile} ->
-        feed = fetch_user_feed(profile.user.id, viewer_id)
+        feed = fetch_user_feed(profile.user.id, viewer_id, :takes)
 
         {:ok,
          socket
          |> assign(active_tab: :profile)
+         |> assign(profile_tab: :takes)
          |> assign(profile: profile)
          |> assign(feed: feed)
          |> assign(show_edit_modal: false)
@@ -138,24 +139,71 @@ defmodule YWeb.ProfileLive do
     {:noreply, socket}
   end
 
+  def handle_event("set_tab", %{"tab" => tab}, socket) do
+    tab = String.to_existing_atom(tab)
+    viewer_id = (socket.assigns[:current_user] && socket.assigns.current_user.id) || nil
+    user_id = socket.assigns.profile.user.id
+    
+    {:noreply, 
+      socket 
+      |> assign(profile_tab: tab)
+      |> assign(feed: fetch_user_feed(user_id, viewer_id, tab))
+    }
+  end
+
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :profile_picture, ref)}
   end
 
-  defp fetch_user_feed(user_id, viewer_id) do
-    # Simple feed for profile: just that user's takes
+  defp fetch_user_feed(user_id, viewer_id, :takes) do
+    # Just that user's takes
     takes = TakeRepository.list_for_user(user_id, limit: 50)
+    enrich_takes(takes, user_id, viewer_id)
+  end
+
+  defp fetch_user_feed(user_id, viewer_id, :replies) do
+    # Fetch user's opinions
+    opinions = OpinionRepository.list_for_user(user_id, limit: 50)
     
-    # Enrich with metadata (simple enrichment for now)
+    # We need to build a feed that shows: [Parent Take/Opinion] -> [User Opinion]
+    # To keep it simple in the feed, we'll turn each opinion into a block
+    Enum.flat_map(opinions, fn op ->
+      # Fetch context (parent)
+      parent = if op.parent_opinion_id do
+        case OpinionRepository.get_by_id(op.parent_opinion_id) do
+          {:ok, parent_op} -> 
+            enrich_takes([opinion_to_take_adapter(parent_op)], parent_op.user_id, viewer_id) |> List.first()
+          _ -> nil
+        end
+      else
+        case TakeRepository.get_by_id(op.take_id) do
+          {:ok, parent_take} ->
+            enrich_takes([parent_take], parent_take.user_id, viewer_id) |> List.first()
+          _ -> nil
+        end
+      end
+
+      reply = enrich_takes([opinion_to_take_adapter(op)], user_id, viewer_id) |> List.first()
+      
+      # Mark them so FeedCard can show the connecting line
+      if parent do
+        [Map.put(parent, :thread_top, true), Map.put(reply, :thread_bottom, true)]
+      else
+        [reply]
+      end
+    end)
+  end
+
+  defp enrich_takes(takes, _user_id, viewer_id) do
     agreed_ids = if viewer_id, do: AgreeRepository.list_agreed_ids(viewer_id, :take, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
     bookmarked_ids = if viewer_id, do: BookmarkRepository.list_for_user(viewer_id, target_type: :take) |> Enum.map(& &1.target_id) |> MapSet.new(), else: MapSet.new()
     retook_ids = if viewer_id, do: RetakeRepository.list_retook_ids(viewer_id, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
 
     Enum.map(takes, fn take ->
       %{
-        type: :take,
+        type: (if Map.get(take, :is_opinion), do: :opinion, else: :take),
         take: take,
-        author: UserRepository.get_by_id!(take.user_id), # Minimal for FeedCard
+        author: UserRepository.get_by_id!(take.user_id),
         agree_count: AgreeRepository.count(:take, take.id),
         retake_count: RetakeRepository.count_for_take(take.id),
         opinion_count: OpinionRepository.count_for_take(take.id),
@@ -166,9 +214,34 @@ defmodule YWeb.ProfileLive do
     end)
   end
 
+  defp opinion_to_take_adapter(op) do
+    replying_to_handle = if op.parent_opinion_id do
+      case OpinionRepository.get_by_id(op.parent_opinion_id) do
+        {:ok, parent_op} -> UserRepository.get_by_id!(parent_op.user_id).username
+        _ -> nil
+      end
+    else
+      case TakeRepository.get_by_id(op.take_id) do
+        {:ok, parent_take} -> UserRepository.get_by_id!(parent_take.user_id).username
+        _ -> nil
+      end
+    end
+
+    %{
+      id: op.id,
+      user_id: op.user_id,
+      body: op.body,
+      inserted_at: op.inserted_at,
+      opinion_count: 0, 
+      retake_count: 0,
+      is_opinion: true,
+      replying_to_handle: replying_to_handle
+    }
+  end
+
   defp refresh_user_feed(socket) do
     viewer_id = (socket.assigns[:current_user] && socket.assigns.current_user.id) || nil
-    assign(socket, feed: fetch_user_feed(socket.assigns.profile.user.id, viewer_id))
+    assign(socket, feed: fetch_user_feed(socket.assigns.profile.user.id, viewer_id, socket.assigns.profile_tab))
   end
 
   defp update_profile(socket) do

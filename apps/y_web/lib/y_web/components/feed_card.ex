@@ -15,25 +15,48 @@ defmodule YWeb.Components.FeedCard do
       id={"card-#{@item.take.id}"}
       phx-click="navigate_to_take" 
       phx-value-take_id={@item.take.id}
-      class={["px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group", if(@border, do: "border-b border-y-border")]}
+      class={[
+        "px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group", 
+        if(@border && !Map.get(@item, :thread_top), do: "border-b border-y-border")
+      ]}
     >
       <%= if @item.type == :retake do %>
         <div class="flex items-center gap-2 mb-2 ml-10 text-y-muted">
           <span class="hero-arrow-path size-4"></span>
-          <span class="text-xs font-bold hover:underline"><%= @item.retaker.username %> retook</span>
+          <.link navigate={~p"/#{@item.retaker.username}"} phx-click-stop class="text-xs font-bold hover:underline">
+            <%= @item.retaker.username %> retook
+          </.link>
         </div>
       <% end %>
 
       <div class="flex gap-3">
-        <.bitmoji user={@item.author} size="md" />
+        <div class="flex flex-col items-center shrink-0 relative">
+          <%= if Map.get(@item, :thread_bottom) do %>
+            <div class="absolute -top-4 w-0.5 h-4 bg-y-border"></div>
+          <% end %>
+          
+          <.link navigate={~p"/#{@item.author.username}"} phx-click-stop class="z-10">
+            <.bitmoji user={@item.author} size="md" />
+          </.link>
+
+          <%= if Map.get(@item, :thread_top) do %>
+            <div class="w-0.5 grow bg-y-border my-1"></div>
+          <% end %>
+        </div>
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between mb-0.5">
             <div class="flex items-center gap-1.5 overflow-hidden">
-              <span class="text-white font-bold text-sm hover:underline truncate">
-                <%= @item.author.username %>
-              </span>
-              <span class="text-y-muted text-sm truncate"><%= @item.author.handle %></span>
+              <.link 
+                navigate={~p"/#{@item.author.username}"} 
+                phx-click-stop
+                class="flex items-center gap-1.5 overflow-hidden group/author"
+              >
+                <span class="text-white font-bold text-sm group-hover/author:underline truncate">
+                  <%= @item.author.username %>
+                </span>
+                <span class="text-y-muted text-sm truncate"><%= @item.author.handle %></span>
+              </.link>
               <span class="text-y-muted text-sm">·</span>
               <span class="text-y-muted text-sm truncate" title={@item.take.inserted_at}>
                 <%= YWeb.Helpers.Time.relative(@item.take.inserted_at) %>
@@ -51,6 +74,12 @@ defmodule YWeb.Components.FeedCard do
               </button>
             <% end %>
           </div>
+          
+          <%= if Map.get(@item, :replying_to_handle) && !Map.get(@item, :thread_bottom) do %>
+            <div class="text-y-muted text-[13px] mb-1">
+              Replying to <span class="text-y-opinion hover:underline cursor-pointer">@<%= Map.get(@item, :replying_to_handle) %></span>
+            </div>
+          <% end %>
 
           <%= if @item.type == :retake && @item.comment do %>
              <p class="text-white text-[15px] leading-relaxed break-words mt-1 mb-3">

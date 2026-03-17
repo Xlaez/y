@@ -13,17 +13,17 @@
   <div class="flex-1">
     <!-- Main Take Hero Section -->
     <div class="px-4 py-4 border-b border-y-border">
-      <div class="flex items-center gap-3 mb-4">
+      <.link navigate={~p"/#{@author.username}"} class="flex items-center gap-3 mb-4 group">
         <.bitmoji user={@author} size="md" />
         <div class="flex flex-col">
-          <span class="text-y-white font-bold text-[15px] hover:underline cursor-pointer leading-tight">
+          <span class="text-y-white font-bold text-[15px] group-hover:underline leading-tight">
             <%= @author.username %>
           </span>
           <span class="text-y-muted text-sm leading-tight">
             <%= @author.handle %>
           </span>
         </div>
-      </div>
+      </.link>
 
       <p class="text-y-white text-2xl leading-normal break-words selection:bg-y-opinion/30">
         <%= @take.body %>
@@ -65,35 +65,28 @@
       </div>
     </div>
 
-    <!-- Inline Reply Composer -->
-    <div class="px-4 border-b border-y-border">
-      <YWeb.Layouts.take_composer 
-        id="reply-composer"
-        current_user={@current_user}
-        placeholder="Post your opinion"
-        submit_label="Reply"
-        submit_event="post_reply"
-        change_event="validate_reply"
-        value={@reply_body}
-        class="px-0"
-      >
-        <:header>
-          <div class="flex items-center justify-between mb-2 text-y-muted text-sm">
-            <%= if @replying_to do %>
-              <span>Replying to <span class="text-y-opinion font-medium">@<%= @replying_to_handle %></span></span>
-              <button phx-click="cancel_reply" class="hover:underline">Cancel</button>
-            <% else %>
-              <span>Replying to <span class="text-y-opinion font-medium">@<%= @author.username %></span></span>
-            <% end %>
-          </div>
-        </:header>
-      </YWeb.Layouts.take_composer>
-    </div>
+    <!-- Main Take Reply Composer (Always at top if replying to main take) -->
+    <%= if @replying_to == @take.id do %>
+      <div class="px-4 border-b border-y-border">
+        <.reply_composer 
+          id="reply-composer-main"
+          current_user={@current_user}
+          reply_body={@reply_body}
+          replying_to_handle={@author.username}
+        />
+      </div>
+    <% end %>
 
     <!-- Opinions Section (Threaded) -->
     <div class="divide-y divide-y-border">
       <%= for node <- @opinion_tree do %>
-        <.opinion_node node={node} current_user={@current_user} />
+        <.opinion_node 
+          node={node} 
+          current_user={@current_user} 
+          replying_to={@replying_to} 
+          replying_to_handle={@replying_to_handle} 
+          reply_body={@reply_body} 
+        />
       <% end %>
       
       <%= if Enum.empty?(@opinion_tree) do %>

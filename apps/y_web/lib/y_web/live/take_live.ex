@@ -28,8 +28,8 @@ defmodule YWeb.TakeLive do
          |> assign(viewer_bookmarked: bookmarked?)
          |> assign(reply_body: "")
          |> assign(reply_char_count: 0)
-         |> assign(replying_to: nil)
-         |> assign(replying_to_handle: nil)
+         |> assign(replying_to: id)
+         |> assign(replying_to_handle: author.username)
          |> assign(error: nil), layout: {YWeb.Layouts, :authenticated}}
 
       _ ->
@@ -49,7 +49,7 @@ defmodule YWeb.TakeLive do
     params = %{
       user_id: user_id,
       take_id: take_id,
-      parent_opinion_id: parent_opinion_id,
+      parent_opinion_id: if(parent_opinion_id == take_id, do: nil, else: parent_opinion_id),
       body: body
     }
 
@@ -58,7 +58,8 @@ defmodule YWeb.TakeLive do
         {:noreply,
          socket
          |> refresh_opinions()
-         |> assign(reply_body: "", reply_char_count: 0, replying_to: nil, replying_to_handle: nil)
+         |> assign(reply_body: "", reply_char_count: 0)
+         |> assign(replying_to: take_id, replying_to_handle: socket.assigns.author.username)
          |> put_flash(:info, "Your opinion was shared!")}
 
       {:error, reason} ->
@@ -100,7 +101,7 @@ defmodule YWeb.TakeLive do
   end
   
   def handle_event("cancel_reply", _, socket) do
-    {:noreply, assign(socket, replying_to: nil, replying_to_handle: nil)}
+    {:noreply, assign(socket, replying_to: socket.assigns.take.id, replying_to_handle: socket.assigns.author.username)}
   end
 
   defp refresh_opinions(socket) do
@@ -117,7 +118,6 @@ defmodule YWeb.TakeLive do
     |> assign(viewer_agreed: AgreeRepository.agreed?(user_id, :take, id))
     |> assign(viewer_bookmarked: BookmarkRepository.bookmarked?(user_id, :take, id))
   end
-
   defp opinion_node(assigns) do
     ~H"""
     <div class="flex flex-col">
@@ -128,14 +128,48 @@ defmodule YWeb.TakeLive do
         chat_value={@node.opinion.id}
         border={false}
       />
+
+      <%= if @replying_to == @node.opinion.id do %>
+        <div class="pl-16 pr-4 pb-4">
+          <.reply_composer 
+            id={"reply-composer-#{@node.opinion.id}"} 
+            current_user={@current_user} 
+            reply_body={@reply_body} 
+            replying_to_handle={@replying_to_handle} 
+          />
+        </div>
+      <% end %>
+
       <%= if !Enum.empty?(@node.replies) do %>
         <div class="pl-12 border-l-2 border-y-border ml-6">
           <%= for reply <- @node.replies do %>
-            <.opinion_node node={reply} current_user={@current_user} />
+            <.opinion_node node={reply} current_user={@current_user} replying_to={@replying_to} replying_to_handle={@replying_to_handle} reply_body={@reply_body} />
           <% end %>
         </div>
       <% end %>
     </div>
+    """
+  end
+
+  defp reply_composer(assigns) do
+    ~H"""
+    <YWeb.Layouts.take_composer 
+      id={@id}
+      current_user={@current_user}
+      placeholder="Post your opinion"
+      submit_label="Reply"
+      submit_event="post_reply"
+      change_event="validate_reply"
+      value={@reply_body}
+      class="px-0"
+    >
+      <:header>
+        <div class="flex items-center justify-between mb-2 text-y-muted text-sm">
+          <span>Replying to <span class="text-y-opinion font-medium">@<%= @replying_to_handle %></span></span>
+          <button phx-click="cancel_reply" class="hover:underline">Cancel</button>
+        </div>
+      </:header>
+    </YWeb.Layouts.take_composer>
     """
   end
 

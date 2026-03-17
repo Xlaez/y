@@ -49,6 +49,18 @@ defmodule YRepo.Repositories.OpinionRepository do
   end
 
   @impl true
+  def list_for_user(user_id, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 20)
+
+    SchemaOpinion
+    |> where(user_id: ^user_id)
+    |> order_by(desc: :inserted_at)
+    |> limit(^limit)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
   def count_for_take(take_id) do
     SchemaOpinion
     |> where(take_id: ^take_id)

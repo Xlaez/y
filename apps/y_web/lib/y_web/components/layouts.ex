@@ -318,12 +318,14 @@ defmodule YWeb.Layouts do
       </div>
       <div class="divide-y divide-y-border">
         <%= for user <- @users do %>
-          <div class="px-4 py-3 flex items-center gap-3 hover:bg-y-hover transition-colors duration-100 group cursor-pointer">
-            <YWeb.Layouts.bitmoji user={user} size="sm" />
-            <div class="flex-1 min-w-0">
-              <p class="text-y-text font-medium text-sm truncate"><%= user.username %></p>
-              <p class="text-y-muted text-xs truncate"><%= user.handle %></p>
-            </div>
+          <div class="px-4 py-3 flex items-center gap-3 hover:bg-y-hover transition-colors duration-100">
+            <.link navigate={~p"/#{user.username}"} class="flex flex-1 items-center gap-3 min-w-0 group">
+              <YWeb.Layouts.bitmoji user={user} size="sm" />
+              <div class="flex-1 min-w-0">
+                <p class="text-y-text font-medium text-sm truncate group-hover:underline"><%= user.username %></p>
+                <p class="text-y-muted text-xs truncate"><%= user.handle %></p>
+              </div>
+            </.link>
             <button class="border border-y-white text-y-white rounded-full px-3 py-1 text-xs font-semibold hover:bg-white/10 transition-colors">
               Follow
             </button>

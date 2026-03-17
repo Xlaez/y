@@ -88,5 +88,6 @@ defmodule YCore.Content.OpinionRepository do
   @callback get_by_id(String.t()) :: {:ok, Opinion.t()} | {:error, :not_found}
   @callback delete(String.t(), String.t()) :: :ok | {:error, :not_found | :forbidden}
   @callback list_for_take(take_id :: String.t()) :: [Opinion.t()]
+  @callback list_for_user(user_id :: String.t(), opts :: keyword()) :: [Opinion.t()]
   @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
 end
