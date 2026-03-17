@@ -119,57 +119,165 @@ defmodule YWeb.TakeLive do
     |> assign(viewer_bookmarked: BookmarkRepository.bookmarked?(user_id, :take, id))
   end
   defp opinion_node(assigns) do
+    # Fetch author once to avoid multiple lookups
+    assigns = assign(assigns, :author, UserRepository.get_by_id!(assigns.node.opinion.user_id))
+    
     ~H"""
-    <div class="flex flex-col">
-      <YWeb.Components.FeedCard.feed_card 
-        item={%{type: :opinion, take: @node.opinion, author: UserRepository.get_by_id!(@node.opinion.user_id), opinion_count: Enum.count(@node.replies), agree_count: 0, retake_count: 0, viewer_agreed: false, viewer_bookmarked: false, viewer_retook: false}}
-        current_user={@current_user}
-        chat_click="set_reply_target"
-        chat_value={@node.opinion.id}
-        border={false}
-      />
+    <div class={["relative flex gap-3", @node.opinion.depth == 0 && "pt-4 border-t border-[#1C1C1E] mt-4"]}>
+      <div class="flex flex-col items-center shrink-0">
+        <.link navigate={~p"/#{@author.username}"} phx-click-stop class="z-10">
+          <YWeb.Layouts.bitmoji user={@author} size="sm" class="md:size-8 size-7" />
+        </.link>
+        
+        <%= if !Enum.empty?(@node.replies) do %>
+          <div class="w-[1px] grow bg-[#2A2A2E] my-1"></div>
+        <% end %>
+      </div>
 
-      <%= if @replying_to == @node.opinion.id do %>
-        <div class="pl-16 pr-4 pb-4">
-          <.reply_composer 
-            id={"reply-composer-#{@node.opinion.id}"} 
-            current_user={@current_user} 
-            reply_body={@reply_body} 
-            replying_to_handle={@replying_to_handle} 
+      <div class="flex-1 min-w-0 pb-4">
+        <div class="flex items-center gap-1.5 mb-0.5 overflow-hidden">
+          <.link 
+            navigate={~p"/#{@author.username}"} 
+            phx-click-stop
+            class="flex items-center gap-1.5 overflow-hidden group/author"
+          >
+            <span class="text-[#E5E5E7] font-bold text-sm group-hover/author:underline truncate">
+              <%= @author.username %>
+            </span>
+            <span class="text-[#8E8E93] text-sm truncate"><%= @author.handle %></span>
+          </.link>
+          <span class="text-[#8E8E93] text-sm">·</span>
+          <span class="text-[#8E8E93] text-sm truncate" title={@node.opinion.inserted_at}>
+            <%= YWeb.Helpers.Time.relative(@node.opinion.inserted_at) %>
+          </span>
+        </div>
+
+        <p class="text-[#E5E5E7] text-[15px] leading-relaxed break-words">
+          <%= @node.opinion.body %>
+        </p>
+
+        <div class="flex items-center gap-5 mt-2">
+          <.opinion_action 
+            icon="hero-chat-bubble-left" 
+            count={Enum.count(@node.replies)} 
+            hover_text="group-hover:text-[#0A84FF]" 
+            phx_click="set_reply_target"
+            phx_value_id={@node.opinion.id}
+          />
+          <.opinion_action 
+            icon="hero-arrow-path" 
+            hover_text="group-hover:text-[#30D158]" 
+            phx_click="toggle_retake"
+            phx_value_target_id={@node.opinion.id}
+          />
+          <.opinion_action 
+            icon="hero-heart" 
+            count={0} 
+            active={false}
+            hover_text="group-hover:text-[#FF375F]" 
+            active_color="text-[#FF375F]"
+            phx_click="toggle_agree"
+            phx_value_target_type="opinion"
+            phx_value_target_id={@node.opinion.id}
+          />
+          <.opinion_action 
+            icon="hero-bookmark" 
+            hover_text="group-hover:text-[#FFD60A]" 
+            active_color="text-[#FFD60A]"
+            phx_click="toggle_bookmark"
+            phx_value_target_type="opinion"
+            phx_value_target_id={@node.opinion.id}
           />
         </div>
-      <% end %>
 
-      <%= if !Enum.empty?(@node.replies) do %>
-        <div class="pl-12 border-l-2 border-y-border ml-6">
-          <%= for reply <- @node.replies do %>
-            <.opinion_node node={reply} current_user={@current_user} replying_to={@replying_to} replying_to_handle={@replying_to_handle} reply_body={@reply_body} />
-          <% end %>
-        </div>
-      <% end %>
+        <%= if @replying_to == @node.opinion.id do %>
+          <div class="mt-4">
+            <.reply_composer 
+              id={"reply-composer-#{@node.opinion.id}"} 
+              current_user={@current_user} 
+              reply_body={@reply_body} 
+              replying_to_handle={@replying_to_handle} 
+            />
+          </div>
+        <% end %>
+
+        <%= if !Enum.empty?(@node.replies) do %>
+          <div class="mt-4 space-y-4">
+            <%= for reply <- @node.replies do %>
+              <.opinion_node 
+                node={reply} 
+                current_user={@current_user} 
+                replying_to={@replying_to} 
+                replying_to_handle={@replying_to_handle} 
+                reply_body={@reply_body} 
+              />
+            <% end %>
+          </div>
+        <% end %>
+      </div>
     </div>
+    """
+  end
+
+  defp opinion_action(assigns) do
+    ~H"""
+    <button 
+      class="group flex items-center transition-colors"
+      phx-click={@phx_click}
+      phx-value-id={assigns[:phx_value_id]}
+      phx-value-target_type={assigns[:phx_value_target_type]}
+      phx-value-target_id={assigns[:phx_value_target_id]}
+    >
+      <span class={[
+        "size-4 text-[#48484A] transition-colors",
+        @icon,
+        @hover_text,
+        assigns[:active] && (@active_color || "text-white")
+      ]}></span>
+      <%= if assigns[:count] && @count > 0 do %>
+        <span class={["text-xs ml-1 text-[#8E8E93] transition-colors", @hover_text]}>
+          <%= @count %>
+        </span>
+      <% end %>
+    </button>
     """
   end
 
   defp reply_composer(assigns) do
     ~H"""
-    <YWeb.Layouts.take_composer 
-      id={@id}
-      current_user={@current_user}
-      placeholder="Post your opinion"
-      submit_label="Reply"
-      submit_event="post_reply"
-      change_event="validate_reply"
-      value={@reply_body}
-      class="px-0"
-    >
-      <:header>
-        <div class="flex items-center justify-between mb-2 text-y-muted text-sm">
-          <span>Replying to <span class="text-y-opinion font-medium">@<%= @replying_to_handle %></span></span>
-          <button phx-click="cancel_reply" class="hover:underline">Cancel</button>
+    <div class="py-4 border-b border-[#1C1C1E]">
+      <%= if @replying_to_handle do %>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[#0A84FF] text-sm">Replying to @<%= @replying_to_handle %></span>
+          <button phx-click="cancel_reply" class="text-[#8E8E93] text-sm hover:underline">Cancel</button>
         </div>
-      </:header>
-    </YWeb.Layouts.take_composer>
+      <% end %>
+      
+      <div class="flex gap-3">
+        <YWeb.Layouts.bitmoji user={@current_user} size="sm" class="size-9 shrink-0" />
+        <div class="flex-1 min-w-0">
+          <form phx-change="validate_reply" phx-submit="post_reply">
+            <textarea
+              name="body"
+              placeholder="Post your opinion"
+              rows="3"
+              class="bg-transparent outline-none border-none resize-none text-[#E5E5E7] text-[15px] placeholder-[#3A3A3C] w-full p-0"
+            ><%= @reply_body %></textarea>
+            
+            <div class="flex items-center justify-end gap-4 mt-2">
+              <span class="text-[#8E8E93] text-xs"><%= String.length(@reply_body || "") %>/250</span>
+              <button 
+                type="submit"
+                disabled={String.length(@reply_body || "") == 0 || String.length(@reply_body || "") > 250}
+                class="bg-white text-black text-sm font-semibold rounded-full px-4 py-1.5 disabled:opacity-30 transition-opacity"
+              >
+                Reply
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
     """
   end
 
@@ -180,13 +288,21 @@ defmodule YWeb.TakeLive do
       phx-value-target_type={assigns[:phx_value_target_type]}
       phx-value-target_id={assigns[:phx_value_target_id]}
       class={[
-        "flex items-center gap-1.5 p-2.5 rounded-full hover:bg-y-hover transition-colors group",
-        if(assigns[:active], do: "text-y-opinion", else: "text-y-faint")
+        "flex items-center gap-2 p-2 rounded-full hover:bg-white/5 transition-colors group",
+        if(assigns[:active], do: @active_text || "text-white", else: "text-[#8E8E93]")
       ]}
     >
-      <span class={["size-5 transition-transform group-active:scale-95", @icon]}></span>
+      <div class={["p-2 rounded-full transition-colors", @hover_bg]}>
+        <span class={["size-5 transition-transform group-active:scale-95", @icon, @hover_text]}></span>
+      </div>
       <%= if assigns[:count] && @count > 0 do %>
-        <span class="text-sm font-medium"><%= @count %></span>
+        <span class={["text-[13px] font-medium ml-[-4px]", @hover_text]}>
+          <%= @count %> <span class="text-[#48484A] ml-0.5"><%= @label %></span>
+        </span>
+      <% else %>
+         <span class={["text-[13px] font-medium ml-[-4px]", @hover_text]}>
+          <%= @label %>
+        </span>
       <% end %>
     </button>
     """

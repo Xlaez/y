@@ -83,15 +83,35 @@ defmodule Mix.Tasks.Y.Seed do
       end
 
       # Opinions (Threaded)
+      opinion_templates = [
+        "this is the take i didn't know i needed today",
+        "hard disagree but i respect the conviction",
+        "genuinely cannot tell if this is satire",
+        "the part about topic is so accurate it hurts",
+        "you're gonna get ratio'd for this and i'm here for it",
+        "i said what i said and i'll say it again",
+        "this take aged like milk",
+        "bro really said this with their whole chest",
+        "the audacity. the nerve. the sheer unbothered energy.",
+        "okay but hear me out — what if you're right",
+        "this is going in my 'screenshots i send people' folder",
+        "we do not have the same definition of excellence",
+        "citation needed but vibes check out",
+        "took me a minute but i'm on board",
+        "respectfully, absolutely not"
+      ]
+
       num_opinions = Enum.random(0..5)
       for _ <- 0..num_opinions do
         user = Enum.random(users)
-        {:ok, op} = OpinionService.post(%{user_id: user.id, take_id: take.id, body: "Interesting perspective!"}, OpinionRepository, TakeRepository)
+        body = Enum.random(opinion_templates)
+        {:ok, op} = OpinionService.post(%{user_id: user.id, take_id: take.id, body: body}, OpinionRepository, TakeRepository)
 
         # Nested opinions
         if :rand.uniform() > 0.7 do
           user2 = Enum.random(users)
-          OpinionService.post(%{user_id: user2.id, take_id: take.id, parent_opinion_id: op.id, body: "I agree with this opinion."}, OpinionRepository, TakeRepository)
+          body2 = Enum.random(opinion_templates)
+          OpinionService.post(%{user_id: user2.id, take_id: take.id, parent_opinion_id: op.id, body: body2}, OpinionRepository, TakeRepository)
         end
       end
     end

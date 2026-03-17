@@ -1,84 +1,98 @@
-<div class="flex flex-col min-h-screen bg-y-bg">
-  <!-- Header: Back button and Title -->
-  <div class="sticky top-0 z-20 flex items-center gap-8 px-4 py-3 bg-y-bg/80 backdrop-blur-md border-b border-y-border">
+<div class="flex flex-col min-h-screen bg-black text-[#E5E5E7] selection:bg-[#0A84FF]/30">
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-black/80 border-b border-[#1C1C1E] px-4 py-3 flex items-center gap-4">
     <.link
       navigate={~p"/home"}
-      class="p-2 hover:bg-y-hover rounded-full transition-colors text-y-text"
+      class="p-2 -ml-2 text-[#E5E5E7] hover:text-white transition-colors"
     >
       <span class="hero-arrow-left size-5"></span>
     </.link>
-    <h2 class="text-xl font-bold text-y-white">Take</h2>
-  </div>
+    <h2 class="text-[#E5E5E7] font-semibold text-[17px]">Take</h2>
+  </header>
 
-  <div class="flex-1">
+  <main class="flex-1 max-w-[600px] mx-auto w-full">
     <!-- Main Take Hero Section -->
-    <div class="px-4 py-4 border-b border-y-border">
-      <.link navigate={~p"/#{@author.username}"} class="flex items-center gap-3 mb-4 group">
-        <.bitmoji user={@author} size="md" />
+    <article class="px-4 pt-4 pb-0">
+      <header class="flex items-center gap-3 mb-4">
+        <.link navigate={~p"/#{@author.username}"} class="group">
+          <YWeb.Layouts.bitmoji user={@author} size="md" class="size-11" />
+        </.link>
         <div class="flex flex-col">
-          <span class="text-y-white font-bold text-[15px] group-hover:underline leading-tight">
-            <%= @author.username %>
-          </span>
-          <span class="text-y-muted text-sm leading-tight">
+          <.link navigate={~p"/#{@author.username}"} class="hover:underline">
+            <span class="text-white font-bold text-[15px] leading-tight block">
+              <%= @author.username %>
+            </span>
+          </.link>
+          <span class="text-[#8E8E93] text-[15px] leading-tight">
             <%= @author.handle %>
           </span>
         </div>
-      </.link>
+      </header>
 
-      <p class="text-y-white text-2xl leading-normal break-words selection:bg-y-opinion/30">
+      <p class="text-[#E5E5E7] text-[17px] leading-relaxed break-words">
         <%= @take.body %>
       </p>
 
-      <div class="mt-4 py-4 border-b border-y-border flex items-center gap-1.5 text-y-muted text-[15px]">
-        <span><%= YWeb.Helpers.Time.relative(@take.inserted_at) %></span>
+      <div class="mt-4 pt-1 pb-4 border-b border-[#1C1C1E]">
+        <span class="text-[#8E8E93] text-[15px]"><%= YWeb.Helpers.Time.relative(@take.inserted_at) %></span>
       </div>
 
-      <div class="flex items-center justify-around py-2 border-b border-y-border">
+      <div class="flex items-center justify-between py-2 border-b border-[#1C1C1E]">
         <.action_button_hero 
           icon="hero-chat-bubble-left" 
           count={Enum.count(@opinion_tree)} 
-          label="Opinions"
+          label="opinions"
+          hover_bg="group-hover:bg-[#0A84FF]/10"
+          hover_text="group-hover:text-[#0A84FF]"
           phx_click="cancel_reply"
         />
         <.action_button_hero 
           icon="hero-arrow-path" 
           count={@retake_count} 
-          label="Retakes" 
+          label="retakes" 
+          hover_bg="group-hover:bg-[#30D158]/10"
+          hover_text="group-hover:text-[#30D158]"
         />
         <.action_button_hero 
           icon="hero-heart" 
           count={@agree_count} 
-          label="Agrees" 
+          label="agrees" 
           active={@viewer_agreed}
+          active_text="text-[#FF375F]"
+          hover_bg="group-hover:bg-[#FF375F]/10"
+          hover_text="group-hover:text-[#FF375F]"
           phx_click="toggle_agree"
           phx_value_target_type="take"
           phx_value_target_id={@take.id}
         />
         <.action_button_hero 
           icon="hero-bookmark" 
-          label="Saves" 
+          label="saves" 
           active={@viewer_bookmarked}
+          active_text="text-[#FFD60A]"
+          hover_bg="group-hover:bg-[#FFD60A]/10"
+          hover_text="group-hover:text-[#FFD60A]"
           phx_click="toggle_bookmark"
           phx_value_target_type="take"
           phx_value_target_id={@take.id}
         />
       </div>
-    </div>
+    </article>
 
-    <!-- Main Take Reply Composer (Always at top if replying to main take) -->
+    <!-- Main Take Reply Composer (Sits between take and opinions) -->
     <%= if @replying_to == @take.id do %>
-      <div class="px-4 border-b border-y-border">
+      <div class="px-4">
         <.reply_composer 
           id="reply-composer-main"
           current_user={@current_user}
           reply_body={@reply_body}
-          replying_to_handle={@author.username}
+          replying_to_handle={nil}
         />
       </div>
     <% end %>
 
     <!-- Opinions Section (Threaded) -->
-    <div class="divide-y divide-y-border">
+    <section class="px-4 pt-2">
       <%= for node <- @opinion_tree do %>
         <.opinion_node 
           node={node} 
@@ -91,9 +105,9 @@
       
       <%= if Enum.empty?(@opinion_tree) do %>
         <div class="py-20 text-center">
-          <p class="text-y-muted text-lg">No opinions yet. Be the first to share one!</p>
+          <p class="text-[#8E8E93] text-[15px]">No opinions yet. Be the first to share one!</p>
         </div>
       <% end %>
-  </div>
-</div>
+    </section>
+  </main>
 </div>
