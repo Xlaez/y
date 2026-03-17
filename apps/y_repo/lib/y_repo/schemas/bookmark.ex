@@ -9,7 +9,7 @@ defmodule YRepo.Schemas.Bookmark do
     field :target_id, :binary_id
     belongs_to :user, YRepo.Schemas.User
 
-    timestamps(type: :utc_datetime_usec, updated_at: false)
+    timestamps(type: :utc_datetime_usec)
   end
 
   def changeset(bookmark, attrs) do

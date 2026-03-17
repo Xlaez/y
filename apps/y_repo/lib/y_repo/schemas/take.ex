@@ -8,14 +8,15 @@ defmodule YRepo.Schemas.Take do
     field :body, :string
     field :opinion_count, :integer, default: 0
     field :retake_count, :integer, default: 0
+    field :score, :float, virtual: true
     belongs_to :user, YRepo.Schemas.User
 
-    timestamps(type: :utc_datetime_usec, updated_at: false)
+    timestamps(type: :utc_datetime_usec)
   end
 
   def changeset(take, attrs) do
     take
-    |> cast(attrs, [:body, :user_id])
+    |> cast(attrs, [:body, :user_id, :opinion_count, :retake_count])
     |> validate_required([:body, :user_id])
     |> validate_length(:body, min: 1, max: 250)
   end

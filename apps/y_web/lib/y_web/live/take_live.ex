@@ -112,7 +112,7 @@ defmodule YWeb.TakeLive do
     ~H"""
     <div class="flex flex-col">
       <YWeb.Components.FeedCard.feed_card 
-        item={%{type: :opinion, take: @node.opinion, author: YRepo.Repo.get!(YRepo.Schemas.User, @node.opinion.user_id), opinion_count: Enum.count(@node.replies), agree_count: 0, retake_count: 0, viewer_agreed: false, viewer_bookmarked: false}}
+        item={%{type: :opinion, take: @node.opinion, author: UserRepository.get_by_id!(@node.opinion.user_id), opinion_count: Enum.count(@node.replies), agree_count: 0, retake_count: 0, viewer_agreed: false, viewer_bookmarked: false, viewer_retook: false}}
         current_user={@current_user}
       />
       <%= if !Enum.empty?(@node.replies) do %>

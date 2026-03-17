@@ -394,7 +394,7 @@ defmodule YWeb.Layouts do
 
   def take_card(assigns) do
     ~H"""
-    <.link navigate={~p"/#{@take.user.username}/take/#{@take.id}"} class="block">
+    <.link navigate={~p"/takes/#{@take.id}"} class="block">
       <div class="px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group">
         <div class="flex gap-3">
           <.bitmoji user={@take.user} size="md" />
@@ -444,7 +444,7 @@ defmodule YWeb.Layouts do
               />
               <.action_button
                 icon="hero-heart"
-                count={@take.agreed_count}
+                count={@take.agree_count}
                 hover_text="group-hover/btn:text-y-agree"
                 hover_bg="group-hover/btn:bg-y-agree/10"
               />
@@ -461,14 +461,19 @@ defmodule YWeb.Layouts do
     """
   end
 
+  attr :icon, :string, required: true
+  attr :count, :integer, default: nil
+  attr :hover_text, :string, default: ""
+  attr :hover_bg, :string, default: ""
+
   defp action_button(assigns) do
     ~H"""
     <div class={["flex items-center gap-1 group/btn transition-colors text-y-faint", @hover_text]}>
       <div class={["p-2 rounded-full transition-colors", @hover_bg]}>
         <span class={[@icon, "size-5"]}></span>
       </div>
-      <%= if assigns[:count] do %>
-        <span class="text-xs font-medium pr-1"><%= assigns.count %></span>
+      <%= if @count do %>
+        <span class="text-xs font-medium pr-1"><%= @count %></span>
       <% end %>
     </div>
     """

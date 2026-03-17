@@ -11,4 +11,5 @@ defmodule YCore.Accounts.UserRepository do
   @callback create(map()) :: {:ok, User.t()} | {:error, term()}
   @callback update(User.t(), map()) :: {:ok, User.t()} | {:error, term()}
   @callback delete(String.t()) :: :ok | {:error, term()}
+  @callback list_by_ids([String.t()]) :: [User.t()]
 end

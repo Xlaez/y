@@ -75,6 +75,7 @@ defmodule YCore.Content.RetakeRepository do
   @callback get_by_id(String.t()) :: {:ok, Retake.t()} | {:error, :not_found}
   @callback delete(String.t(), String.t()) :: :ok | {:error, :not_found | :forbidden}
   @callback already_retook?(user_id :: String.t(), take_id :: String.t()) :: boolean()
+  @callback list_retook_ids(user_id :: String.t(), take_ids :: [String.t()]) :: [String.t()]
   @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
 end
 

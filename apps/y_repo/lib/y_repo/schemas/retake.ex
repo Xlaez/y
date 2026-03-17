@@ -9,7 +9,7 @@ defmodule YRepo.Schemas.Retake do
     belongs_to :user, YRepo.Schemas.User
     belongs_to :original_take, YRepo.Schemas.Take
 
-    timestamps(type: :utc_datetime_usec, updated_at: false)
+    timestamps(type: :utc_datetime_usec)
   end
 
   def changeset(retake, attrs) do

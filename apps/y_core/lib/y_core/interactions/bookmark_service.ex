@@ -28,7 +28,12 @@ defmodule YCore.Interactions.BookmarkService do
               type: :take,
               take: take,
               author: author,
+              agree_count: 0,
+              retake_count: 0,
+              opinion_count: 0,
+              viewer_agreed: false,
               viewer_bookmarked: true,
+              viewer_retook: false,
               inserted_at: b.inserted_at # sorting by bookmark time
             }
           else

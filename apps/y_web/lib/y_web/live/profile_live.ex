@@ -5,8 +5,7 @@ defmodule YWeb.ProfileLive do
   @follow_repo YRepo.Repositories.FollowRepository
   @block_repo YRepo.Repositories.BlockRepository
 
-  alias YCore.Content.FeedService
-  alias YRepo.Repositories.{TakeRepository, AgreeRepository, BookmarkRepository, OpinionRepository, RetakeRepository}
+  alias YRepo.Repositories.{TakeRepository, AgreeRepository, BookmarkRepository, OpinionRepository, RetakeRepository, UserRepository}
 
   def mount(%{"username" => username}, _session, socket) do
     current_user = socket.assigns.current_user
@@ -62,33 +61,6 @@ defmodule YWeb.ProfileLive do
 
   def handle_event("navigate_to_take", %{"take_id" => id}, socket) do
     {:noreply, push_navigate(socket, to: ~p"/takes/#{id}")}
-  end
-
-  defp fetch_user_feed(user_id, viewer_id) do
-    # Simple feed for profile: just that user's takes
-    takes = TakeRepository.list_for_user(user_id, limit: 50)
-    
-    # Enrich with metadata (simple enrichment for now)
-    agreed_ids = if viewer_id, do: AgreeRepository.list_agreed_ids(viewer_id, :take, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
-    bookmarked_ids = if viewer_id, do: BookmarkRepository.list_for_user(viewer_id, target_type: :take) |> Enum.map(& &1.target_id) |> MapSet.new(), else: MapSet.new()
-
-    Enum.map(takes, fn take ->
-      %{
-        type: :take,
-        take: take,
-        author: YRepo.Repo.get!(YRepo.Schemas.User, take.user_id), # Minimal for FeedCard
-        agree_count: AgreeRepository.count(:take, take.id),
-        retake_count: RetakeRepository.count_for_take(take.id),
-        opinion_count: OpinionRepository.count_for_take(take.id),
-        viewer_agreed: MapSet.member?(agreed_ids, take.id),
-        viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id)
-      }
-    end)
-  end
-
-  defp refresh_user_feed(socket) do
-    viewer_id = (socket.assigns[:current_user] && socket.assigns.current_user.id) || nil
-    assign(socket, feed: fetch_user_feed(socket.assigns.profile.user.id, viewer_id))
   end
 
   def handle_event("follow", _, socket) do
@@ -168,6 +140,35 @@ defmodule YWeb.ProfileLive do
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply, cancel_upload(socket, :profile_picture, ref)}
+  end
+
+  defp fetch_user_feed(user_id, viewer_id) do
+    # Simple feed for profile: just that user's takes
+    takes = TakeRepository.list_for_user(user_id, limit: 50)
+    
+    # Enrich with metadata (simple enrichment for now)
+    agreed_ids = if viewer_id, do: AgreeRepository.list_agreed_ids(viewer_id, :take, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
+    bookmarked_ids = if viewer_id, do: BookmarkRepository.list_for_user(viewer_id, target_type: :take) |> Enum.map(& &1.target_id) |> MapSet.new(), else: MapSet.new()
+    retook_ids = if viewer_id, do: RetakeRepository.list_retook_ids(viewer_id, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
+
+    Enum.map(takes, fn take ->
+      %{
+        type: :take,
+        take: take,
+        author: UserRepository.get_by_id!(take.user_id), # Minimal for FeedCard
+        agree_count: AgreeRepository.count(:take, take.id),
+        retake_count: RetakeRepository.count_for_take(take.id),
+        opinion_count: OpinionRepository.count_for_take(take.id),
+        viewer_agreed: MapSet.member?(agreed_ids, take.id),
+        viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id),
+        viewer_retook: MapSet.member?(retook_ids, take.id)
+      }
+    end)
+  end
+
+  defp refresh_user_feed(socket) do
+    viewer_id = (socket.assigns[:current_user] && socket.assigns.current_user.id) || nil
+    assign(socket, feed: fetch_user_feed(socket.assigns.profile.user.id, viewer_id))
   end
 
   defp update_profile(socket) do

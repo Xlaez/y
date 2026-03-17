@@ -17,24 +17,25 @@ defmodule YCore.Content.FeedService do
       retake_repo: retake_repo
     } = repos
 
-    # 1. Get followees (including self)
+    # Get followees (including self)
     following_ids = follow_repo.list_following(user_id)
-    target_ids = [user_id | following_ids]
+    target_ids = if following_ids == [], do: :all, else: [user_id | following_ids]
 
-    # 2. Fetch takes (scored by SQL)
+    # Fetch takes (scored by SQL)
     takes = take_repo.list_for_feed(target_ids, opts)
-    
-    # 3. Batch fetch all necessary data
+
+    # Batch fetch all necessary data
     all_take_ids = Enum.map(takes, & &1.id)
     user_ids = Enum.map(takes, & &1.user_id) |> Enum.uniq()
-    
+
     users_map = user_repo.list_by_ids(user_ids) |> Map.new(& {&1.id, &1})
     agreed_ids = agree_repo.list_agreed_ids(user_id, :take, all_take_ids) |> MapSet.new()
-    bookmarked_ids = bookmark_repo.list_for_user(user_id, target_type: :take) 
-                     |> Enum.map(& &1.target_id) 
+    bookmarked_ids = bookmark_repo.list_for_user(user_id, target_type: :take)
+                     |> Enum.map(& &1.target_id)
                      |> MapSet.new()
+    retook_ids = retake_repo.list_retook_ids(user_id, all_take_ids) |> MapSet.new()
 
-    # 4. Assemble feed items
+    # Assemble feed items
     takes
     |> Enum.map(fn take ->
       %{
@@ -45,7 +46,8 @@ defmodule YCore.Content.FeedService do
         retake_count: retake_repo.count_for_take(take.id),
         opinion_count: opinion_repo.count_for_take(take.id),
         viewer_agreed: MapSet.member?(agreed_ids, take.id),
-        viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id)
+        viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id),
+        viewer_retook: MapSet.member?(retook_ids, take.id)
       }
     end)
     # Note: Retakes interspersing as per requirements will be added as Step 4 progress continues

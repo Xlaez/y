@@ -14,6 +14,13 @@ defmodule YRepo.Repositories.UserRepository do
     end
   end
 
+  def get_by_id!(id) do
+    case get_by_id(id) do
+      {:ok, user} -> user
+      {:error, :not_found} -> raise "User with id #{id} not found"
+    end
+  end
+
   def get(id), do: get_by_id(id)
 
   @impl true
@@ -65,6 +72,14 @@ defmodule YRepo.Repositories.UserRepository do
           {:error, changeset} -> {:error, changeset}
         end
     end
+  end
+
+  @impl true
+  def list_by_ids(ids) do
+    SchemaUser
+    |> where([u], u.id in ^ids)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
   end
 
   @impl true

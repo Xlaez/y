@@ -103,14 +103,25 @@ defmodule YWeb.Components.FeedCard do
     """
   end
 
+  attr :icon, :string, required: true
+  attr :count, :integer, default: nil
+  attr :color, :string, default: "text-y-faint"
+  attr :hover_text, :string, default: ""
+  attr :hover_bg, :string, default: ""
+  attr :phx_click, :string, default: nil
+  attr :phx_value_take_id, :string, default: nil
+  attr :phx_value_target_type, :string, default: nil
+  attr :phx_value_target_id, :string, default: nil
+  attr :rest, :global
+
   defp action_button(assigns) do
     ~H"""
     <button 
       phx-click={@phx_click}
-      phx-value-take_id={assigns[:phx_value_take_id]}
-      phx-value-target_type={assigns[:phx_value_target_type]}
-      phx-value-target_id={assigns[:phx_value_target_id]}
-      class={["flex items-center gap-1 group/btn transition-colors", @color || "text-y-faint", @hover_text]}
+      phx-value-take_id={@phx_value_take_id}
+      phx-value-target_type={@phx_value_target_type}
+      phx-value-target_id={@phx_value_target_id}
+      class={["flex items-center gap-1 group/btn transition-colors", @color, @hover_text]}
     >
       <div class={["p-2 rounded-full transition-colors", @hover_bg]}>
         <span class={[@icon, "size-5"]}></span>

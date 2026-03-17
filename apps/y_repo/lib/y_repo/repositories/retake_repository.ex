@@ -49,6 +49,15 @@ defmodule YRepo.Repositories.RetakeRepository do
   end
 
   @impl true
+  def list_retook_ids(user_id, original_take_ids) do
+    SchemaRetake
+    |> where(user_id: ^user_id)
+    |> where([r], r.original_take_id in ^original_take_ids)
+    |> select([r], r.original_take_id)
+    |> Repo.all()
+  end
+
+  @impl true
   def count_for_take(original_take_id) do
     SchemaRetake
     |> where(original_take_id: ^original_take_id)
