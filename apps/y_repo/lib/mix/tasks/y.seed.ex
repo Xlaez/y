@@ -1,8 +1,7 @@
 defmodule Mix.Tasks.Y.Seed do
   use Mix.Task
   alias YRepo.Repo
-  alias YRepo.Schemas.User
-  alias YRepo.Repositories.{UserRepository, TakeRepository, FollowRepository, AgreeRepository, BookmarkRepository, OpinionRepository, RetakeRepository}
+  alias YRepo.Repositories.{UserRepository, TakeRepository, FollowRepository, AgreeRepository, OpinionRepository, RetakeRepository}
   alias YCore.Content.{TakeService, RetakeService, OpinionService}
 
   @shortdoc "Seeds the database with rich content data"

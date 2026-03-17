@@ -1,7 +1,7 @@
 defmodule YWeb.TakeLive do
   use YWeb, :live_view
 
-  alias YCore.Content.{TakeService, OpinionService}
+  alias YCore.Content.OpinionService
   alias YRepo.Repositories.{TakeRepository, OpinionRepository, AgreeRepository, BookmarkRepository, UserRepository, RetakeRepository}
 
   def mount(%{"id" => id} = _params, _session, socket) do
@@ -29,6 +29,7 @@ defmodule YWeb.TakeLive do
          |> assign(reply_body: "")
          |> assign(reply_char_count: 0)
          |> assign(replying_to: nil)
+         |> assign(replying_to_handle: nil)
          |> assign(error: nil), layout: {YWeb.Layouts, :authenticated}}
 
       _ ->
@@ -57,7 +58,7 @@ defmodule YWeb.TakeLive do
         {:noreply,
          socket
          |> refresh_opinions()
-         |> assign(reply_body: "", reply_char_count: 0, replying_to: nil)
+         |> assign(reply_body: "", reply_char_count: 0, replying_to: nil, replying_to_handle: nil)
          |> put_flash(:info, "Your opinion was shared!")}
 
       {:error, reason} ->
@@ -85,12 +86,21 @@ defmodule YWeb.TakeLive do
     end
   end
 
-  def handle_event("set_reply_target", %{"id" => id}, socket) do
-    {:noreply, assign(socket, replying_to: id)}
+  def handle_event("set_reply_target", params, socket) do
+    id = params["id"] || params["take_id"]
+    # If it's an opinion, fetch the user. If it's the take, use author.
+    handle = if id == socket.assigns.take.id do
+      socket.assigns.author.handle
+    else
+      # Simple for now: could be optimized
+      YRepo.Repo.get!(YRepo.Schemas.User, YRepo.Repo.get!(YRepo.Schemas.Opinion, id).user_id).username
+    end
+
+    {:noreply, assign(socket, replying_to: id, replying_to_handle: handle)}
   end
   
   def handle_event("cancel_reply", _, socket) do
-    {:noreply, assign(socket, replying_to: nil, reply_body: "", reply_char_count: 0)}
+    {:noreply, assign(socket, replying_to: nil, replying_to_handle: nil)}
   end
 
   defp refresh_opinions(socket) do
@@ -114,6 +124,9 @@ defmodule YWeb.TakeLive do
       <YWeb.Components.FeedCard.feed_card 
         item={%{type: :opinion, take: @node.opinion, author: UserRepository.get_by_id!(@node.opinion.user_id), opinion_count: Enum.count(@node.replies), agree_count: 0, retake_count: 0, viewer_agreed: false, viewer_bookmarked: false, viewer_retook: false}}
         current_user={@current_user}
+        chat_click="set_reply_target"
+        chat_value={@node.opinion.id}
+        border={false}
       />
       <%= if !Enum.empty?(@node.replies) do %>
         <div class="pl-12 border-l-2 border-y-border ml-6">
@@ -149,13 +162,5 @@ defmodule YWeb.TakeLive do
     YWeb.Layouts.bitmoji(assigns)
   end
 
-  defp opinion_to_take_adapter(opinion) do
-    %{
-      id: opinion.id,
-      user_id: opinion.user_id,
-      body: opinion.body,
-      inserted_at: opinion.inserted_at,
-      type: :opinion
-    }
-  end
+
 end

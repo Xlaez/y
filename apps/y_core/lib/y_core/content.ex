@@ -66,6 +66,8 @@ defmodule YCore.Content.TakeRepository do
   @callback list_for_feed(user_ids :: [String.t()], opts :: keyword()) :: [Take.t()]
   @callback list_for_user(user_id :: String.t(), opts :: keyword()) :: [Take.t()]
   @callback count_for_user(user_id :: String.t()) :: non_neg_integer()
+  @callback increment_opinion_count(take_id :: String.t()) :: :ok
+  @callback increment_retake_count(take_id :: String.t()) :: :ok
 end
 
 defmodule YCore.Content.RetakeRepository do

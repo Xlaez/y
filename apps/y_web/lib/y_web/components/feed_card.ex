@@ -5,6 +5,9 @@ defmodule YWeb.Components.FeedCard do
   attr :item, :map, required: true
   attr :current_user, :map, required: true
   attr :show_delete, :boolean, default: false
+  attr :chat_click, :string, default: "navigate_to_take"
+  attr :chat_value, :string, default: nil
+  attr :border, :boolean, default: true
 
   def feed_card(assigns) do
     ~H"""
@@ -12,7 +15,7 @@ defmodule YWeb.Components.FeedCard do
       id={"card-#{@item.take.id}"}
       phx-click="navigate_to_take" 
       phx-value-take_id={@item.take.id}
-      class="px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group border-b border-y-border"
+      class={["px-4 py-4 hover:bg-y-hover transition-colors duration-100 cursor-pointer group", if(@border, do: "border-b border-y-border")]}
     >
       <%= if @item.type == :retake do %>
         <div class="flex items-center gap-2 mb-2 ml-10 text-y-muted">
@@ -65,8 +68,8 @@ defmodule YWeb.Components.FeedCard do
               count={@item.opinion_count}
               hover_text="group-hover/btn:text-y-opinion"
               hover_bg="group-hover/btn:bg-y-opinion/10"
-              phx_click="navigate_to_take"
-              phx_value_take_id={@item.take.id}
+              phx_click={@chat_click}
+              phx_value_take_id={@chat_value || @item.take.id}
             />
             <.action_button
               icon="hero-arrow-path"

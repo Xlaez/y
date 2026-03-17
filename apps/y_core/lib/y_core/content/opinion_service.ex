@@ -46,7 +46,7 @@ defmodule YCore.Content.OpinionService do
 
     # Build forest (root nodes have nil parent)
     root_opinions = Map.get(opinions_by_parent, nil, [])
-    |> Enum.sort_by(& &1.inserted_at, {:asc, DateTime})
+    |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
 
     Enum.map(root_opinions, fn op -> assemble_node(op, opinions_by_parent) end)
   end

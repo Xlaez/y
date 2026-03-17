@@ -37,7 +37,8 @@
         <.action_button_hero 
           icon="hero-chat-bubble-left" 
           count={Enum.count(@opinion_tree)} 
-          label="Opinions" 
+          label="Opinions"
+          phx_click="cancel_reply"
         />
         <.action_button_hero 
           icon="hero-arrow-path" 
@@ -65,7 +66,7 @@
     </div>
 
     <!-- Inline Reply Composer -->
-    <div class="border-b border-y-border">
+    <div class="px-4 border-b border-y-border">
       <YWeb.Layouts.take_composer 
         id="reply-composer"
         current_user={@current_user}
@@ -74,7 +75,19 @@
         submit_event="post_reply"
         change_event="validate_reply"
         value={@reply_body}
-      />
+        class="px-0"
+      >
+        <:header>
+          <div class="flex items-center justify-between mb-2 text-y-muted text-sm">
+            <%= if @replying_to do %>
+              <span>Replying to <span class="text-y-opinion font-medium">@<%= @replying_to_handle %></span></span>
+              <button phx-click="cancel_reply" class="hover:underline">Cancel</button>
+            <% else %>
+              <span>Replying to <span class="text-y-opinion font-medium">@<%= @author.username %></span></span>
+            <% end %>
+          </div>
+        </:header>
+      </YWeb.Layouts.take_composer>
     </div>
 
     <!-- Opinions Section (Threaded) -->

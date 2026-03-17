@@ -142,12 +142,13 @@ defmodule YWeb.Layouts do
   attr :submit_event, :string, default: "share_take"
   attr :change_event, :string, default: nil
   attr :value, :string, default: ""
+  attr :class, :string, default: "px-6 py-4"
 
   slot :header
 
   def take_composer(assigns) do
     ~H"""
-    <div id={@id} phx-hook="TakeComposer" class="px-6 py-4 flex flex-col min-h-[150px]">
+    <div id={@id} phx-hook="TakeComposer" class={["flex flex-col min-h-[150px]", @class]}>
       <%= render_slot(@header) %>
       <div class="flex gap-4">
         <div class="shrink-0 pt-1">
