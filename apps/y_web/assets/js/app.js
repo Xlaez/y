@@ -84,6 +84,36 @@ const Hooks = {
       // Initial check
       updateUI()
     }
+  },
+  NotificationObserver: {
+    mounted() {
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.dataset.id;
+            const unread = entry.target.dataset.unread === "true";
+            if (unread) {
+              this.pushEvent("mark_read", { id: id });
+              // Optimization: update local state so we don't spam
+              entry.target.dataset.unread = "false"; 
+            }
+          }
+        });
+      }, { threshold: 0.1 });
+
+      this.observeItems();
+    },
+    updated() {
+      this.observeItems();
+    },
+    destroyed() {
+      if (this.observer) this.observer.disconnect();
+    },
+    observeItems() {
+      this.el.querySelectorAll('[data-id]').forEach(item => {
+        this.observer.observe(item);
+      });
+    }
   }
 }
 

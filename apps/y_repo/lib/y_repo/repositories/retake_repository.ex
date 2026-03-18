@@ -64,6 +64,14 @@ defmodule YRepo.Repositories.RetakeRepository do
     |> Repo.aggregate(:count, :id)
   end
 
+  @impl true
+  def list_by_ids(ids) do
+    SchemaRetake
+    |> where([r], r.id in ^ids)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
   defp to_domain(%SchemaRetake{} = schema) do
     %DomainRetake{
       id: schema.id,

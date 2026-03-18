@@ -67,6 +67,14 @@ defmodule YRepo.Repositories.OpinionRepository do
     |> Repo.aggregate(:count, :id)
   end
 
+  @impl true
+  def list_by_ids(ids) do
+    SchemaOpinion
+    |> where([o], o.id in ^ids)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
   defp to_domain(%SchemaOpinion{} = schema) do
     %DomainOpinion{
       id: schema.id,

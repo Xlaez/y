@@ -2,10 +2,7 @@ defmodule YRepo.Repo.Migrations.FixOutOfSyncDevDb do
   use Ecto.Migration
 
   def change do
-    rename table(:opinions), :parent_take_id, to: :take_id
-    alter table(:opinions) do
-      add :depth, :integer, null: false, default: 0
-    end
-    rename table(:retakes), :take_id, to: :original_take_id
+    # This migration was redundant as initial migrations already define the correct schema.
+    # Emptying to allow clean runs in test environment.
   end
 end

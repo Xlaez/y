@@ -68,6 +68,7 @@ defmodule YCore.Content.TakeRepository do
   @callback count_for_user(user_id :: String.t()) :: non_neg_integer()
   @callback increment_opinion_count(take_id :: String.t()) :: :ok
   @callback increment_retake_count(take_id :: String.t()) :: :ok
+  @callback list_by_ids(take_ids :: [String.t()]) :: [Take.t()]
 end
 
 defmodule YCore.Content.RetakeRepository do
@@ -79,6 +80,7 @@ defmodule YCore.Content.RetakeRepository do
   @callback already_retook?(user_id :: String.t(), take_id :: String.t()) :: boolean()
   @callback list_retook_ids(user_id :: String.t(), take_ids :: [String.t()]) :: [String.t()]
   @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
+  @callback list_by_ids(retake_ids :: [String.t()]) :: [Retake.t()]
 end
 
 defmodule YCore.Content.OpinionRepository do
@@ -90,4 +92,5 @@ defmodule YCore.Content.OpinionRepository do
   @callback list_for_take(take_id :: String.t()) :: [Opinion.t()]
   @callback list_for_user(user_id :: String.t(), opts :: keyword()) :: [Opinion.t()]
   @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
+  @callback list_by_ids(opinion_ids :: [String.t()]) :: [Opinion.t()]
 end

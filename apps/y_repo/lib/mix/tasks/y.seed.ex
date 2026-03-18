@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Y.Seed do
   use Mix.Task
   alias YRepo.Repo
-  alias YRepo.Repositories.{UserRepository, TakeRepository, FollowRepository, AgreeRepository, OpinionRepository, RetakeRepository}
+  alias YRepo.Repositories.{UserRepository, TakeRepository, FollowRepository, AgreeRepository, OpinionRepository, RetakeRepository, NotificationRepository}
   alias YCore.Content.{TakeService, RetakeService, OpinionService}
 
   @shortdoc "Seeds the database with rich content data"
@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Y.Seed do
     Mix.Task.run("app.start")
 
     # 0. Cleanup with TRUNCATE for a true fresh start
-    Repo.query!("TRUNCATE TABLE users, takes, retakes, opinions, follows, agrees, bookmarks CASCADE")
+    Repo.query!("TRUNCATE TABLE users, takes, retakes, opinions, follows, agrees, bookmarks, notifications CASCADE")
 
     IO.puts "🌱 Seeding 10 users..."
     users = create_users(10)
@@ -23,6 +23,9 @@ defmodule Mix.Tasks.Y.Seed do
 
     IO.puts "🔄 Generating retakes and opinions..."
     generate_interactions(users, takes)
+
+    IO.puts "⏳ Waiting for async notifications..."
+    Process.sleep(2000)
 
     IO.puts "✅ Seeding complete!"
   end
@@ -63,7 +66,7 @@ defmodule Mix.Tasks.Y.Seed do
   defp create_follows(users) do
     for u1 <- users, u2 <- users, u1.id != u2.id do
       if :rand.uniform() > 0.4 do
-        YCore.Social.FollowService.follow(u1.id, u2.id, FollowRepository)
+        YCore.Social.FollowService.follow(u1.id, u2.id, FollowRepository, NotificationRepository)
       end
     end
   end
@@ -72,14 +75,14 @@ defmodule Mix.Tasks.Y.Seed do
     for take <- takes do
       # Agrees
       for user <- Enum.take_random(users, Enum.random(0..length(users))) do
-        AgreeRepository.toggle(user.id, :take, take.id)
+        AgreeRepository.toggle(user.id, :take, take.id, NotificationRepository)
       end
 
       # Retakes
       retakers = Enum.take_random(users, Enum.random(0..3))
       for user <- retakers, user.id != take.user_id do
         comment = if :rand.uniform() > 0.5, do: "Check this out!", else: nil
-        RetakeService.retake(user.id, take.id, comment, RetakeRepository, TakeRepository)
+        RetakeService.retake(user.id, take.id, comment, RetakeRepository, TakeRepository, NotificationRepository)
       end
 
       # Opinions (Threaded)
@@ -105,13 +108,13 @@ defmodule Mix.Tasks.Y.Seed do
       for _ <- 0..num_opinions do
         user = Enum.random(users)
         body = Enum.random(opinion_templates)
-        {:ok, op} = OpinionService.post(%{user_id: user.id, take_id: take.id, body: body}, OpinionRepository, TakeRepository)
+        {:ok, op} = OpinionService.post(%{user_id: user.id, take_id: take.id, body: body}, OpinionRepository, TakeRepository, NotificationRepository)
 
         # Nested opinions
         if :rand.uniform() > 0.7 do
           user2 = Enum.random(users)
           body2 = Enum.random(opinion_templates)
-          OpinionService.post(%{user_id: user2.id, take_id: take.id, parent_opinion_id: op.id, body: body2}, OpinionRepository, TakeRepository)
+          OpinionService.post(%{user_id: user2.id, take_id: take.id, parent_opinion_id: op.id, body: body2}, OpinionRepository, TakeRepository, NotificationRepository)
         end
       end
     end

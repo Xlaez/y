@@ -3,7 +3,8 @@ defmodule YWeb.HomeLive do
 
   alias YCore.Content.TakeService
   alias YCore.Content.FeedService
-  alias YRepo.Repositories.{TakeRepository, FollowRepository, AgreeRepository, BookmarkRepository, UserRepository, OpinionRepository, RetakeRepository}
+  alias YRepo.Repositories.{TakeRepository, FollowRepository, AgreeRepository, BookmarkRepository, UserRepository, OpinionRepository, RetakeRepository, NotificationRepository}
+  @notification_repo NotificationRepository
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -48,7 +49,7 @@ defmodule YWeb.HomeLive do
     user_id = socket.assigns.current_user.id
     target_type = String.to_existing_atom(type)
 
-    case AgreeRepository.toggle(user_id, target_type, id) do
+    case AgreeRepository.toggle(user_id, target_type, id, @notification_repo) do
       {:ok, _} -> {:noreply, refresh_feed(socket)}
       _ -> {:noreply, socket}
     end

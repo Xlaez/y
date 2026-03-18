@@ -1,10 +1,19 @@
-<header class="sticky top-0 z-40 backdrop-blur-xl bg-black/70 border-b border-y-border px-4 py-4">
+<header class="sticky top-0 z-40 backdrop-blur-xl bg-black/70 border-b border-y-border px-4 py-4 flex items-center justify-between">
   <h2 class="text-white text-xl font-semibold">Notifications</h2>
+  <button 
+    phx-click="mark_all_read"
+    class="text-y-opinion text-sm font-medium hover:underline"
+  >
+    Mark all as read
+  </button>
 </header>
 
-<div class="divide-y divide-y-border">
+<div id="notifications-list" phx-hook="NotificationObserver" class="divide-y divide-y-border">
   <%= for notification <- @notifications do %>
     <div
+      id={"notification-#{notification.id}"}
+      data-id={notification.id}
+      data-unread={to_string(notification.unread)}
       phx-click="mark_read"
       phx-value-id={notification.id}
       class={[
@@ -20,11 +29,11 @@
             <div class="size-8 rounded-full flex items-center justify-center text-y-agree">
               <span class="hero-heart-solid size-6"></span>
             </div>
-          <% :opinion -> %>
+          <% :opined -> %>
             <div class="size-8 rounded-full flex items-center justify-center text-y-opinion">
               <span class="hero-chat-bubble-left-solid size-6"></span>
             </div>
-          <% :retake -> %>
+          <% :retook -> %>
             <div class="size-8 rounded-full flex items-center justify-center text-y-retake">
               <span class="hero-arrow-path-solid size-6"></span>
             </div>
@@ -38,15 +47,17 @@
           <%= if notification.type != :followed do %>
             <YWeb.Layouts.bitmoji user={notification.actor} size="sm" />
           <% end %>
-          <p class="text-y-text text-sm">
-            <span class="font-medium hover:underline"><%= notification.actor.username %></span>
-            <span class="text-y-muted"><%= notification.text %></span>
-          </p>
-          <span class="text-y-muted text-xs ml-auto"><%= notification.timestamp %></span>
+          <div class="flex flex-col min-w-0">
+            <p class="text-y-text text-sm leading-tight">
+              <span class="font-bold hover:underline"><%= notification.actor.username %></span>
+              <span class="text-y-text ml-1"><%= notification.text %></span>
+            </p>
+            <span class="text-y-muted text-xs mt-0.5"><%= notification.timestamp %></span>
+          </div>
         </div>
 
         <%= if notification.excerpt do %>
-          <p class="text-y-muted text-sm italic truncate pl-2 border-l border-y-border">
+          <p class="text-y-muted text-[13px] leading-relaxed italic truncate pl-3 border-l-2 border-y-border mt-2">
             "<%= notification.excerpt %>"
           </p>
         <% end %>

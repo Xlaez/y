@@ -16,7 +16,14 @@
         <YWeb.Layouts.bitmoji user={@profile.user} size="xl" />
       </div>
       
-      <%= if @current_user && @current_user.id != @profile.user.id do %>
+      <%= if @current_user && @current_user.id == @profile.user.id do %>
+        <button 
+          phx-click="open_edit_modal"
+          class="bg-transparent border border-y-border text-white font-bold rounded-full px-6 py-2 hover:bg-y-hover transition-all"
+        >
+          Edit profile
+        </button>
+      <% else %>
         <button 
           phx-click={if @profile.is_following, do: "unfollow", else: "follow"}
           class={[
@@ -32,13 +39,6 @@
           <% else %>
             Follow
           <% end %>
-        </button>
-      <% else %>
-        <button 
-          phx-click="open_edit_modal"
-          class="bg-transparent border border-y-border text-white font-bold rounded-full px-6 py-2 hover:bg-y-hover transition-all"
-        >
-          Edit profile
         </button>
       <% end %>
     </div>
@@ -110,7 +110,7 @@
         <%= if @profile_tab == :takes do %>
           <YWeb.Components.FeedCard.feed_card item={item} current_user={@current_user} show_delete={@current_user && @current_user.id == @profile.user.id} />
         <% else %>
-          <%# Context rich reply item %>
+        <%!-- Context rich reply item --%>
           <div 
             phx-click="navigate_to_take" 
             phx-value-take_id={item.take.id}

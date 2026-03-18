@@ -9,7 +9,7 @@ defmodule YWeb.FollowController do
   def create(conn, %{"followee_id" => followee_id}) do
     current_user = conn.assigns.current_user
 
-    case FollowService.follow(current_user.id, followee_id, FollowRepository) do
+    case FollowService.follow(current_user.id, followee_id, FollowRepository, YRepo.Repositories.NotificationRepository) do
       {:ok, _follow} ->
         conn
         |> put_status(:created)

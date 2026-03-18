@@ -2,7 +2,8 @@ defmodule YWeb.TakeLive do
   use YWeb, :live_view
 
   alias YCore.Content.OpinionService
-  alias YRepo.Repositories.{TakeRepository, OpinionRepository, AgreeRepository, BookmarkRepository, UserRepository, RetakeRepository}
+  alias YRepo.Repositories.{TakeRepository, OpinionRepository, AgreeRepository, BookmarkRepository, UserRepository, RetakeRepository, NotificationRepository}
+  @notification_repo NotificationRepository
 
   def mount(%{"id" => id} = _params, _session, socket) do
     user_id = socket.assigns.current_user.id
@@ -53,7 +54,7 @@ defmodule YWeb.TakeLive do
       body: body
     }
 
-    case OpinionService.post(params, OpinionRepository, TakeRepository) do
+    case OpinionService.post(params, OpinionRepository, TakeRepository, @notification_repo) do
       {:ok, _opinion} ->
         {:noreply,
          socket
@@ -71,7 +72,7 @@ defmodule YWeb.TakeLive do
     user_id = socket.assigns.current_user.id
     target_type = String.to_existing_atom(type)
 
-    case AgreeRepository.toggle(user_id, target_type, id) do
+    case AgreeRepository.toggle(user_id, target_type, id, @notification_repo) do
       {:ok, _} -> {:noreply, refresh_take_data(socket)}
       _ -> {:noreply, socket}
     end

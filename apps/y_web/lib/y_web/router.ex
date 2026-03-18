@@ -51,7 +51,11 @@ defmodule YWeb.Router do
     pipe_through :browser
 
     live_session :require_authenticated_user,
-      on_mount: [{YWeb.Plugs.Auth, :mount_current_user}, {YWeb.Plugs.Auth, :ensure_authenticated}] do
+      on_mount: [
+        {YWeb.Plugs.Auth, :mount_current_user},
+        {YWeb.Plugs.Auth, :ensure_authenticated},
+        YWeb.Hooks.NotificationCount
+      ] do
       live "/home", HomeLive, :index
       live "/explore", ExploreLive, :index
       live "/notifications", NotificationsLive, :index

@@ -54,7 +54,7 @@ defmodule YWeb.Layouts do
               icon="hero-bell"
               label="Notifications"
               active={@active_tab == :notifications}
-              badge={12}
+              badge={@unread_notification_count}
             />
             <.nav_item to="/bookmarks" icon="hero-bookmark" label="Saves" active={@active_tab == :bookmarks} />
             <.nav_item
@@ -100,7 +100,7 @@ defmodule YWeb.Layouts do
           to="/notifications"
           icon="hero-bell"
           active={@active_tab == :notifications}
-          badge={12}
+          badge={@unread_notification_count}
         />
         <.mobile_nav_item to="/settings" icon="hero-cog-6-tooth" active={@active_tab == :settings} />
       </nav>

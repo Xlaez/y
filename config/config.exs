@@ -36,7 +36,12 @@ config :argon2_elixir,
 # Oban configuration
 config :y_workers, Oban,
   repo: YRepo.Repo,
-  plugins: [Oban.Plugins.Pruner],
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron, crontab: [
+      {"@daily", YWorkers.Jobs.ExpireNotifications}
+    ]}
+  ],
   queues: [default: 10, notifications: 5]
 
 # Configures the endpoint

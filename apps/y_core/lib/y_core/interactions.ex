@@ -23,7 +23,7 @@ defmodule YCore.Interactions.Bookmark do
 end
 
 defmodule YCore.Interactions.AgreeRepository do
-  @callback toggle(user_id :: String.t(), target_type :: atom(), target_id :: String.t()) ::
+  @callback toggle(user_id :: String.t(), target_type :: atom(), target_id :: String.t(), notification_repo :: module()) ::
               {:ok, :agreed} | {:ok, :removed} | {:error, term()}
   @callback agreed?(user_id :: String.t(), target_type :: atom(), target_id :: String.t()) ::
               boolean()

@@ -4,6 +4,7 @@ defmodule YWeb.ProfileLive do
   @user_repo YRepo.Repositories.UserRepository
   @follow_repo YRepo.Repositories.FollowRepository
   @block_repo YRepo.Repositories.BlockRepository
+  @notification_repo YRepo.Repositories.NotificationRepository
 
   alias YRepo.Repositories.{TakeRepository, AgreeRepository, BookmarkRepository, OpinionRepository, RetakeRepository, UserRepository}
 
@@ -45,7 +46,7 @@ defmodule YWeb.ProfileLive do
     user_id = socket.assigns.current_user.id
     target_type = String.to_existing_atom(type)
 
-    case AgreeRepository.toggle(user_id, target_type, id) do
+    case AgreeRepository.toggle(user_id, target_type, id, @notification_repo) do
       {:ok, _} -> {:noreply, refresh_user_feed(socket)}
       _ -> {:noreply, socket}
     end
@@ -70,7 +71,8 @@ defmodule YWeb.ProfileLive do
       case YCore.Social.FollowService.follow(
              current_user.id,
              socket.assigns.profile.user.id,
-             @follow_repo
+             @follow_repo,
+             @notification_repo
            ) do
         {:ok, _} ->
           {:noreply, update_profile(socket)}
@@ -162,7 +164,7 @@ defmodule YWeb.ProfileLive do
     enrich_takes(takes, user_id, viewer_id)
   end
 
-  defp fetch_user_feed(user_id, viewer_id, :replies) do
+  defp fetch_user_feed(user_id, _viewer_id, :replies) do
     # Fetch user's opinions
     opinions = OpinionRepository.list_for_user(user_id, limit: 20)
     
@@ -212,31 +214,6 @@ defmodule YWeb.ProfileLive do
         viewer_retook: MapSet.member?(retook_ids, take.id)
       }
     end)
-  end
-
-  defp opinion_to_take_adapter(op) do
-    replying_to_handle = if op.parent_opinion_id do
-      case OpinionRepository.get_by_id(op.parent_opinion_id) do
-        {:ok, parent_op} -> UserRepository.get_by_id!(parent_op.user_id).username
-        _ -> nil
-      end
-    else
-      case TakeRepository.get_by_id(op.take_id) do
-        {:ok, parent_take} -> UserRepository.get_by_id!(parent_take.user_id).username
-        _ -> nil
-      end
-    end
-
-    %{
-      id: op.id,
-      user_id: op.user_id,
-      body: op.body,
-      inserted_at: op.inserted_at,
-      opinion_count: 0, 
-      retake_count: 0,
-      is_opinion: true,
-      replying_to_handle: replying_to_handle
-    }
   end
 
   defp refresh_user_feed(socket) do

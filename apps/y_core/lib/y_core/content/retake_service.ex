@@ -4,9 +4,9 @@ defmodule YCore.Content.RetakeService do
   """
   alias YCore.Content.TakeBody
 
-  @spec retake(String.t(), String.t(), String.t() | nil, module(), module()) ::
+  @spec retake(String.t(), String.t(), String.t() | nil, module(), module(), module()) ::
           {:ok, YCore.Content.Retake.t()} | {:error, :already_retook | :cannot_retake_own | term()}
-  def retake(user_id, original_take_id, comment, retake_repo, take_repo) do
+  def retake(user_id, original_take_id, comment, retake_repo, take_repo, notification_repo) do
     with {:ok, take} <- get_original_take(original_take_id, take_repo),
          :ok <- check_not_own_take(user_id, take),
          {:ok, valid_comment} <- validate_comment(comment),
@@ -16,6 +16,17 @@ defmodule YCore.Content.RetakeService do
         original_take_id: original_take_id,
         comment: valid_comment
       })
+      |> case do
+        {:ok, retake} ->
+          Task.start(fn ->
+            YCore.Notifications.NotificationService.notify_retook(
+              user_id, take.user_id, take.id, retake.id, notification_repo
+            )
+          end)
+          {:ok, retake}
+
+        error -> error
+      end
     end
   end
 

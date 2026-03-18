@@ -6,7 +6,7 @@ defmodule YRepo.Repositories.AgreeRepository do
   alias YRepo.Schemas.Agree, as: SchemaAgree
 
   @impl true
-  def toggle(user_id, target_type, target_id) do
+  def toggle(user_id, target_type, target_id, notification_repo) do
     Ecto.Multi.new()
     |> Ecto.Multi.run(:existing, fn repo, _ ->
       result = repo.one(from a in SchemaAgree, 
@@ -29,10 +29,24 @@ defmodule YRepo.Repositories.AgreeRepository do
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{action: action}} -> {:ok, action}
-      {:error, :action, error, _} -> {:error, error}
+      {:ok, %{action: :agreed}} ->
+        Task.start(fn ->
+          owner_id = get_target_owner_id(target_type, target_id)
+          YCore.Notifications.NotificationService.notify_agreed(user_id, owner_id, target_type, target_id, notification_repo)
+        end)
+        {:ok, :agreed}
+
+      {:ok, %{action: action}} ->
+        {:ok, action}
+
+      {:error, :action, error, _} ->
+        {:error, error}
     end
   end
+
+  defp get_target_owner_id(:take, target_id), do: Repo.get(YRepo.Schemas.Take, target_id).user_id
+  defp get_target_owner_id(:retake, target_id), do: Repo.get(YRepo.Schemas.Retake, target_id).user_id
+  defp get_target_owner_id(:opinion, target_id), do: Repo.get(YRepo.Schemas.Opinion, target_id).user_id
 
   @impl true
   def agreed?(user_id, target_type, target_id) do
