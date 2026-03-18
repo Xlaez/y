@@ -12,7 +12,7 @@ defmodule YRepo.Repositories.NotificationRepository do
     |> SchemaNotification.changeset(attrs)
     |> Repo.insert(
       on_conflict: :nothing, 
-      conflict_target: {:unsafe_fragment, "(recipient_id, actor_id, type, COALESCE(target_type, 'nil'), COALESCE(target_id::text, 'nil'))"}
+      conflict_target: {:unsafe_fragment, "(recipient_id, actor_id, type, COALESCE(target_type, 'nil'::character varying), COALESCE(target_id, '00000000-0000-0000-0000-000000000000'::uuid))"}
     )
     |> case do
       {:ok, schema} -> {:ok, to_domain(schema)}

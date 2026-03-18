@@ -55,9 +55,19 @@
         <button 
           phx-click="toggle_follow" 
           phx-value-id={user.id}
-          class="bg-white hover:bg-[#E5E5E7] text-black text-xs font-bold rounded-full px-4 py-1.5 transition-all"
+          class={[
+            "text-xs font-bold rounded-full px-4 py-1.5 transition-all",
+            if(user.is_following, 
+              do: "bg-transparent border border-y-border text-white hover:border-y-agree hover:text-y-agree hover:bg-y-agree/5 group", 
+              else: "bg-white text-black hover:bg-[#E5E5E7]")
+          ]}
         >
-          Follow
+          <%= if user.is_following do %>
+            <span class="block group-hover:hidden">Following</span>
+            <span class="hidden group-hover:block">Unfollow</span>
+          <% else %>
+            Follow
+          <% end %>
         </button>
       </div>
     <% end %>
@@ -80,9 +90,19 @@
         <button 
           phx-click="toggle_follow" 
           phx-value-id={user.id}
-          class="bg-white hover:bg-[#E5E5E7] text-black text-xs font-bold rounded-full px-4 py-1.5 transition-all"
+          class={[
+            "text-xs font-bold rounded-full px-4 py-1.5 transition-all",
+            if(user.is_following, 
+              do: "bg-transparent border border-y-border text-white hover:border-y-agree hover:text-y-agree hover:bg-y-agree/5 group", 
+              else: "bg-white text-black hover:bg-[#E5E5E7]")
+          ]}
         >
-          Follow
+          <%= if user.is_following do %>
+            <span class="block group-hover:hidden">Following</span>
+            <span class="hidden group-hover:block">Unfollow</span>
+          <% else %>
+            Follow
+          <% end %>
         </button>
       </div>
     <% end %>
