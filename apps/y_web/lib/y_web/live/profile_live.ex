@@ -16,7 +16,8 @@ defmodule YWeb.ProfileLive do
            viewer_id,
            @user_repo,
            @follow_repo,
-           @block_repo
+           @block_repo,
+           TakeRepository
          ) do
       {:ok, profile} ->
         feed = fetch_user_feed(profile.user.id, viewer_id, :takes)
@@ -163,35 +164,34 @@ defmodule YWeb.ProfileLive do
 
   defp fetch_user_feed(user_id, viewer_id, :replies) do
     # Fetch user's opinions
-    opinions = OpinionRepository.list_for_user(user_id, limit: 50)
+    opinions = OpinionRepository.list_for_user(user_id, limit: 20)
     
-    # We need to build a feed that shows: [Parent Take/Opinion] -> [User Opinion]
-    # To keep it simple in the feed, we'll turn each opinion into a block
-    Enum.flat_map(opinions, fn op ->
-      # Fetch context (parent)
-      parent = if op.parent_opinion_id do
-        case OpinionRepository.get_by_id(op.parent_opinion_id) do
-          {:ok, parent_op} -> 
-            enrich_takes([opinion_to_take_adapter(parent_op)], parent_op.user_id, viewer_id) |> List.first()
-          _ -> nil
-        end
-      else
-        case TakeRepository.get_by_id(op.take_id) do
-          {:ok, parent_take} ->
-            enrich_takes([parent_take], parent_take.user_id, viewer_id) |> List.first()
-          _ -> nil
-        end
-      end
-
-      reply = enrich_takes([opinion_to_take_adapter(op)], user_id, viewer_id) |> List.first()
+    # Get unique Take IDs from opinions
+    take_ids = opinions |> Enum.map(& &1.take_id) |> Enum.uniq()
+    
+    # Fetch Takes in one query
+    takes = TakeRepository.list_by_ids(take_ids)
+    takes_map = Map.new(takes, &{&1.id, &1})
+    
+    # Get unique User IDs from Takes (to get authors)
+    take_author_ids = takes |> Enum.map(& &1.user_id) |> Enum.uniq()
+    
+    # Fetch Authors in one query
+    take_authors = UserRepository.list_by_ids(take_author_ids)
+    authors_map = Map.new(take_authors, &{&1.id, &1})
+    
+    # Assemble context maps
+    Enum.map(opinions, fn op ->
+      take = Map.get(takes_map, op.take_id)
+      take_author = if take, do: Map.get(authors_map, take.user_id), else: nil
       
-      # Mark them so FeedCard can show the connecting line
-      if parent do
-        [Map.put(parent, :thread_top, true), Map.put(reply, :thread_bottom, true)]
-      else
-        [reply]
-      end
+      %{
+        opinion: op,
+        take: take,
+        author: take_author # Original take author
+      }
     end)
+    |> Enum.reject(&(&1.take == nil))
   end
 
   defp enrich_takes(takes, _user_id, viewer_id) do
@@ -253,7 +253,8 @@ defmodule YWeb.ProfileLive do
            viewer_id,
            @user_repo,
            @follow_repo,
-           @block_repo
+           @block_repo,
+           TakeRepository
          ) do
       {:ok, profile} ->
         socket

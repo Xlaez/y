@@ -129,12 +129,12 @@ defmodule YWeb.TakeLive do
           <YWeb.Layouts.bitmoji user={@author} size="sm" class="md:size-8 size-7" />
         </.link>
         
-        <%= if !Enum.empty?(@node.replies) do %>
+        <%= if @node.replies != [] do %>
           <div class="w-[1px] grow bg-[#2A2A2E] my-1"></div>
         <% end %>
       </div>
 
-      <div class="flex-1 min-w-0 pb-4">
+      <div class="flex-1 min-w-0">
         <div class="flex items-center gap-1.5 mb-0.5 overflow-hidden">
           <.link 
             navigate={~p"/#{@author.username}"} 
@@ -156,7 +156,7 @@ defmodule YWeb.TakeLive do
           <%= @node.opinion.body %>
         </p>
 
-        <div class="flex items-center gap-5 mt-2">
+        <div class="flex items-center gap-5 mt-2 mb-4">
           <.opinion_action 
             icon="hero-chat-bubble-left" 
             count={Enum.count(@node.replies)} 
@@ -191,7 +191,7 @@ defmodule YWeb.TakeLive do
         </div>
 
         <%= if @replying_to == @node.opinion.id do %>
-          <div class="mt-4">
+          <div class="mt-4 mb-4">
             <.reply_composer 
               id={"reply-composer-#{@node.opinion.id}"} 
               current_user={@current_user} 
@@ -202,7 +202,7 @@ defmodule YWeb.TakeLive do
         <% end %>
 
         <%= if !Enum.empty?(@node.replies) do %>
-          <div class="mt-4 space-y-4">
+          <div class="space-y-4">
             <%= for reply <- @node.replies do %>
               <.opinion_node 
                 node={reply} 

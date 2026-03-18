@@ -364,6 +364,7 @@ defmodule YWeb.Layouts do
 
   attr :user, :map, required: true
   attr :size, :string, default: "md", values: ["sm", "md", "lg", "xl"]
+  attr :class, :any, default: nil
 
   def bitmoji(assigns) do
     size_classes = %{
@@ -377,7 +378,7 @@ defmodule YWeb.Layouts do
 
     ~H"""
     <div
-      class={["shrink-0 rounded-full flex items-center justify-center font-bold text-[#E5E5E7] shadow-inner overflow-hidden", @size_class]}
+      class={["shrink-0 rounded-full flex items-center justify-center font-bold text-[#E5E5E7] shadow-inner overflow-hidden", @size_class, @class]}
       style={"background-color: #{@user.bitmoji_color};"}
     >
       <% profile_pic = Map.get(@user, :profile_picture_base64) %>

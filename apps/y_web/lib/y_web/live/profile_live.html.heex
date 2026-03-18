@@ -107,7 +107,67 @@
     <!-- Profile Feed -->
     <div class="divide-y divide-y-border">
       <%= for item <- @feed do %>
-        <YWeb.Components.FeedCard.feed_card item={item} current_user={@current_user} show_delete={@current_user && @current_user.id == @profile.user.id} />
+        <%= if @profile_tab == :takes do %>
+          <YWeb.Components.FeedCard.feed_card item={item} current_user={@current_user} show_delete={@current_user && @current_user.id == @profile.user.id} />
+        <% else %>
+          <%# Context rich reply item %>
+          <div 
+            phx-click="navigate_to_take" 
+            phx-value-take_id={item.take.id}
+            class="px-4 py-4 border-b border-[#1C1C1E] hover:bg-[#111111] transition-colors cursor-pointer group"
+          >
+            <!-- Replying to header -->
+            <div class="flex items-center gap-2 mb-3">
+               <div class="h-[1px] w-4 bg-[#1C1C1E]"></div>
+               <span class="text-[#8E8E93] text-xs">Replying to <span class="text-y-opinion">@<%= item.author.username %></span></span>
+               <div class="h-[1px] flex-grow bg-[#1C1C1E]"></div>
+            </div>
+
+            <!-- Original Take Summary -->
+            <div class="flex gap-3 mb-4 opacity-70">
+              <div class="flex flex-col items-center shrink-0">
+                 <YWeb.Layouts.bitmoji user={item.author} size="sm" class="size-6 opacity-50" />
+                 <div class="w-[1px] grow bg-[#1C1C1E] mt-1"></div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                   <span class="text-[#8E8E93] font-bold text-xs"><%= item.author.username %></span>
+                   <span class="text-[#8E8E93] text-[10px] truncate"><%= YWeb.Helpers.Time.relative(item.take.inserted_at) %></span>
+                </div>
+                <p class="text-[#8E8E93] text-sm line-clamp-2"><%= item.take.body %></p>
+              </div>
+            </div>
+
+            <!-- User's Opinion -->
+            <div class="flex gap-3">
+              <div class="flex flex-col items-center shrink-0">
+                <YWeb.Layouts.bitmoji user={@profile.user} size="sm" class="size-8" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                   <span class="text-white font-bold text-sm"><%= @profile.user.username %></span>
+                   <span class="text-y-muted text-xs"><%= YWeb.Helpers.Time.relative(item.opinion.inserted_at) %></span>
+                </div>
+                <p class="text-[#E5E5E7] text-[15px] leading-relaxed"><%= item.opinion.body %></p>
+                
+                <div class="flex items-center gap-5 mt-2 opacity-60">
+                  <div class="flex items-center gap-1 text-[#48484A]">
+                    <span class="hero-chat-bubble-left size-4"></span>
+                    <span class="text-[10px]">Reply</span>
+                  </div>
+                  <div class="flex items-center gap-1 text-[#48484A]">
+                    <span class="hero-arrow-path size-4"></span>
+                    <span class="text-[10px]">Retake</span>
+                  </div>
+                  <div class="flex items-center gap-1 text-[#48484A]">
+                    <span class="hero-heart size-4"></span>
+                    <span class="text-[10px]">Agree</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
       <% end %>
     </div>
   <% end %>

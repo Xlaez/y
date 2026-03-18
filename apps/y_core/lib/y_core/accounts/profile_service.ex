@@ -1,7 +1,7 @@
 defmodule YCore.Accounts.ProfileService do
-  @spec get_profile(String.t(), String.t() | nil, module(), module(), module()) ::
+  @spec get_profile(String.t(), String.t() | nil, module(), module(), module(), module()) ::
           {:ok, map()} | {:error, :not_found}
-  def get_profile(username, viewer_id, user_repo, follow_repo, block_repo) do
+  def get_profile(username, viewer_id, user_repo, follow_repo, block_repo, take_repo) do
     case user_repo.get_by_username(username) do
       {:error, :not_found} ->
         {:error, :not_found}
@@ -9,6 +9,7 @@ defmodule YCore.Accounts.ProfileService do
       {:ok, user} ->
         follower_count = follow_repo.follower_count(user.id)
         following_count = follow_repo.following_count(user.id)
+        take_count = take_repo.count_for_user(user.id)
 
         {is_following, is_blocked_by_viewer, viewer_is_blocked} =
           if viewer_id && viewer_id != user.id do
@@ -32,7 +33,7 @@ defmodule YCore.Accounts.ProfileService do
           user: user,
           follower_count: follower_count,
           following_count: following_count,
-          take_count: 0,
+          take_count: take_count,
           is_following: is_following,
           is_blocked_by_viewer: is_blocked_by_viewer,
           viewer_is_blocked: viewer_is_blocked,
