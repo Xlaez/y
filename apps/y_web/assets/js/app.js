@@ -119,7 +119,8 @@ const Hooks = {
     mounted() {
       this.handleOutsideClick = (e) => {
         if (!this.el.contains(e.target)) {
-          this.pushEvent("close_emoji_picker", {})
+          const closeEvent = this.el.dataset.closeEvent || "close_emoji_picker"
+          this.pushEvent(closeEvent, {})
         }
       }
       // Delay so the toggle click doesn't immediately close

@@ -26,6 +26,10 @@ defmodule YWeb.HomeLive do
      |> assign(active_skin_tone: "")
      |> assign(retake_modal: nil)
      |> assign(quote_body: "")
+     |> assign(quote_show_emoji_picker: false)
+     |> assign(quote_emoji_search: "")
+     |> assign(quote_active_emoji_category: "smileys")
+     |> assign(quote_active_skin_tone: "")
      |> assign(who_to_follow: []), # Improved: "Who to follow" logic would use UserRepository.list_suggested
      layout: {YWeb.Layouts, :authenticated}}
   end
@@ -106,7 +110,12 @@ defmodule YWeb.HomeLive do
   end
 
   def handle_event("open_retake_modal", %{"take_id" => id}, socket) do
-    {:noreply, assign(socket, retake_modal: %{take_id: id, type: :menu})}
+    {:noreply, 
+      socket
+      |> assign(retake_modal: %{take_id: id, type: :menu})
+      |> assign(quote_show_emoji_picker: false)
+      |> assign(quote_emoji_search: "")
+    }
   end
 
   def handle_event("close_retake_modal", _, socket) do
@@ -159,11 +168,11 @@ defmodule YWeb.HomeLive do
     end
   end
 
-  def handle_event("submit_quote_take", %{"take_id" => id}, socket) do
+  def handle_event("submit_quote_take", %{"body" => body}, socket) do
     user_id = socket.assigns.current_user.id
-    comment = socket.assigns.quote_body
+    id = socket.assigns.retake_modal.take_id
     
-    case YCore.Content.RetakeService.retake(user_id, id, comment, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 
@@ -173,6 +182,31 @@ defmodule YWeb.HomeLive do
       {:error, reason} -> 
         {:noreply, put_flash(socket, :error, "Could not quote: #{reason}")}
     end
+  end
+
+  # Quote Emoji Handlers
+  def handle_event("quote_toggle_emoji_picker", _, socket) do
+    {:noreply, assign(socket, quote_show_emoji_picker: !socket.assigns.quote_show_emoji_picker)}
+  end
+
+  def handle_event("quote_emoji_search_change", %{"value" => value}, socket) do
+    {:noreply, assign(socket, quote_emoji_search: value)}
+  end
+
+  def handle_event("quote_set_emoji_category", %{"category" => cat}, socket) do
+    {:noreply, assign(socket, quote_active_emoji_category: cat)}
+  end
+
+  def handle_event("quote_set_skin_tone", %{"tone" => tone}, socket) do
+    {:noreply, assign(socket, quote_active_skin_tone: tone)}
+  end
+
+  def handle_event("quote_insert_emoji", %{"emoji" => emoji}, socket) do
+    {:noreply, 
+      socket 
+      |> assign(quote_body: socket.assigns.quote_body <> emoji)
+      |> assign(quote_show_emoji_picker: false)
+    }
   end
 
   defp search_emojis(query) do

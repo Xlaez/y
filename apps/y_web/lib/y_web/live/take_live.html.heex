@@ -134,6 +134,10 @@
       current_user={@current_user}
       quote_body={@quote_body}
       viewer_retook={RetakeRepository.already_retook?(@current_user.id, take.id)}
+      quote_show_emoji_picker={@quote_show_emoji_picker}
+      quote_emoji_search={@quote_emoji_search}
+      quote_active_emoji_category={@quote_active_emoji_category}
+      quote_active_skin_tone={@quote_active_skin_tone}
     />
   <% end %>
 <% end %>

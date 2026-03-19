@@ -7,6 +7,11 @@ defmodule YWeb.Components.RetakeModal do
   attr :current_user, :map, required: true
   attr :quote_body, :string, default: ""
   attr :viewer_retook, :boolean, default: false
+  
+  attr :quote_show_emoji_picker, :boolean, default: false
+  attr :quote_emoji_search, :string, default: ""
+  attr :quote_active_emoji_category, :string, default: "smileys"
+  attr :quote_active_skin_tone, :string, default: ""
 
   def retake_modal(assigns) do
     ~H"""
@@ -44,39 +49,38 @@ defmodule YWeb.Components.RetakeModal do
             </button>
           </div>
         <% else %>
-          <div class="flex flex-col max-h-[90vh]">
-            <div class="flex items-center justify-between p-4 bg-black/80 sticky top-0 z-10">
+          <div class="flex flex-col max-h-[90vh] bg-black">
+            <div class="px-4 py-2 border-b border-[#2F3336] flex items-center justify-between sticky top-0 bg-black z-20">
               <button phx-click="close_retake_modal" class="text-white hover:bg-white/10 p-2 rounded-full transition-colors">
                 <span class="hero-x-mark size-5"></span>
               </button>
-              <button 
-                phx-click="submit_quote_take"
-                phx-value-take_id={@modal.take_id}
-                disabled={String.length(@quote_body || "") == 0 || String.length(@quote_body || "") > 250}
-                class="bg-white text-black text-sm font-bold rounded-full px-4 py-1.5 disabled:opacity-50 transition-opacity"
-              >
-                Retake
-              </button>
             </div>
 
-            <div class="p-4 overflow-y-auto scrollbar-none">
-              <div class="flex gap-3">
-                <.bitmoji user={@current_user} size="md" class="shrink-0" />
-                <div class="flex-1 min-w-0">
-                  <textarea
-                    id="quote-textarea"
-                    phx-hook="TextAreaAutosize"
-                    phx-change="validate_quote"
-                    name="body"
-                    placeholder="Add a comment"
-                    autofocus
-                    class="w-full bg-transparent border-none text-white text-xl resize-none focus:ring-0 focus:outline-none p-0 placeholder-[#71767B] min-h-[100px]"
-                  ><%= @quote_body %></textarea>
-
+            <div class="overflow-y-auto scrollbar-none">
+              <YWeb.Layouts.take_composer
+                id="quote-composer"
+                current_user={@current_user}
+                placeholder="Add a comment"
+                submit_event="submit_quote_take"
+                change_event="validate_quote"
+                value={@quote_body}
+                submit_label="Retake"
+                show_emoji_picker={assigns[:quote_show_emoji_picker] || false}
+                emoji_search={assigns[:quote_emoji_search] || ""}
+                active_emoji_category={assigns[:quote_active_emoji_category] || "smileys"}
+                active_skin_tone={assigns[:quote_active_skin_tone] || ""}
+                on_toggle_emoji="quote_toggle_emoji_picker"
+                on_emoji_search="quote_emoji_search_change"
+                on_set_category="quote_set_emoji_category"
+                on_set_tone="quote_set_skin_tone"
+                on_insert_emoji="quote_insert_emoji"
+                class="px-4 py-4"
+              >
+                <:footer>
                   <!-- Original Take Preview -->
                   <div class="mt-3 border border-[#2F3336] rounded-2xl p-3 bg-black">
                     <div class="flex items-center gap-2 mb-1">
-                      <.bitmoji user={@take.author} size="xs" />
+                      <YWeb.Layouts.bitmoji user={@take.author} size="xs" />
                       <span class="text-white font-bold text-sm truncate"><%= @take.author.username %></span>
                       <span class="text-[#71767B] text-sm truncate"><%= @take.author.handle %></span>
                     </div>
@@ -84,8 +88,8 @@ defmodule YWeb.Components.RetakeModal do
                       <%= @take.body %>
                     </p>
                   </div>
-                </div>
-              </div>
+                </:footer>
+              </YWeb.Layouts.take_composer>
             </div>
           </div>
         <% end %>
