@@ -167,9 +167,6 @@ defmodule YWeb.Layouts do
 
             <div class="border-t border-y-border mt-4 pt-4 flex items-center justify-between">
               <div class="flex items-center gap-1">
-                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group">
-                  <span class="hero-photo size-5 text-y-opinion"></span>
-                </button>
                 <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion">
                   <span class="hero-list-bullet size-5"></span>
                 </button>
@@ -178,6 +175,9 @@ defmodule YWeb.Layouts do
                 </button>
                 <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
                   <span class="hero-calendar-days size-5"></span>
+                </button>
+                <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
+                  <span class="hero-photo size-5"></span>
                 </button>
                 <button type="button" class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors group text-y-opinion/50 cursor-not-allowed">
                   <span class="hero-map-pin size-5"></span>
