@@ -32,6 +32,7 @@ defmodule YWeb.TakeLive do
          |> assign(show_emoji_picker: false)
          |> assign(emoji_search: "")
          |> assign(active_emoji_category: "smileys")
+         |> assign(active_skin_tone: "")
          |> assign(replying_to: id)
          |> assign(replying_to_handle: author.username)
          |> assign(error: nil), layout: {YWeb.Layouts, :authenticated}}
@@ -124,10 +125,15 @@ defmodule YWeb.TakeLive do
     {:noreply, assign(socket, emoji_search: query)}
   end
 
+  def handle_event("set_skin_tone", %{"tone" => tone}, socket) do
+    {:noreply, assign(socket, active_skin_tone: tone)}
+  end
+
   def handle_event("insert_emoji", %{"emoji" => emoji}, socket) do
     body = socket.assigns.reply_body || ""
     if String.length(body) < 250 do
-      new_body = body <> emoji
+      toned_emoji = YWeb.EmojiData.apply_tone(emoji, socket.assigns.active_skin_tone)
+      new_body = body <> toned_emoji
       {:noreply, assign(socket, reply_body: new_body, reply_char_count: String.length(new_body))}
     else
       {:noreply, socket}
@@ -234,6 +240,7 @@ defmodule YWeb.TakeLive do
               show_emoji_picker={@show_emoji_picker}
               emoji_search={@emoji_search}
               active_emoji_category={@active_emoji_category}
+              active_skin_tone={@active_skin_tone}
             />
           </div>
         <% end %>
@@ -279,6 +286,11 @@ defmodule YWeb.TakeLive do
     </button>
     """
   end
+
+  attr :show_emoji_picker, :boolean, default: false
+  attr :emoji_search, :string, default: ""
+  attr :active_emoji_category, :string, default: "smileys"
+  attr :active_skin_tone, :string, default: ""
 
   defp reply_composer(assigns) do
     ~H"""
@@ -335,20 +347,38 @@ defmodule YWeb.TakeLive do
                     </div>
 
                     <!-- Category tabs -->
-                    <div class="flex gap-1 px-3 pb-2 overflow-x-auto scrollbar-none">
-                      <%= for cat <- YWeb.EmojiData.categories() do %>
-                        <button
-                          type="button"
-                          phx-click="set_emoji_category"
-                          phx-value-category={cat.id}
-                          class={"w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0
-                                  transition-colors #{if @active_emoji_category == cat.id,
-                                    do: "bg-[#3A3A3C]", else: "hover:bg-[#2A2A2E]"}"}
-                          title={cat.label}
-                        >
-                          <%= cat.icon %>
-                        </button>
-                      <% end %>
+                    <div class="flex items-center justify-between px-3 pb-2">
+                        <div class="flex gap-1 overflow-x-auto scrollbar-none">
+                            <%= for cat <- YWeb.EmojiData.categories() do %>
+                                <button
+                                type="button"
+                                phx-click="set_emoji_category"
+                                phx-value-category={cat.id}
+                                class={"w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0
+                                        transition-colors #{if @active_emoji_category == cat.id,
+                                            do: "bg-[#3A3A3C]", else: "hover:bg-[#2A2A2E]"}"}
+                                title={cat.label}
+                                >
+                                <%= cat.icon %>
+                                </button>
+                            <% end %>
+                        </div>
+                        
+                        <!-- Skin tone selector -->
+                        <div class="flex gap-0.5 ml-2 pl-2 border-l border-[#2A2A2E]">
+                            <%= for tone <- YWeb.EmojiData.skin_tones() do %>
+                                <button
+                                    type="button"
+                                    phx-click="set_skin_tone"
+                                    phx-value-tone={tone.id}
+                                    class={"w-6 h-6 rounded-md flex items-center justify-center text-xs transition-transform hover:scale-110
+                                            #{if @active_skin_tone == tone.id, do: "bg-[#3A3A3C] ring-1 ring-white/20", else: ""}"}
+                                    title={tone.label}
+                                >
+                                    <%= tone.icon %>
+                                </button>
+                            <% end %>
+                        </div>
                     </div>
 
                     <!-- Emoji grid -->
@@ -358,6 +388,7 @@ defmodule YWeb.TakeLive do
                         <p class="text-[#8E8E93] text-xs mb-2 uppercase tracking-wider sticky top-0 bg-[#1C1C1E] py-1">Search results</p>
                         <div class="grid grid-cols-8 gap-1">
                           <%= for emoji <- YWeb.EmojiData.search(@emoji_search) do %>
+                            <% toned_emoji = YWeb.EmojiData.apply_tone(emoji, @active_skin_tone) %>
                             <button
                               type="button"
                               phx-click="insert_emoji"
@@ -365,7 +396,7 @@ defmodule YWeb.TakeLive do
                               class="w-9 h-9 rounded-lg flex items-center justify-center text-xl
                                      hover:bg-[#3A3A3C] transition-colors"
                             >
-                              <%= emoji %>
+                              <%= toned_emoji %>
                             </button>
                           <% end %>
                         </div>
@@ -382,6 +413,7 @@ defmodule YWeb.TakeLive do
                             </p>
                             <div class="grid grid-cols-8 gap-1">
                               <%= for emoji <- cat.emojis do %>
+                                <% toned_emoji = YWeb.EmojiData.apply_tone(emoji, @active_skin_tone) %>
                                 <button
                                   type="button"
                                   phx-click="insert_emoji"
@@ -389,7 +421,7 @@ defmodule YWeb.TakeLive do
                                   class="w-9 h-9 rounded-lg flex items-center justify-center text-xl
                                          hover:bg-[#3A3A3C] active:scale-95 transition-all duration-75"
                                 >
-                                  <%= emoji %>
+                                  <%= toned_emoji %>
                                 </button>
                               <% end %>
                             </div>

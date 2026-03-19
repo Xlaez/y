@@ -133,6 +133,35 @@ defmodule YWeb.EmojiData do
     |> Enum.take(40)
   end
 
+  def skin_tones do
+    [
+      %{id: "", icon: "🟡", label: "Default"},
+      %{id: "🏻", icon: "🏻", label: "Light"},
+      %{id: "🏼", icon: "🏼", label: "Medium-Light"},
+      %{id: "🏽", icon: "🏽", label: "Medium"},
+      %{id: "🏾", icon: "🏾", label: "Medium-Dark"},
+      %{id: "🏿", icon: "🏿", label: "Dark"}
+    ]
+  end
+
+  def apply_tone(emoji, tone) do
+    if tone != "" and tonable?(emoji) do
+      # Remove any existing skin tone modifier (U+1F3FB through U+1F3FF)
+      base = String.replace(emoji, ~r/[\x{1F3FB}-\x{1F3FF}]/u, "")
+      base <> tone
+    else
+      emoji
+    end
+  end
+
+  def tonable?(emoji) do
+    # Any emoji in People & Gestures category supports skin tones
+    # We can also add specifically tonable ones if they are in other categories
+    Enum.any?(categories(), fn cat ->
+      cat.id == "gestures" and Enum.member?(cat.emojis, emoji)
+    end)
+  end
+
   defp keywords do
     %{
       "fire" => ["🔥"], "heart" => ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💕","💗"],

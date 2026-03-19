@@ -23,6 +23,7 @@ defmodule YWeb.HomeLive do
      |> assign(show_emoji_picker: false)
      |> assign(emoji_search: "")
      |> assign(active_emoji_category: "smileys")
+     |> assign(active_skin_tone: "")
      |> assign(retake_modal: nil)
      |> assign(who_to_follow: []), # Improved: "Who to follow" logic would use UserRepository.list_suggested
      layout: {YWeb.Layouts, :authenticated}}
@@ -88,10 +89,15 @@ defmodule YWeb.HomeLive do
     {:noreply, assign(socket, emoji_search: query)}
   end
 
+  def handle_event("set_skin_tone", %{"tone" => tone}, socket) do
+    {:noreply, assign(socket, active_skin_tone: tone)}
+  end
+
   def handle_event("insert_emoji", %{"emoji" => emoji}, socket) do
     body = socket.assigns.compose_body || ""
     if String.length(body) < 250 do
-      new_body = body <> emoji
+      toned_emoji = YWeb.EmojiData.apply_tone(emoji, socket.assigns.active_skin_tone)
+      new_body = body <> toned_emoji
       {:noreply, assign(socket, compose_body: new_body, compose_char_count: String.length(new_body))}
     else
       {:noreply, socket}
