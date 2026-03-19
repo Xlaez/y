@@ -21,6 +21,10 @@ defmodule YWeb.ExploreLive do
     {:noreply, assign(socket, search_query: "", results: %{users: [], takes: []})}
   end
 
+  def handle_event("select_hashtag", %{"hashtag" => hashtag}, socket) do
+    handle_event("search", %{"query" => hashtag}, socket)
+  end
+
   def handle_event("search", %{"query" => query}, socket) do
     # Real search logic using repositories for domain mapping
     users = UserRepository.search(query, limit: 10)

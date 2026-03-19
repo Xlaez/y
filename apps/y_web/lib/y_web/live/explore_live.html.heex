@@ -26,7 +26,11 @@
       <h3 class="px-4 py-3 text-white font-bold text-lg border-b border-y-border">Trending</h3>
       <div>
         <%= for hashtag <- @hashtags do %>
-          <div class="px-4 py-4 hover:bg-y-hover transition-colors cursor-pointer flex justify-between items-center group border-b border-y-border last:border-b-0">
+          <div 
+            phx-click="select_hashtag" 
+            phx-value-hashtag={hashtag.name}
+            class="px-4 py-4 hover:bg-y-hover transition-colors cursor-pointer flex justify-between items-center group border-b border-y-border last:border-b-0"
+          >
             <div>
               <p class="text-y-opinion font-bold group-hover:underline"><%= hashtag.name %></p>
               <p class="text-y-muted text-xs">Trending in y</p>
@@ -53,11 +57,8 @@
                 <p class="text-y-muted text-sm"><%= user.handle %></p>
               </div>
             </.link>
-            <button class="border border-y-white text-y-white hover:bg-white/10 text-sm font-bold rounded-full px-5 py-2 transition-all">
-              Follow
-            </button>
           </div>
-        <% end %>
+<% end %>
       </div>
 
       <!-- Takes -->
@@ -72,7 +73,7 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-1.5">
                   <span class="text-y-text font-medium text-sm"><%= take.author.username %></span>
-                  <span class="text-y-muted text-xs">· <%= take.inserted_at %></span>
+                  <span class="text-y-muted text-xs">· <%= YWeb.Helpers.Time.relative(take.inserted_at) %></span>
                 </div>
                 <p class="text-y-text text-sm leading-relaxed line-clamp-2 mt-1">
                   <%= take.body %>
