@@ -20,8 +20,11 @@ defmodule YWeb.HomeLive do
      |> assign(feed: feed)
      |> assign(compose_body: "")
      |> assign(compose_char_count: 0)
+     |> assign(show_emoji_picker: false)
+     |> assign(emoji_search: "")
+     |> assign(active_emoji_category: "smileys")
      |> assign(retake_modal: nil)
-     |> assign(who_to_follow: []), # Real "Who to follow" logic would use UserRepository.list_suggested
+     |> assign(who_to_follow: []), # Improved: "Who to follow" logic would use UserRepository.list_suggested
      layout: {YWeb.Layouts, :authenticated}}
   end
 
@@ -67,6 +70,36 @@ defmodule YWeb.HomeLive do
 
   def handle_event("navigate_to_take", %{"take_id" => id}, socket) do
     {:noreply, push_navigate(socket, to: ~p"/takes/#{id}")}
+  end
+
+  def handle_event("toggle_emoji_picker", _, socket) do
+    {:noreply, assign(socket, show_emoji_picker: !socket.assigns.show_emoji_picker)}
+  end
+
+  def handle_event("close_emoji_picker", _, socket) do
+    {:noreply, assign(socket, show_emoji_picker: false)}
+  end
+
+  def handle_event("set_emoji_category", %{"category" => id}, socket) do
+    {:noreply, assign(socket, active_emoji_category: id)}
+  end
+
+  def handle_event("emoji_search_change", %{"value" => query}, socket) do
+    {:noreply, assign(socket, emoji_search: query)}
+  end
+
+  def handle_event("insert_emoji", %{"emoji" => emoji}, socket) do
+    body = socket.assigns.compose_body || ""
+    if String.length(body) < 250 do
+      new_body = body <> emoji
+      {:noreply, assign(socket, compose_body: new_body, compose_char_count: String.length(new_body))}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp search_emojis(query) do
+    YWeb.EmojiData.search(query)
   end
 
   defp fetch_feed(user_id) do

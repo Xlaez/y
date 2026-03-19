@@ -9,18 +9,18 @@
 @theme {
   /* y Design System — Monochrome macOS-inspired */
   --color-y-bg: #000000;
-  --color-y-surface: #0A0A0A;
+  --color-y-surface: #0a0a0a;
   --color-y-hover: #111111;
-  --color-y-border: #1C1C1E;
-  --color-y-text: #E5E5E7;
-  --color-y-muted: #8E8E93;
-  --color-y-faint: #48484A;
-  --color-y-placeholder: #3A3A3C;
-  --color-y-white: #F5F5F5;
-  --color-y-agree: #FF375F;
-  --color-y-retake: #30D158;
-  --color-y-opinion: #0A84FF;
-  --color-y-bookmark: #FFD60A;
+  --color-y-border: #1c1c1e;
+  --color-y-text: #e5e5e7;
+  --color-y-muted: #8e8e93;
+  --color-y-faint: #48484a;
+  --color-y-placeholder: #3a3a3c;
+  --color-y-white: #f5f5f5;
+  --color-y-agree: #ff375f;
+  --color-y-retake: #30d158;
+  --color-y-opinion: #0a84ff;
+  --color-y-bookmark: #ffd60a;
 
   --font-inter: "Inter", system-ui, sans-serif;
 }
@@ -84,6 +84,16 @@
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 /* Make LiveView wrapper divs transparent for layout */
-[data-phx-session], [data-phx-teleported-src] { display: contents }
+[data-phx-session],
+[data-phx-teleported-src] {
+  display: contents;
+}
 
-/* This file is for your main application CSS */
+/* This file is for the main application CSS */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

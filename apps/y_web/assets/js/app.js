@@ -114,6 +114,22 @@ const Hooks = {
         this.observer.observe(item);
       });
     }
+  },
+  EmojiPicker: {
+    mounted() {
+      this.handleOutsideClick = (e) => {
+        if (!this.el.contains(e.target)) {
+          this.pushEvent("close_emoji_picker", {})
+        }
+      }
+      // Delay so the toggle click doesn't immediately close
+      setTimeout(() => {
+        document.addEventListener("click", this.handleOutsideClick)
+      }, 10)
+    },
+    destroyed() {
+      document.removeEventListener("click", this.handleOutsideClick)
+    }
   }
 }
 

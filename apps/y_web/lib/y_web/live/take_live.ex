@@ -29,6 +29,9 @@ defmodule YWeb.TakeLive do
          |> assign(viewer_bookmarked: bookmarked?)
          |> assign(reply_body: "")
          |> assign(reply_char_count: 0)
+         |> assign(show_emoji_picker: false)
+         |> assign(emoji_search: "")
+         |> assign(active_emoji_category: "smileys")
          |> assign(replying_to: id)
          |> assign(replying_to_handle: author.username)
          |> assign(error: nil), layout: {YWeb.Layouts, :authenticated}}
@@ -103,6 +106,36 @@ defmodule YWeb.TakeLive do
   
   def handle_event("cancel_reply", _, socket) do
     {:noreply, assign(socket, replying_to: socket.assigns.take.id, replying_to_handle: socket.assigns.author.username)}
+  end
+
+  def handle_event("toggle_emoji_picker", _, socket) do
+    {:noreply, assign(socket, show_emoji_picker: !socket.assigns.show_emoji_picker)}
+  end
+
+  def handle_event("close_emoji_picker", _, socket) do
+    {:noreply, assign(socket, show_emoji_picker: false)}
+  end
+
+  def handle_event("set_emoji_category", %{"category" => id}, socket) do
+    {:noreply, assign(socket, active_emoji_category: id)}
+  end
+
+  def handle_event("emoji_search_change", %{"value" => query}, socket) do
+    {:noreply, assign(socket, emoji_search: query)}
+  end
+
+  def handle_event("insert_emoji", %{"emoji" => emoji}, socket) do
+    body = socket.assigns.reply_body || ""
+    if String.length(body) < 250 do
+      new_body = body <> emoji
+      {:noreply, assign(socket, reply_body: new_body, reply_char_count: String.length(new_body))}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp search_emojis(query) do
+    YWeb.EmojiData.search(query)
   end
 
   defp refresh_opinions(socket) do
@@ -198,6 +231,9 @@ defmodule YWeb.TakeLive do
               current_user={@current_user} 
               reply_body={@reply_body} 
               replying_to_handle={@replying_to_handle} 
+              show_emoji_picker={@show_emoji_picker}
+              emoji_search={@emoji_search}
+              active_emoji_category={@active_emoji_category}
             />
           </div>
         <% end %>
@@ -246,14 +282,14 @@ defmodule YWeb.TakeLive do
 
   defp reply_composer(assigns) do
     ~H"""
-    <div class="py-4 border-b border-[#1C1C1E]">
+    <div class="py-4 border-b border-[#1C1C1E] relative">
       <%= if @replying_to_handle do %>
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between mb-3 px-1">
           <span class="text-[#0A84FF] text-sm">Replying to @<%= @replying_to_handle %></span>
           <button phx-click="cancel_reply" class="text-[#8E8E93] text-sm hover:underline">Cancel</button>
         </div>
       <% end %>
-      
+
       <div class="flex gap-3">
         <YWeb.Layouts.bitmoji user={@current_user} size="sm" class="size-9 shrink-0" />
         <div class="flex-1 min-w-0">
@@ -264,16 +300,117 @@ defmodule YWeb.TakeLive do
               rows="3"
               class="bg-transparent outline-none border-none resize-none text-[#E5E5E7] text-[15px] placeholder-[#3A3A3C] w-full p-0"
             ><%= @reply_body %></textarea>
-            
-            <div class="flex items-center justify-end gap-4 mt-2">
-              <span class="text-[#8E8E93] text-xs"><%= String.length(@reply_body || "") %>/250</span>
-              <button 
-                type="submit"
-                disabled={String.length(@reply_body || "") == 0 || String.length(@reply_body || "") > 250}
-                class="bg-white text-black text-sm font-semibold rounded-full px-4 py-1.5 disabled:opacity-30 transition-opacity"
-              >
-                Reply
-              </button>
+
+            <div class="flex items-center justify-between mt-2 relative">
+              <div class="flex items-center gap-1">
+                <button
+                  type="button"
+                  phx-click="toggle_emoji_picker"
+                  class={"p-2 rounded-lg transition-colors #{if @show_emoji_picker,
+                    do: "text-white bg-[#2A2A2E]", else: "text-[#8E8E93] hover:text-[#E5E5E7] hover:bg-[#1C1C1E]"}"}
+                  title="Emoji"
+                >
+                  <span class="hero-face-smile size-5"></span>
+                </button>
+
+                <%= if @show_emoji_picker do %>
+                  <div
+                    id={"#{@id}-emoji-picker"}
+                    phx-hook="EmojiPicker"
+                    class="absolute top-[calc(100%+4px)] left-0 w-[340px] max-h-[380px] bg-[#1C1C1E] rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.6)] border border-[#2A2A2E] overflow-hidden z-50 flex flex-col"
+                  >
+                    <!-- Search bar -->
+                    <div class="px-3 pt-3 pb-2">
+                        <div class="flex items-center gap-2 bg-[#2A2A2E] rounded-xl px-3 py-2">
+                            <span class="hero-magnifying-glass size-[14px] text-[#8E8E93]"></span>
+                            <input
+                            type="text"
+                            placeholder="Search emoji..."
+                            value={@emoji_search}
+                            phx-keyup="emoji_search_change"
+                            phx-value-value={@emoji_search}
+                            class="bg-transparent outline-none text-[#E5E5E7] text-sm placeholder-[#48484A] w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Category tabs -->
+                    <div class="flex gap-1 px-3 pb-2 overflow-x-auto scrollbar-none">
+                      <%= for cat <- YWeb.EmojiData.categories() do %>
+                        <button
+                          type="button"
+                          phx-click="set_emoji_category"
+                          phx-value-category={cat.id}
+                          class={"w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0
+                                  transition-colors #{if @active_emoji_category == cat.id,
+                                    do: "bg-[#3A3A3C]", else: "hover:bg-[#2A2A2E]"}"}
+                          title={cat.label}
+                        >
+                          <%= cat.icon %>
+                        </button>
+                      <% end %>
+                    </div>
+
+                    <!-- Emoji grid -->
+                    <div class="overflow-y-auto px-3 pb-3 scrollbar-none" style="max-height: 280px;">
+                      <%= if @emoji_search != "" do %>
+                        <!-- Search results -->
+                        <p class="text-[#8E8E93] text-xs mb-2 uppercase tracking-wider sticky top-0 bg-[#1C1C1E] py-1">Search results</p>
+                        <div class="grid grid-cols-8 gap-1">
+                          <%= for emoji <- YWeb.EmojiData.search(@emoji_search) do %>
+                            <button
+                              type="button"
+                              phx-click="insert_emoji"
+                              phx-value-emoji={emoji}
+                              class="w-9 h-9 rounded-lg flex items-center justify-center text-xl
+                                     hover:bg-[#3A3A3C] transition-colors"
+                            >
+                              <%= emoji %>
+                            </button>
+                          <% end %>
+                        </div>
+                        <%= if YWeb.EmojiData.search(@emoji_search) == [] do %>
+                          <p class="text-[#8E8E93] text-sm text-center py-8">No emoji found</p>
+                        <% end %>
+                      <% else %>
+                        <!-- Category view -->
+                        <%= for cat <- YWeb.EmojiData.categories() do %>
+                          <% active = @active_emoji_category == cat.id %>
+                          <%= if active do %>
+                            <p class="text-[#8E8E93] text-xs mb-2 uppercase tracking-wider sticky top-0 bg-[#1C1C1E] py-1">
+                              <%= cat.label %>
+                            </p>
+                            <div class="grid grid-cols-8 gap-1">
+                              <%= for emoji <- cat.emojis do %>
+                                <button
+                                  type="button"
+                                  phx-click="insert_emoji"
+                                  phx-value-emoji={emoji}
+                                  class="w-9 h-9 rounded-lg flex items-center justify-center text-xl
+                                         hover:bg-[#3A3A3C] active:scale-95 transition-all duration-75"
+                                >
+                                  <%= emoji %>
+                                </button>
+                              <% end %>
+                            </div>
+                          <% end %>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <span class="text-[#8E8E93] text-xs"><%= String.length(@reply_body || "") %>/250</span>
+                <button 
+                  type="submit"
+                  disabled={String.length(@reply_body || "") == 0 || String.length(@reply_body || "") > 250}
+                  class="bg-white text-black text-sm font-semibold rounded-full px-4 py-1.5 disabled:opacity-30 transition-opacity"
+                >
+                  Reply
+                </button>
+              </div>
             </div>
           </form>
         </div>
