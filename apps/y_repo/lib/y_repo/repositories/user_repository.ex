@@ -83,6 +83,16 @@ defmodule YRepo.Repositories.UserRepository do
   end
 
   @impl true
+  def search(query, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 20)
+    
+    query
+    |> YRepo.Queries.ExploreQuery.search_users(limit)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
   def delete(id) do
     case Repo.get(SchemaUser, id) do
       nil -> {:error, :not_found}
@@ -92,7 +102,7 @@ defmodule YRepo.Repositories.UserRepository do
     end
   end
 
-  defp to_domain(%SchemaUser{} = schema) do
+  def to_domain(%SchemaUser{} = schema) do
     %DomainUser{
       id: schema.id,
       username: schema.username,

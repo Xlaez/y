@@ -17,7 +17,7 @@ end
 
 defmodule YCore.Content.Take do
   @enforce_keys [:id, :user_id, :body, :inserted_at]
-  defstruct [:id, :user_id, :body, :inserted_at, opinion_count: 0, retake_count: 0]
+  defstruct [:id, :user_id, :body, :inserted_at, :author, opinion_count: 0, retake_count: 0]
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -69,6 +69,7 @@ defmodule YCore.Content.TakeRepository do
   @callback increment_opinion_count(take_id :: String.t()) :: :ok
   @callback increment_retake_count(take_id :: String.t()) :: :ok
   @callback list_by_ids(take_ids :: [String.t()]) :: [Take.t()]
+  @callback search(String.t(), keyword()) :: [Take.t()]
 end
 
 defmodule YCore.Content.RetakeRepository do

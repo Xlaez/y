@@ -67,6 +67,24 @@ defmodule YRepo.Repositories.TakeRepository do
     |> Repo.aggregate(:count, :id)
   end
 
+  @impl true
+  def search(query, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 20)
+    
+    query
+    |> YRepo.Queries.ExploreQuery.search_takes(limit)
+    |> Repo.all()
+    |> Enum.map(fn schema ->
+      domain = to_domain(schema)
+      if Ecto.assoc_loaded?(schema.user) do
+        author = YRepo.Repositories.UserRepository.to_domain(schema.user)
+        %{domain | author: author}
+      else
+        domain
+      end
+    end)
+  end
+
   def list_by_ids(ids) do
     SchemaTake
     |> where([t], t.id in ^ids)
