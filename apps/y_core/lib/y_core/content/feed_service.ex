@@ -21,12 +21,21 @@ defmodule YCore.Content.FeedService do
     following_ids = follow_repo.list_following(user_id)
     target_ids = if following_ids == [], do: :all, else: [user_id | following_ids]
 
-    # Fetch takes (scored by SQL)
+    # Fetch takes and retakes
     takes = take_repo.list_for_feed(target_ids, opts)
+    retakes = retake_repo.list_for_users(target_ids, opts)
 
     # Batch fetch all necessary data
-    all_take_ids = Enum.map(takes, & &1.id)
-    user_ids = Enum.map(takes, & &1.user_id) |> Enum.uniq()
+    all_take_ids = Enum.map(takes, & &1.id) ++ Enum.map(retakes, & &1.original_take_id)
+    |> Enum.uniq()
+
+    # Fetch original takes for retakes
+    referenced_takes = take_repo.list_by_ids(all_take_ids) |> Map.new(& {&1.id, &1})
+
+    user_ids = (Enum.map(takes, & &1.user_id) ++ 
+                Enum.map(retakes, & &1.user_id) ++ 
+                Enum.map(Map.values(referenced_takes), & &1.user_id))
+               |> Enum.uniq()
 
     users_map = user_repo.list_by_ids(user_ids) |> Map.new(& {&1.id, &1})
     agreed_ids = agree_repo.list_agreed_ids(user_id, :take, all_take_ids) |> MapSet.new()
@@ -36,10 +45,11 @@ defmodule YCore.Content.FeedService do
     retook_ids = retake_repo.list_retook_ids(user_id, all_take_ids) |> MapSet.new()
 
     # Assemble feed items
-    takes
-    |> Enum.map(fn take ->
+    take_items = Enum.map(takes, fn take ->
       %{
         type: :take,
+        id: take.id, # For sorting
+        timestamp: take.inserted_at,
         take: take,
         author: Map.get(users_map, take.user_id),
         agree_count: agree_repo.count(:take, take.id),
@@ -50,6 +60,29 @@ defmodule YCore.Content.FeedService do
         viewer_retook: MapSet.member?(retook_ids, take.id)
       }
     end)
+
+    retake_items = Enum.map(retakes, fn retake ->
+      original_take = Map.get(referenced_takes, retake.original_take_id)
+      %{
+        type: :retake,
+        id: retake.id,
+        timestamp: retake.inserted_at,
+        take: original_take,
+        author: Map.get(users_map, original_take.user_id),
+        retaker: Map.get(users_map, retake.user_id),
+        comment: retake.comment,
+        agree_count: agree_repo.count(:take, original_take.id),
+        retake_count: retake_repo.count_for_take(original_take.id),
+        opinion_count: opinion_repo.count_for_take(original_take.id),
+        viewer_agreed: MapSet.member?(agreed_ids, original_take.id),
+        viewer_bookmarked: MapSet.member?(bookmarked_ids, original_take.id),
+        viewer_retook: MapSet.member?(retook_ids, original_take.id)
+      }
+    end)
+
+    (take_items ++ retake_items)
+    |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
+    |> Enum.take(Keyword.get(opts, :limit, 20))
     # Note: Retakes interspersing as per requirements will be added as Step 4 progress continues
   end
 end

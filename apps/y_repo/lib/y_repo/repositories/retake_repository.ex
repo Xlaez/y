@@ -42,6 +42,17 @@ defmodule YRepo.Repositories.RetakeRepository do
   end
 
   @impl true
+  def get_by_user_and_take(user_id, original_take_id) do
+    SchemaRetake
+    |> where(user_id: ^user_id, original_take_id: ^original_take_id)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, :not_found}
+      schema -> {:ok, to_domain(schema)}
+    end
+  end
+
+  @impl true
   def already_retook?(user_id, original_take_id) do
     SchemaRetake
     |> where(user_id: ^user_id, original_take_id: ^original_take_id)
@@ -68,6 +79,23 @@ defmodule YRepo.Repositories.RetakeRepository do
   def list_by_ids(ids) do
     SchemaRetake
     |> where([r], r.id in ^ids)
+    |> Repo.all()
+    |> Enum.map(&to_domain/1)
+  end
+
+  @impl true
+  def list_for_users(user_ids, opts) do
+    limit = Keyword.get(opts, :limit, 20)
+    
+    query = if user_ids == :all do
+      SchemaRetake
+    else
+      where(SchemaRetake, [r], r.user_id in ^user_ids)
+    end
+
+    query
+    |> order_by(desc: :inserted_at)
+    |> limit(^limit)
     |> Repo.all()
     |> Enum.map(&to_domain/1)
   end

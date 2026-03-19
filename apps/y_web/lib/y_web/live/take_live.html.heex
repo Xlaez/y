@@ -50,8 +50,12 @@
           icon="hero-arrow-path" 
           count={@retake_count} 
           label="retakes" 
-          hover_bg="group-hover:bg-[#30D158]/10"
-          hover_text="group-hover:text-[#30D158]"
+          hover_text="group-hover:text-[#30D158]" 
+          hover_bg="hover:bg-[#30D158]/10"
+          active={RetakeRepository.already_retook?(@current_user.id, @take.id)}
+          active_text="text-y-retake"
+          phx_click="open_retake_modal"
+          phx_value_take_id={@take.id}
         />
         <.action_button_hero 
           icon="hero-heart" 
@@ -115,3 +119,21 @@
     </section>
   </main>
 </div>
+
+<%= if @retake_modal do %>
+  <% take = case TakeRepository.get_by_id(@retake_modal.take_id) do
+       {:ok, t} -> 
+         author = UserRepository.get_by_id!(t.user_id)
+         %{t | author: author}
+       _ -> nil
+     end %>
+  <%= if take do %>
+    <YWeb.Components.RetakeModal.retake_modal 
+      modal={@retake_modal} 
+      take={take}
+      current_user={@current_user}
+      quote_body={@quote_body}
+      viewer_retook={RetakeRepository.already_retook?(@current_user.id, take.id)}
+    />
+  <% end %>
+<% end %>

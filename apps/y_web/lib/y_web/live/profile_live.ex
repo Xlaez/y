@@ -159,9 +159,63 @@ defmodule YWeb.ProfileLive do
   end
 
   defp fetch_user_feed(user_id, viewer_id, :takes) do
-    # Just that user's takes
+    # Fetch user's takes and retakes
     takes = TakeRepository.list_for_user(user_id, limit: 50)
-    enrich_takes(takes, user_id, viewer_id)
+    retakes = RetakeRepository.list_for_users([user_id], limit: 50)
+
+    # Batch fetch all necessary data for enrichment
+    all_take_ids = Enum.map(takes, & &1.id) ++ Enum.map(retakes, & &1.original_take_id)
+    |> Enum.uniq()
+
+    referenced_takes = TakeRepository.list_by_ids(all_take_ids) |> Map.new(& {&1.id, &1})
+    
+    user_ids = (Enum.map(takes, & &1.user_id) ++ 
+                Enum.map(retakes, & &1.user_id) ++ 
+                Enum.map(Map.values(referenced_takes), & &1.user_id))
+               |> Enum.uniq()
+    
+    users_map = UserRepository.list_by_ids(user_ids) |> Map.new(& {&1.id, &1})
+
+    agreed_ids = if viewer_id, do: AgreeRepository.list_agreed_ids(viewer_id, :take, all_take_ids) |> MapSet.new(), else: MapSet.new()
+    bookmarked_ids = if viewer_id, do: BookmarkRepository.list_for_user(viewer_id, target_type: :take) |> Enum.map(& &1.target_id) |> MapSet.new(), else: MapSet.new()
+    retook_ids = if viewer_id, do: RetakeRepository.list_retook_ids(viewer_id, all_take_ids) |> MapSet.new(), else: MapSet.new()
+
+    take_items = Enum.map(takes, fn take ->
+      %{
+        type: :take,
+        timestamp: take.inserted_at,
+        take: take,
+        author: Map.get(users_map, take.user_id),
+        agree_count: AgreeRepository.count(:take, take.id),
+        retake_count: RetakeRepository.count_for_take(take.id),
+        opinion_count: OpinionRepository.count_for_take(take.id),
+        viewer_agreed: MapSet.member?(agreed_ids, take.id),
+        viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id),
+        viewer_retook: MapSet.member?(retook_ids, take.id)
+      }
+    end)
+
+    retake_items = Enum.map(retakes, fn retake ->
+      original_take = Map.get(referenced_takes, retake.original_take_id)
+      %{
+        type: :retake,
+        timestamp: retake.inserted_at,
+        take: original_take,
+        author: Map.get(users_map, original_take.user_id),
+        retaker: Map.get(users_map, retake.user_id),
+        comment: retake.comment,
+        agree_count: AgreeRepository.count(:take, original_take.id),
+        retake_count: RetakeRepository.count_for_take(original_take.id),
+        opinion_count: OpinionRepository.count_for_take(original_take.id),
+        viewer_agreed: MapSet.member?(agreed_ids, original_take.id),
+        viewer_bookmarked: MapSet.member?(bookmarked_ids, original_take.id),
+        viewer_retook: MapSet.member?(retook_ids, original_take.id)
+      }
+    end)
+
+    (take_items ++ retake_items)
+    |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
+    |> Enum.take(50)
   end
 
   defp fetch_user_feed(user_id, _viewer_id, :replies) do
@@ -194,26 +248,6 @@ defmodule YWeb.ProfileLive do
       }
     end)
     |> Enum.reject(&(&1.take == nil))
-  end
-
-  defp enrich_takes(takes, _user_id, viewer_id) do
-    agreed_ids = if viewer_id, do: AgreeRepository.list_agreed_ids(viewer_id, :take, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
-    bookmarked_ids = if viewer_id, do: BookmarkRepository.list_for_user(viewer_id, target_type: :take) |> Enum.map(& &1.target_id) |> MapSet.new(), else: MapSet.new()
-    retook_ids = if viewer_id, do: RetakeRepository.list_retook_ids(viewer_id, Enum.map(takes, & &1.id)) |> MapSet.new(), else: MapSet.new()
-
-    Enum.map(takes, fn take ->
-      %{
-        type: (if Map.get(take, :is_opinion), do: :opinion, else: :take),
-        take: take,
-        author: UserRepository.get_by_id!(take.user_id),
-        agree_count: AgreeRepository.count(:take, take.id),
-        retake_count: RetakeRepository.count_for_take(take.id),
-        opinion_count: OpinionRepository.count_for_take(take.id),
-        viewer_agreed: MapSet.member?(agreed_ids, take.id),
-        viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id),
-        viewer_retook: MapSet.member?(retook_ids, take.id)
-      }
-    end)
   end
 
   defp refresh_user_feed(socket) do

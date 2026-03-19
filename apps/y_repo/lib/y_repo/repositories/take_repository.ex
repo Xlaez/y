@@ -108,6 +108,15 @@ defmodule YRepo.Repositories.TakeRepository do
     :ok
   end
 
+  @impl true
+  def decrement_retake_count(id) do
+    SchemaTake
+    |> where(id: ^id)
+    |> where([t], t.retake_count > 0)
+    |> Repo.update_all(inc: [retake_count: -1])
+    :ok
+  end
+
   defp to_domain(%SchemaTake{} = schema) do
     %DomainTake{
       id: schema.id,

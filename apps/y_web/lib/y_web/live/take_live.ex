@@ -35,6 +35,8 @@ defmodule YWeb.TakeLive do
          |> assign(active_skin_tone: "")
          |> assign(replying_to: id)
          |> assign(replying_to_handle: author.username)
+         |> assign(retake_modal: nil)
+         |> assign(quote_body: "")
          |> assign(error: nil), layout: {YWeb.Layouts, :authenticated}}
 
       _ ->
@@ -140,6 +142,76 @@ defmodule YWeb.TakeLive do
     end
   end
 
+  def handle_event("open_retake_modal", %{"take_id" => id}, socket) do
+    {:noreply, assign(socket, retake_modal: %{take_id: id, type: :menu})}
+  end
+
+  def handle_event("close_retake_modal", _, socket) do
+    {:noreply, assign(socket, retake_modal: nil, quote_body: "")}
+  end
+
+  def handle_event("select_quote", _, socket) do
+    modal = socket.assigns.retake_modal
+    {:noreply, assign(socket, retake_modal: %{modal | type: :quote})}
+  end
+
+  def handle_event("validate_quote", %{"body" => body}, socket) do
+    {:noreply, assign(socket, quote_body: body)}
+  end
+
+  def handle_event("do_retake", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+    IO.inspect({:do_retake, user_id, id}, label: "RETAKE_EVENT")
+    
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+      {:ok, _} -> 
+        {:noreply, 
+         socket 
+         |> assign(retake_modal: nil)
+         |> refresh_take_data()}
+      {:error, :cannot_retake_own} ->
+        {:noreply, 
+         socket
+         |> assign(retake_modal: nil)
+         |> put_flash(:error, "You cannot retake your own take")}
+      error -> 
+        IO.inspect(error, label: "RETAKE_ERROR")
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("undo_retake", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+    IO.inspect({:undo_retake, user_id, id}, label: "RETAKE_EVENT")
+    
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+      {:ok, _} -> 
+        {:noreply, 
+         socket 
+         |> assign(retake_modal: nil)
+         |> refresh_take_data()}
+      error -> 
+        IO.inspect(error, label: "RETAKE_ERROR")
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("submit_quote_take", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+    comment = socket.assigns.quote_body
+    
+    case YCore.Content.RetakeService.retake(user_id, id, comment, RetakeRepository, TakeRepository, @notification_repo) do
+      {:ok, _} -> 
+        {:noreply, 
+         socket 
+         |> assign(retake_modal: nil, quote_body: "")
+         |> put_flash(:info, "Your quote was shared!")
+         |> refresh_take_data()}
+      {:error, reason} -> 
+        {:noreply, put_flash(socket, :error, "Could not quote: #{reason}")}
+    end
+  end
+
   defp search_emojis(query) do
     YWeb.EmojiData.search(query)
   end
@@ -155,6 +227,7 @@ defmodule YWeb.TakeLive do
     
     socket
     |> assign(agree_count: AgreeRepository.count(:take, id))
+    |> assign(retake_count: RetakeRepository.count_for_take(id))
     |> assign(viewer_agreed: AgreeRepository.agreed?(user_id, :take, id))
     |> assign(viewer_bookmarked: BookmarkRepository.bookmarked?(user_id, :take, id))
   end
@@ -204,11 +277,13 @@ defmodule YWeb.TakeLive do
             phx_click="set_reply_target"
             phx_value_id={@node.opinion.id}
           />
+          <%!-- Retake for opinions not supported by schema yet --%>
           <.opinion_action 
             icon="hero-arrow-path" 
             hover_text="group-hover:text-[#30D158]" 
-            phx_click="toggle_retake"
+            phx_click=""
             phx_value_target_id={@node.opinion.id}
+            class="opacity-20 cursor-default"
           />
           <.opinion_action 
             icon="hero-heart" 
@@ -266,7 +341,7 @@ defmodule YWeb.TakeLive do
   defp opinion_action(assigns) do
     ~H"""
     <button 
-      class="group flex items-center transition-colors"
+      class={["group flex items-center transition-colors", assigns[:class]]}
       phx-click={@phx_click}
       phx-value-id={assigns[:phx_value_id]}
       phx-value-target_type={assigns[:phx_value_target_type]}

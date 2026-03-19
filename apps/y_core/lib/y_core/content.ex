@@ -68,6 +68,7 @@ defmodule YCore.Content.TakeRepository do
   @callback count_for_user(user_id :: String.t()) :: non_neg_integer()
   @callback increment_opinion_count(take_id :: String.t()) :: :ok
   @callback increment_retake_count(take_id :: String.t()) :: :ok
+  @callback decrement_retake_count(take_id :: String.t()) :: :ok
   @callback list_by_ids(take_ids :: [String.t()]) :: [Take.t()]
   @callback search(String.t(), keyword()) :: [Take.t()]
 end
@@ -78,10 +79,12 @@ defmodule YCore.Content.RetakeRepository do
   @callback create(map()) :: {:ok, Retake.t()} | {:error, :already_retook | term()}
   @callback get_by_id(String.t()) :: {:ok, Retake.t()} | {:error, :not_found}
   @callback delete(String.t(), String.t()) :: :ok | {:error, :not_found | :forbidden}
+  @callback get_by_user_and_take(user_id :: String.t(), take_id :: String.t()) :: {:ok, Retake.t()} | {:error, :not_found}
   @callback already_retook?(user_id :: String.t(), take_id :: String.t()) :: boolean()
   @callback list_retook_ids(user_id :: String.t(), take_ids :: [String.t()]) :: [String.t()]
   @callback count_for_take(take_id :: String.t()) :: non_neg_integer()
   @callback list_by_ids(retake_ids :: [String.t()]) :: [Retake.t()]
+  @callback list_for_users(user_ids :: [String.t()] | :all, opts :: keyword()) :: [Retake.t()]
 end
 
 defmodule YCore.Content.OpinionRepository do

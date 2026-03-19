@@ -18,6 +18,7 @@ defmodule YCore.Content.RetakeService do
       })
       |> case do
         {:ok, retake} ->
+          take_repo.increment_retake_count(original_take_id)
           Task.start(fn ->
             YCore.Notifications.NotificationService.notify_retook(
               user_id, take.user_id, take.id, retake.id, notification_repo
@@ -30,10 +31,37 @@ defmodule YCore.Content.RetakeService do
     end
   end
 
-  @spec delete(String.t(), String.t(), module()) ::
+  @spec toggle_retake(String.t(), String.t(), module(), module(), module()) ::
+          {:ok, :retook | :removed} | {:error, term()}
+  def toggle_retake(user_id, original_take_id, retake_repo, take_repo, notification_repo) do
+    case retake_repo.get_by_user_and_take(user_id, original_take_id) do
+      {:ok, retake} ->
+        # Already retook, so we undo it
+        with :ok <- retake_repo.delete(retake.id, user_id) do
+          take_repo.decrement_retake_count(original_take_id)
+          {:ok, :removed}
+        end
+
+      {:error, :not_found} ->
+        # Not retook yet, so we perform simple retake
+        case retake(user_id, original_take_id, nil, retake_repo, take_repo, notification_repo) do
+          {:ok, _} -> {:ok, :retook}
+          error -> error
+        end
+    end
+  end
+
+  @spec delete(String.t(), String.t(), module(), module()) ::
           :ok | {:error, :not_found | :forbidden}
-  def delete(retake_id, requesting_user_id, retake_repo) do
-    retake_repo.delete(retake_id, requesting_user_id)
+  def delete(retake_id, requesting_user_id, retake_repo, take_repo) do
+    case retake_repo.get_by_id(retake_id) do
+      {:ok, retake} ->
+        with :ok <- retake_repo.delete(retake_id, requesting_user_id) do
+          take_repo.decrement_retake_count(retake.original_take_id)
+          :ok
+        end
+      error -> error
+    end
   end
 
   defp get_original_take(take_id, take_repo) do

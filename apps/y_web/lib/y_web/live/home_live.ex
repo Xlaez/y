@@ -25,6 +25,7 @@ defmodule YWeb.HomeLive do
      |> assign(active_emoji_category: "smileys")
      |> assign(active_skin_tone: "")
      |> assign(retake_modal: nil)
+     |> assign(quote_body: "")
      |> assign(who_to_follow: []), # Improved: "Who to follow" logic would use UserRepository.list_suggested
      layout: {YWeb.Layouts, :authenticated}}
   end
@@ -101,6 +102,76 @@ defmodule YWeb.HomeLive do
       {:noreply, assign(socket, compose_body: new_body, compose_char_count: String.length(new_body))}
     else
       {:noreply, socket}
+    end
+  end
+
+  def handle_event("open_retake_modal", %{"take_id" => id}, socket) do
+    {:noreply, assign(socket, retake_modal: %{take_id: id, type: :menu})}
+  end
+
+  def handle_event("close_retake_modal", _, socket) do
+    {:noreply, assign(socket, retake_modal: nil, quote_body: "")}
+  end
+
+  def handle_event("select_quote", _, socket) do
+    modal = socket.assigns.retake_modal
+    {:noreply, assign(socket, retake_modal: %{modal | type: :quote})}
+  end
+
+  def handle_event("validate_quote", %{"body" => body}, socket) do
+    {:noreply, assign(socket, quote_body: body)}
+  end
+
+  def handle_event("do_retake", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+    IO.inspect({:do_retake, user_id, id}, label: "RETAKE_EVENT")
+    
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+      {:ok, _} -> 
+        {:noreply, 
+         socket 
+         |> assign(retake_modal: nil)
+         |> refresh_feed()}
+      {:error, :cannot_retake_own} ->
+        {:noreply, 
+         socket
+         |> assign(retake_modal: nil)
+         |> put_flash(:error, "You cannot retake your own take")}
+      error -> 
+        IO.inspect(error, label: "RETAKE_ERROR")
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("undo_retake", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+    IO.inspect({:undo_retake, user_id, id}, label: "RETAKE_EVENT")
+    
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+      {:ok, _} -> 
+        {:noreply, 
+         socket 
+         |> assign(retake_modal: nil)
+         |> refresh_feed()}
+      error -> 
+        IO.inspect(error, label: "RETAKE_ERROR")
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("submit_quote_take", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+    comment = socket.assigns.quote_body
+    
+    case YCore.Content.RetakeService.retake(user_id, id, comment, RetakeRepository, TakeRepository, @notification_repo) do
+      {:ok, _} -> 
+        {:noreply, 
+         socket 
+         |> assign(retake_modal: nil, quote_body: "")
+         |> put_flash(:info, "Your quote was shared!")
+         |> refresh_feed()}
+      {:error, reason} -> 
+        {:noreply, put_flash(socket, :error, "Could not quote: #{reason}")}
     end
   end
 
