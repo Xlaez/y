@@ -11,7 +11,7 @@ defmodule YRepo.Schemas.Opinion do
     belongs_to :take, YRepo.Schemas.Take
     belongs_to :parent_opinion, YRepo.Schemas.Opinion
 
-    timestamps(type: :utc_datetime_usec)
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
   def changeset(opinion, attrs) do

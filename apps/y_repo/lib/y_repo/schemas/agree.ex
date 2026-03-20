@@ -9,7 +9,7 @@ defmodule YRepo.Schemas.Agree do
     field :target_id, :binary_id
     belongs_to :user, YRepo.Schemas.User
 
-    timestamps(type: :utc_datetime_usec)
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
   def changeset(agree, attrs) do

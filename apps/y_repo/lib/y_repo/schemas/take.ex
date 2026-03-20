@@ -11,7 +11,7 @@ defmodule YRepo.Schemas.Take do
     field :score, :float, virtual: true
     belongs_to :user, YRepo.Schemas.User
 
-    timestamps(type: :utc_datetime_usec)
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
   def changeset(take, attrs) do
