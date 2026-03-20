@@ -1,6 +1,6 @@
 defmodule YWeb.Components.RetakeModal do
   use YWeb, :html
-  import YWeb.Layouts, only: [bitmoji: 1]
+
 
   attr :modal, :map, required: true # %{take_id: id, type: :menu | :quote}
   attr :take, :map, required: true

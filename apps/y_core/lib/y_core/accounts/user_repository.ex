@@ -7,6 +7,7 @@ defmodule YCore.Accounts.UserRepository do
   alias YCore.Accounts.User
 
   @callback get_by_id(String.t()) :: {:ok, User.t()} | {:error, :not_found}
+  @callback get_by_id!(String.t()) :: User.t()
   @callback get_by_username(String.t()) :: {:ok, User.t()} | {:error, :not_found}
   @callback create(map()) :: {:ok, User.t()} | {:error, term()}
   @callback update(User.t(), map()) :: {:ok, User.t()} | {:error, term()}

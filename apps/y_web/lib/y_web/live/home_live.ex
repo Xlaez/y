@@ -136,7 +136,7 @@ defmodule YWeb.HomeLive do
     user_id = socket.assigns.current_user.id
     IO.inspect({:do_retake, user_id, id}, label: "RETAKE_EVENT")
     
-    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 
@@ -157,7 +157,7 @@ defmodule YWeb.HomeLive do
     user_id = socket.assigns.current_user.id
     IO.inspect({:undo_retake, user_id, id}, label: "RETAKE_EVENT")
     
-    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 

@@ -73,6 +73,7 @@ defmodule YWeb.ProfileLive do
              current_user.id,
              socket.assigns.profile.user.id,
              @follow_repo,
+             @user_repo,
              @notification_repo
            ) do
         {:ok, _} ->

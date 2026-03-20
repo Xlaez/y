@@ -14,6 +14,7 @@ defmodule YRepo.Repositories.UserRepository do
     end
   end
 
+  @impl true
   def get_by_id!(id) do
     case get_by_id(id) do
       {:ok, user} -> user

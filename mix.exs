@@ -7,7 +7,17 @@ defmodule Y.MixProject do
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      releases: [
+        y: [
+          applications: [
+            y_core: :permanent,
+            y_repo: :permanent,
+            y_workers: :permanent,
+            y_web: :permanent
+          ]
+        ]
+      ]
     ]
   end
 
@@ -34,7 +44,8 @@ defmodule Y.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
+      "assets.deploy": ["cmd --cd apps/y_web mix assets.deploy"]
     ]
   end
 end

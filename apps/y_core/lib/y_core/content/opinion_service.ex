@@ -4,9 +4,9 @@ defmodule YCore.Content.OpinionService do
   """
   alias YCore.Content.TakeBody
 
-  @spec post(map(), module(), module(), module()) ::
+  @spec post(map(), module(), module(), module(), module()) ::
           {:ok, YCore.Content.Opinion.t()} | {:error, term()}
-  def post(params, opinion_repo, take_repo, notification_repo) do
+  def post(params, opinion_repo, take_repo, user_repo, notification_repo) do
     %{user_id: user_id, take_id: take_id, body: body} = params
     parent_opinion_id = Map.get(params, :parent_opinion_id)
 
@@ -25,7 +25,7 @@ defmodule YCore.Content.OpinionService do
           Task.start(fn ->
             recipient_id = resolve_opinion_recipient(opinion, take_repo, opinion_repo)
             YCore.Notifications.NotificationService.notify_opined(
-              opinion.user_id, recipient_id, opinion.take_id, opinion.id, notification_repo
+              opinion.user_id, recipient_id, opinion.take_id, opinion.id, notification_repo, user_repo, opinion_repo
             )
           end)
           {:ok, opinion}

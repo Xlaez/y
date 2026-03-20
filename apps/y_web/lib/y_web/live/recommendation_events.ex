@@ -2,7 +2,7 @@ defmodule YWeb.Live.RecommendationEvents do
   @moduledoc """
   Shared event handlers for "Who to Follow" recommendations.
   """
-  import Phoenix.LiveView
+
   import Phoenix.Component
 
   defmacro __using__(_) do
@@ -14,6 +14,7 @@ defmodule YWeb.Live.RecommendationEvents do
                current_user.id,
                target_id,
                YRepo.Repositories.FollowRepository,
+               YRepo.Repositories.UserRepository,
                YRepo.Repositories.NotificationRepository
              ) do
           {:ok, _} ->

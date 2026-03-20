@@ -65,7 +65,7 @@ defmodule YWeb.TakeLive do
       body: body
     }
 
-    case OpinionService.post(params, OpinionRepository, TakeRepository, @notification_repo) do
+    case OpinionService.post(params, OpinionRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _opinion} ->
         {:noreply,
          socket
@@ -111,7 +111,7 @@ defmodule YWeb.TakeLive do
 
     {:noreply, assign(socket, replying_to: id, replying_to_handle: handle)}
   end
-  
+
   def handle_event("cancel_reply", _, socket) do
     {:noreply, assign(socket, replying_to: socket.assigns.take.id, replying_to_handle: socket.assigns.author.username)}
   end
@@ -148,7 +148,7 @@ defmodule YWeb.TakeLive do
   end
 
   def handle_event("open_retake_modal", %{"take_id" => id}, socket) do
-    {:noreply, 
+    {:noreply,
       socket
       |> assign(retake_modal: %{take_id: id, type: :menu})
       |> assign(quote_show_emoji_picker: false)
@@ -172,19 +172,19 @@ defmodule YWeb.TakeLive do
   def handle_event("do_retake", %{"take_id" => id}, socket) do
     user_id = socket.assigns.current_user.id
     IO.inspect({:do_retake, user_id, id}, label: "RETAKE_EVENT")
-    
-    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
-      {:ok, _} -> 
-        {:noreply, 
-         socket 
+
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
+      {:ok, _} ->
+        {:noreply,
+         socket
          |> assign(retake_modal: nil)
          |> refresh_take_data()}
       {:error, :cannot_retake_own} ->
-        {:noreply, 
+        {:noreply,
          socket
          |> assign(retake_modal: nil)
          |> put_flash(:error, "You cannot retake your own take")}
-      error -> 
+      error ->
         IO.inspect(error, label: "RETAKE_ERROR")
         {:noreply, socket}
     end
@@ -193,14 +193,14 @@ defmodule YWeb.TakeLive do
   def handle_event("undo_retake", %{"take_id" => id}, socket) do
     user_id = socket.assigns.current_user.id
     IO.inspect({:undo_retake, user_id, id}, label: "RETAKE_EVENT")
-    
-    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
-      {:ok, _} -> 
-        {:noreply, 
-         socket 
+
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
+      {:ok, _} ->
+        {:noreply,
+         socket
          |> assign(retake_modal: nil)
          |> refresh_take_data()}
-      error -> 
+      error ->
         IO.inspect(error, label: "RETAKE_ERROR")
         {:noreply, socket}
     end
@@ -209,15 +209,15 @@ defmodule YWeb.TakeLive do
   def handle_event("submit_quote_take", %{"body" => body}, socket) do
     user_id = socket.assigns.current_user.id
     id = socket.assigns.retake_modal.take_id
-    
-    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, @notification_repo) do
-      {:ok, _} -> 
-        {:noreply, 
-         socket 
+
+    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
+      {:ok, _} ->
+        {:noreply,
+         socket
          |> assign(retake_modal: nil, quote_body: "")
          |> put_flash(:info, "Your quote was shared!")
          |> refresh_take_data()}
-      {:error, reason} -> 
+      {:error, reason} ->
         {:noreply, put_flash(socket, :error, "Could not quote: #{reason}")}
     end
   end
@@ -239,9 +239,9 @@ defmodule YWeb.TakeLive do
     {:noreply, assign(socket, quote_active_skin_tone: tone)}
   end
 
-  def handle_event("quote_insert_emoji", %{"emoji" => emoji}, socket) do
-    {:noreply, 
-      socket 
+  def handle_event("quote_insert_emoji", %{"emoji" => _emoji}, socket) do
+    {:noreply,
+      socket
       |> assign(quote_show_emoji_picker: false)
     }
   end
@@ -254,7 +254,7 @@ defmodule YWeb.TakeLive do
   defp refresh_take_data(socket) do
     id = socket.assigns.take.id
     user_id = socket.assigns.current_user.id
-    
+
     socket
     |> assign(agree_count: AgreeRepository.count(:take, id))
     |> assign(retake_count: RetakeRepository.count_for_take(id))
@@ -264,14 +264,14 @@ defmodule YWeb.TakeLive do
   defp opinion_node(assigns) do
     # Fetch author once to avoid multiple lookups
     assigns = assign(assigns, :author, UserRepository.get_by_id!(assigns.node.opinion.user_id))
-    
+
     ~H"""
     <div class={["relative flex gap-3", @node.opinion.depth == 0 && "pt-4 border-t border-[#1C1C1E] mt-4"]}>
       <div class="flex flex-col items-center shrink-0">
         <.link navigate={~p"/#{@author.username}"} phx-click-stop class="z-10">
           <YWeb.Layouts.bitmoji user={@author} size="sm" class="md:size-8 size-7" />
         </.link>
-        
+
         <%= if @node.replies != [] do %>
           <div class="w-[1px] grow bg-[#2A2A2E] my-1"></div>
         <% end %>
@@ -279,8 +279,8 @@ defmodule YWeb.TakeLive do
 
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-1.5 mb-0.5 overflow-hidden">
-          <.link 
-            navigate={~p"/#{@author.username}"} 
+          <.link
+            navigate={~p"/#{@author.username}"}
             phx-click-stop
             class="flex items-center gap-1.5 overflow-hidden group/author"
           >
@@ -300,34 +300,34 @@ defmodule YWeb.TakeLive do
         </p>
 
         <div class="flex items-center gap-5 mt-2 mb-4">
-          <.opinion_action 
-            icon="hero-chat-bubble-left" 
-            count={Enum.count(@node.replies)} 
-            hover_text="group-hover:text-[#0A84FF]" 
+          <.opinion_action
+            icon="hero-chat-bubble-left"
+            count={Enum.count(@node.replies)}
+            hover_text="group-hover:text-[#0A84FF]"
             phx_click="set_reply_target"
             phx_value_id={@node.opinion.id}
           />
           <%!-- Retake for opinions not supported by schema yet --%>
-          <.opinion_action 
-            icon="hero-arrow-path" 
-            hover_text="group-hover:text-[#30D158]" 
+          <.opinion_action
+            icon="hero-arrow-path"
+            hover_text="group-hover:text-[#30D158]"
             phx_click=""
             phx_value_target_id={@node.opinion.id}
             class="opacity-20 cursor-default"
           />
-          <.opinion_action 
-            icon="hero-heart" 
-            count={0} 
+          <.opinion_action
+            icon="hero-heart"
+            count={0}
             active={false}
-            hover_text="group-hover:text-[#FF375F]" 
+            hover_text="group-hover:text-[#FF375F]"
             active_color="text-[#FF375F]"
             phx_click="toggle_agree"
             phx_value_target_type="opinion"
             phx_value_target_id={@node.opinion.id}
           />
-          <.opinion_action 
-            icon="hero-bookmark" 
-            hover_text="group-hover:text-[#FFD60A]" 
+          <.opinion_action
+            icon="hero-bookmark"
+            hover_text="group-hover:text-[#FFD60A]"
             active_color="text-[#FFD60A]"
             phx_click="toggle_bookmark"
             phx_value_target_type="opinion"
@@ -337,11 +337,11 @@ defmodule YWeb.TakeLive do
 
         <%= if @replying_to == @node.opinion.id do %>
           <div class="mt-4 mb-4">
-            <.reply_composer 
-              id={"reply-composer-#{@node.opinion.id}"} 
-              current_user={@current_user} 
-              reply_body={@reply_body} 
-              replying_to_handle={@replying_to_handle} 
+            <.reply_composer
+              id={"reply-composer-#{@node.opinion.id}"}
+              current_user={@current_user}
+              reply_body={@reply_body}
+              replying_to_handle={@replying_to_handle}
               show_emoji_picker={@show_emoji_picker}
               emoji_search={@emoji_search}
               active_emoji_category={@active_emoji_category}
@@ -353,12 +353,12 @@ defmodule YWeb.TakeLive do
         <%= if !Enum.empty?(@node.replies) do %>
           <div class="space-y-4">
             <%= for reply <- @node.replies do %>
-              <.opinion_node 
-                node={reply} 
-                current_user={@current_user} 
-                replying_to={@replying_to} 
-                replying_to_handle={@replying_to_handle} 
-                reply_body={@reply_body} 
+              <.opinion_node
+                node={reply}
+                current_user={@current_user}
+                replying_to={@replying_to}
+                replying_to_handle={@replying_to_handle}
+                reply_body={@reply_body}
               />
             <% end %>
           </div>
@@ -370,7 +370,7 @@ defmodule YWeb.TakeLive do
 
   defp opinion_action(assigns) do
     ~H"""
-    <button 
+    <button
       class={["group flex items-center transition-colors", assigns[:class]]}
       phx-click={@phx_click}
       phx-value-id={assigns[:phx_value_id]}
@@ -472,7 +472,7 @@ defmodule YWeb.TakeLive do
                                 </button>
                             <% end %>
                         </div>
-                        
+
                         <!-- Skin tone selector -->
                         <div class="flex gap-0.5 ml-2 pl-2 border-l border-[#2A2A2E]">
                             <%= for tone <- YWeb.EmojiData.skin_tones() do %>
@@ -544,7 +544,7 @@ defmodule YWeb.TakeLive do
 
               <div class="flex items-center gap-4">
                 <span class="text-[#8E8E93] text-xs"><%= String.length(@reply_body || "") %>/250</span>
-                <button 
+                <button
                   type="submit"
                   disabled={String.length(@reply_body || "") == 0 || String.length(@reply_body || "") > 250}
                   class="bg-white text-black text-sm font-semibold rounded-full px-4 py-1.5 disabled:opacity-30 transition-opacity"
@@ -562,7 +562,7 @@ defmodule YWeb.TakeLive do
 
   defp action_button_hero(assigns) do
     ~H"""
-    <button 
+    <button
       phx-click={assigns[:phx_click]}
       phx-value-target_type={assigns[:phx_value_target_type]}
       phx-value-target_id={assigns[:phx_value_target_id]}
