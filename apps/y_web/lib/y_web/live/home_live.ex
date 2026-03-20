@@ -173,7 +173,7 @@ defmodule YWeb.HomeLive do
     user_id = socket.assigns.current_user.id
     id = socket.assigns.retake_modal.take_id
     
-    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 

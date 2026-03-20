@@ -45,7 +45,7 @@ defmodule Y.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
-      "assets.deploy": ["cmd --cd apps/y_web mix assets.deploy"]
+      "assets.deploy": ["do --app y_web assets.deploy"]
     ]
   end
 end

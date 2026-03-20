@@ -5,7 +5,7 @@ defmodule YCore.Social.RecommendationService do
 
   @spec who_to_follow(String.t(), map()) :: [map()]
   def who_to_follow(user_id, repos) do
-    case YRepo.Cache.Recommendations.get(user_id) do
+    case repos.cache_repo.get(user_id) do
       {:ok, cached} ->
         cached
 
@@ -22,7 +22,7 @@ defmodule YCore.Social.RecommendationService do
           }
         end)
         
-        YRepo.Cache.Recommendations.put(user_id, cacheable)
+        repos.cache_repo.put(user_id, cacheable)
         cacheable
     end
   end

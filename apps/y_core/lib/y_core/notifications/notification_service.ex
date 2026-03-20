@@ -2,9 +2,7 @@ defmodule YCore.Notifications.NotificationService do
   @moduledoc """
   Service for creating and broadcasting notifications.
   """
-  alias YCore.Accounts.UserRepository
   alias YCore.Notifications.Notification
-  alias YCore.Notifications.NotificationRepository
 
   @spec notify_agreed(String.t(), String.t(), atom(), String.t(), module(), module()) :: :ok
   def notify_agreed(actor_id, recipient_id, target_type, target_id, repo, user_repo) do

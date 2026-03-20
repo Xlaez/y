@@ -16,7 +16,8 @@ defmodule YWeb.Hooks.Recommendations do
             %{
               follow_repo: YRepo.Repositories.FollowRepository,
               block_repo: YRepo.Repositories.BlockRepository,
-              user_repo: YRepo.Repositories.UserRepository
+              user_repo: YRepo.Repositories.UserRepository,
+              cache_repo: YRepo.Cache.Recommendations
             }
           )
 
