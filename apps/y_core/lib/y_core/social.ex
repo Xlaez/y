@@ -40,6 +40,12 @@ defmodule YCore.Social.FollowRepository do
   @callback following_count(user_id :: String.t()) :: non_neg_integer()
   @callback list_followers(user_id :: String.t()) :: [String.t()]
   @callback list_following(user_id :: String.t()) :: [String.t()]
+  @callback suggestions(
+              user_id :: String.t(),
+              blocked_ids :: [String.t()],
+              opts :: keyword()
+            ) :: [%{user_id: String.t(), mutual_count: non_neg_integer()}]
+  @callback invalidate_recommendations(user_id :: String.t()) :: :ok
 end
 
 defmodule YCore.Social.BlockRepository do
@@ -51,6 +57,8 @@ defmodule YCore.Social.BlockRepository do
               :ok | {:error, :not_blocked}
   @callback blocked?(blocker_id :: String.t(), blocked_id :: String.t()) :: boolean()
   @callback list_blocked(user_id :: String.t()) :: [YCore.Accounts.User.t()]
+  @callback list_blocked_ids(user_id :: String.t()) :: [String.t()]
+  @callback list_blocked_by_ids(user_id :: String.t()) :: [String.t()]
 end
 
 defmodule YCore.Social.MuteRepository do

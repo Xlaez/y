@@ -1,5 +1,6 @@
 defmodule YWeb.MutedAccountsLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   @mute_repo YRepo.Repositories.MuteRepository
 

@@ -89,7 +89,7 @@ defmodule YWeb.Layouts do
 
       <!-- Right Panel: fixed 300px -->
       <aside class="fixed right-0 top-0 hidden lg:block h-screen w-[300px] px-4 py-6 overflow-y-auto z-10">
-        <.right_panel />
+        <.right_panel {assigns} />
       </aside>
 
       <!-- Mobile Bottom Nav -->
@@ -415,39 +415,65 @@ defmodule YWeb.Layouts do
   defp right_panel(assigns) do
     ~H"""
     <div class="flex flex-col gap-6 pt-2">
-      <.who_to_follow_widget />
+      <.who_to_follow_widget {assigns} />
       <.trending_widget />
     </div>
     """
   end
 
   defp who_to_follow_widget(assigns) do
-    assigns = assign(assigns, :users, Enum.take(YWeb.DummyData.users(), 3))
-
     ~H"""
     <div class="bg-y-surface rounded-2xl overflow-hidden">
       <div class="px-4 py-3 border-b border-y-border">
         <h3 class="text-y-text font-semibold text-[15px]">Who to follow</h3>
       </div>
-      <div class="divide-y divide-y-border">
-        <%= for user <- @users do %>
-          <div class="px-4 py-3 flex items-center gap-3 hover:bg-y-hover transition-colors duration-100">
-            <.link navigate={~p"/#{user.username}"} class="flex flex-1 items-center gap-3 min-w-0 group">
-              <YWeb.Layouts.bitmoji user={user} size="sm" />
-              <div class="flex-1 min-w-0">
-                <p class="text-y-text font-medium text-sm truncate group-hover:underline"><%= user.username %></p>
-                <p class="text-y-muted text-xs truncate"><%= user.handle %></p>
-              </div>
-            </.link>
-            <button class="border border-y-white text-y-white rounded-full px-3 py-1 text-xs font-semibold hover:bg-white/10 transition-colors">
-              Follow
-            </button>
-          </div>
-        <% end %>
-      </div>
-      <div class="px-4 py-3 text-y-opinion text-sm font-medium hover:underline cursor-pointer">
-        Show more
-      </div>
+
+      <% who_to_follow = assigns[:who_to_follow] || [] %>
+      <%= if who_to_follow == [] do %>
+        <div class="px-4 py-6 text-center">
+          <p class="text-y-muted text-sm px-4">Follow more people to get recommendations</p>
+        </div>
+      <% else %>
+        <div class="divide-y divide-y-border">
+          <%= for item <- (if assigns[:show_all_suggestions], do: who_to_follow, else: Enum.take(who_to_follow, 3)) do %>
+            <div
+              id={"suggestion-#{item.user_id}"}
+              class="px-4 py-3 flex items-center gap-3 hover:bg-y-hover transition-colors duration-100"
+            >
+              <.link navigate={~p"/#{item.username}"} class="flex flex-1 items-center gap-3 min-w-0 group">
+                <.bitmoji user={item} size="sm" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-y-text font-medium text-sm truncate group-hover:underline">
+                    <%= item.username %>
+                  </p>
+                  <p class="text-y-muted text-xs truncate">
+                    <%= if item.mutual_count == 1 do %>
+                      1 mutual
+                    <% else %>
+                      <%= item.mutual_count %> mutuals
+                    <% end %>
+                  </p>
+                </div>
+              </.link>
+              <button
+                phx-click="follow_suggested"
+                phx-value-user_id={item.user_id}
+                class="border border-y-white text-y-white rounded-full px-3 py-1 text-xs font-semibold hover:bg-white/10 transition-colors flex-shrink-0"
+              >
+                Follow
+              </button>
+            </div>
+          <% end %>
+        </div>
+        <div class="px-4 py-3">
+          <button
+            phx-click={if assigns[:show_all_suggestions], do: "show_less_suggestions", else: "show_more_suggestions"}
+            class="text-y-opinion text-sm font-medium hover:underline"
+          >
+            <%= if assigns[:show_all_suggestions], do: "Show less", else: "Show more" %>
+          </button>
+        </div>
+      <% end %>
     </div>
     """
   end

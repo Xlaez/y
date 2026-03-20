@@ -1,5 +1,6 @@
 defmodule YWeb.TakeLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   alias YCore.Content.OpinionService
   alias YRepo.Repositories.{TakeRepository, OpinionRepository, AgreeRepository, BookmarkRepository, UserRepository, RetakeRepository, NotificationRepository}
@@ -241,13 +242,8 @@ defmodule YWeb.TakeLive do
   def handle_event("quote_insert_emoji", %{"emoji" => emoji}, socket) do
     {:noreply, 
       socket 
-      |> assign(quote_body: socket.assigns.quote_body <> emoji)
       |> assign(quote_show_emoji_picker: false)
     }
-  end
-
-  defp search_emojis(query) do
-    YWeb.EmojiData.search(query)
   end
 
   defp refresh_opinions(socket) do
@@ -396,6 +392,10 @@ defmodule YWeb.TakeLive do
     """
   end
 
+  attr :id, :string, required: true
+  attr :current_user, :map, required: true
+  attr :reply_body, :string, required: true
+  attr :replying_to_handle, :string, default: nil
   attr :show_emoji_picker, :boolean, default: false
   attr :emoji_search, :string, default: ""
   attr :active_emoji_category, :string, default: "smileys"
@@ -587,9 +587,6 @@ defmodule YWeb.TakeLive do
     """
   end
 
-  defp bitmoji(assigns) do
-    YWeb.Layouts.bitmoji(assigns)
-  end
 
 
 end

@@ -71,6 +71,39 @@ defmodule YRepo.Repositories.FollowRepository do
     |> Repo.all()
   end
 
+  @impl true
+  def suggestions(user_id, blocked_ids, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 10)
+    
+    # Handle empty blocked_ids to avoid invalid SQL for 'not in'
+    blocked_ids = if blocked_ids == [], do: ["00000000-0000-0000-0000-000000000000"], else: blocked_ids
+
+    query = from f1 in Follow,
+      join: f2 in Follow, on: f2.follower_id == f1.followee_id,
+      where: f1.follower_id == ^user_id,
+      where: f2.followee_id != ^user_id,
+      where: f2.followee_id not in ^blocked_ids,
+      where: f2.followee_id not in subquery(
+        from f3 in Follow,
+        where: f3.follower_id == ^user_id,
+        select: f3.followee_id
+      ),
+      group_by: f2.followee_id,
+      order_by: [desc: count(f2.followee_id)],
+      limit: ^limit,
+      select: %{
+        user_id: f2.followee_id,
+        mutual_count: count(f2.followee_id)
+      }
+
+    Repo.all(query)
+  end
+
+  @impl true
+  def invalidate_recommendations(user_id) do
+    YRepo.Cache.Recommendations.invalidate(user_id)
+  end
+
   defp has_unique_error?(errors) do
     Enum.any?(errors, fn {_field, {_msg, opts}} ->
       opts[:constraint] == :unique

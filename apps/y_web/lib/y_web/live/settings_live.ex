@@ -1,5 +1,6 @@
 defmodule YWeb.SettingsLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   @user_repo YRepo.Repositories.UserRepository
   @session_repo YRepo.Repositories.SessionRepository

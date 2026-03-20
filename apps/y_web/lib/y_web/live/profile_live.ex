@@ -1,5 +1,6 @@
 defmodule YWeb.ProfileLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   @user_repo YRepo.Repositories.UserRepository
   @follow_repo YRepo.Repositories.FollowRepository

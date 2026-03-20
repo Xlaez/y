@@ -64,8 +64,11 @@ defmodule Mix.Tasks.Y.Seed do
   end
 
   defp create_follows(users) do
-    for u1 <- users, u2 <- users, u1.id != u2.id do
-      if :rand.uniform() > 0.4 do
+    for u1 <- users do
+      others = Enum.reject(users, & &1.id == u1.id)
+      num_to_follow = Enum.random(5..8)
+
+      for u2 <- Enum.take_random(others, num_to_follow) do
         YCore.Social.FollowService.follow(u1.id, u2.id, FollowRepository, NotificationRepository)
       end
     end

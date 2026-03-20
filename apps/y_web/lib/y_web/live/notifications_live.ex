@@ -1,5 +1,6 @@
 defmodule YWeb.NotificationsLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   alias YRepo.Repositories.{NotificationRepository, UserRepository, TakeRepository, OpinionRepository, RetakeRepository}
 

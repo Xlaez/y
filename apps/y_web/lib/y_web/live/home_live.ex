@@ -1,5 +1,6 @@
 defmodule YWeb.HomeLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   alias YCore.Content.TakeService
   alias YCore.Content.FeedService
@@ -30,7 +31,7 @@ defmodule YWeb.HomeLive do
      |> assign(quote_emoji_search: "")
      |> assign(quote_active_emoji_category: "smileys")
      |> assign(quote_active_skin_tone: "")
-     |> assign(who_to_follow: []), # Improved: "Who to follow" logic would use UserRepository.list_suggested
+     |> assign(who_to_follow: socket.assigns[:who_to_follow] || []),
      layout: {YWeb.Layouts, :authenticated}}
   end
 
@@ -207,10 +208,6 @@ defmodule YWeb.HomeLive do
       |> assign(quote_body: socket.assigns.quote_body <> emoji)
       |> assign(quote_show_emoji_picker: false)
     }
-  end
-
-  defp search_emojis(query) do
-    YWeb.EmojiData.search(query)
   end
 
   defp fetch_feed(user_id) do

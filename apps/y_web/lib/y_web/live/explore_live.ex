@@ -1,5 +1,6 @@
 defmodule YWeb.ExploreLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   alias YRepo.Repositories.{UserRepository, TakeRepository}
   alias YRepo.Queries.ExploreQuery
