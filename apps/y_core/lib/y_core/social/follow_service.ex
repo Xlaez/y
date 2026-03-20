@@ -9,16 +9,28 @@ defmodule YCore.Social.FollowService do
   def follow(follower_id, followee_id, repo, notification_repo) do
     case repo.follow(follower_id, followee_id) do
       {:ok, follow} ->
+        repo.invalidate_recommendations(follower_id)
+
         Task.start(fn ->
           YCore.Notifications.NotificationService.notify_followed(follower_id, followee_id, notification_repo)
         end)
+
         {:ok, follow}
-      error -> error
+
+      error ->
+        error
     end
   end
 
   @spec unfollow(String.t(), String.t(), module()) :: :ok | {:error, :not_following}
   def unfollow(follower_id, followee_id, repo) do
-    repo.unfollow(follower_id, followee_id)
+    case repo.unfollow(follower_id, followee_id) do
+      :ok ->
+        repo.invalidate_recommendations(follower_id)
+        :ok
+
+      error ->
+        error
+    end
   end
 end

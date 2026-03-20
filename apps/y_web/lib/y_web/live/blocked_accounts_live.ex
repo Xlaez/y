@@ -1,5 +1,6 @@
 defmodule YWeb.BlockedAccountsLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   @block_repo YRepo.Repositories.BlockRepository
 

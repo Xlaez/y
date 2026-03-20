@@ -54,7 +54,8 @@ defmodule YWeb.Router do
       on_mount: [
         {YWeb.Plugs.Auth, :mount_current_user},
         {YWeb.Plugs.Auth, :ensure_authenticated},
-        YWeb.Hooks.NotificationCount
+        YWeb.Hooks.NotificationCount,
+        YWeb.Hooks.Recommendations
       ] do
       live "/home", HomeLive, :index
       live "/explore", ExploreLive, :index

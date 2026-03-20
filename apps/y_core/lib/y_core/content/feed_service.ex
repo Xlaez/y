@@ -61,24 +61,30 @@ defmodule YCore.Content.FeedService do
       }
     end)
 
-    retake_items = Enum.map(retakes, fn retake ->
-      original_take = Map.get(referenced_takes, retake.original_take_id)
-      %{
-        type: :retake,
-        id: retake.id,
-        timestamp: retake.inserted_at,
-        take: original_take,
-        author: Map.get(users_map, original_take.user_id),
-        retaker: Map.get(users_map, retake.user_id),
-        comment: retake.comment,
-        agree_count: agree_repo.count(:take, original_take.id),
-        retake_count: retake_repo.count_for_take(original_take.id),
-        opinion_count: opinion_repo.count_for_take(original_take.id),
-        viewer_agreed: MapSet.member?(agreed_ids, original_take.id),
-        viewer_bookmarked: MapSet.member?(bookmarked_ids, original_take.id),
-        viewer_retook: MapSet.member?(retook_ids, original_take.id)
-      }
-    end)
+    retake_items = 
+      retakes
+      |> Enum.map(fn retake ->
+        case Map.get(referenced_takes, retake.original_take_id) do
+          nil -> nil
+          original_take ->
+            %{
+              type: :retake,
+              id: retake.id,
+              timestamp: retake.inserted_at,
+              take: original_take,
+              author: Map.get(users_map, original_take.user_id),
+              retaker: Map.get(users_map, retake.user_id),
+              comment: retake.comment,
+              agree_count: agree_repo.count(:take, original_take.id),
+              retake_count: retake_repo.count_for_take(original_take.id),
+              opinion_count: opinion_repo.count_for_take(original_take.id),
+              viewer_agreed: MapSet.member?(agreed_ids, original_take.id),
+              viewer_bookmarked: MapSet.member?(bookmarked_ids, original_take.id),
+              viewer_retook: MapSet.member?(retook_ids, original_take.id)
+            }
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
 
     (take_items ++ retake_items)
     |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})

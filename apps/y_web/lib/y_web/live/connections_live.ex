@@ -1,5 +1,6 @@
 defmodule YWeb.ConnectionsLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
   alias YRepo.Repositories.{UserRepository, FollowRepository, NotificationRepository}
   alias YCore.Social.FollowService
 

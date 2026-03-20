@@ -1,5 +1,6 @@
 defmodule YWeb.BookmarksLive do
   use YWeb, :live_view
+  use YWeb.Live.RecommendationEvents
 
   alias YCore.Interactions.BookmarkService
   alias YRepo.Repositories.{BookmarkRepository, TakeRepository, RetakeRepository, UserRepository}

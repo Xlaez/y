@@ -55,6 +55,24 @@ defmodule YRepo.Repositories.BlockRepository do
     |> Enum.map(&user_to_domain/1)
   end
 
+  @impl true
+  def list_blocked_ids(user_id) do
+    from(b in Block,
+      where: b.blocker_id == ^user_id,
+      select: b.blocked_id
+    )
+    |> Repo.all()
+  end
+
+  @impl true
+  def list_blocked_by_ids(user_id) do
+    from(b in Block,
+      where: b.blocked_id == ^user_id,
+      select: b.blocker_id
+    )
+    |> Repo.all()
+  end
+
   defp has_unique_error?(errors) do
     Enum.any?(errors, fn {_field, {_msg, opts}} ->
       opts[:constraint] == :unique

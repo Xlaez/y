@@ -80,7 +80,7 @@ defmodule YWeb.Components.RetakeModal do
                   <!-- Original Take Preview -->
                   <div class="mt-3 border border-[#2F3336] rounded-2xl p-3 bg-black">
                     <div class="flex items-center gap-2 mb-1">
-                      <YWeb.Layouts.bitmoji user={@take.author} size="xs" />
+                      <YWeb.Layouts.bitmoji user={@take.author} size="sm" />
                       <span class="text-white font-bold text-sm truncate"><%= @take.author.username %></span>
                       <span class="text-[#71767B] text-sm truncate"><%= @take.author.handle %></span>
                     </div>
