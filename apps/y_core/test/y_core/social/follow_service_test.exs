@@ -11,12 +11,16 @@ defmodule YCore.Social.FollowServiceTest do
     def create(_), do: {:ok, %{id: "n1", recipient_id: "u1", inserted_at: DateTime.utc_now()}}
   end
 
+  defmodule MockUserRepo do
+    def get_by_id!(_), do: %{id: "u1", username: "test"}
+  end
+
   test "cannot follow self" do
-    assert {:error, :cannot_follow_self} == FollowService.follow("user1", "user1", MockRepo, MockNotificationRepo)
+    assert {:error, :cannot_follow_self} == FollowService.follow("user1", "user1", MockRepo, MockUserRepo, MockNotificationRepo)
   end
 
   test "delegates follow to repo" do
-    assert {:ok, _} = FollowService.follow("user1", "user2", MockRepo, MockNotificationRepo)
+    assert {:ok, _} = FollowService.follow("user1", "user2", MockRepo, MockUserRepo, MockNotificationRepo)
   end
 
   test "delegates unfollow to repo" do

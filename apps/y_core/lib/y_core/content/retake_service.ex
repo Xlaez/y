@@ -4,9 +4,9 @@ defmodule YCore.Content.RetakeService do
   """
   alias YCore.Content.TakeBody
 
-  @spec retake(String.t(), String.t(), String.t() | nil, module(), module(), module()) ::
+  @spec retake(String.t(), String.t(), String.t() | nil, module(), module(), module(), module()) ::
           {:ok, YCore.Content.Retake.t()} | {:error, :already_retook | :cannot_retake_own | term()}
-  def retake(user_id, original_take_id, comment, retake_repo, take_repo, notification_repo) do
+  def retake(user_id, original_take_id, comment, retake_repo, take_repo, user_repo, notification_repo) do
     with {:ok, take} <- get_original_take(original_take_id, take_repo),
          :ok <- check_not_own_take(user_id, take),
          {:ok, valid_comment} <- validate_comment(comment),
@@ -21,7 +21,7 @@ defmodule YCore.Content.RetakeService do
           take_repo.increment_retake_count(original_take_id)
           Task.start(fn ->
             YCore.Notifications.NotificationService.notify_retook(
-              user_id, take.user_id, take.id, retake.id, notification_repo
+              user_id, take.user_id, take.id, retake.id, notification_repo, user_repo, retake_repo
             )
           end)
           {:ok, retake}
@@ -31,9 +31,9 @@ defmodule YCore.Content.RetakeService do
     end
   end
 
-  @spec toggle_retake(String.t(), String.t(), module(), module(), module()) ::
+  @spec toggle_retake(String.t(), String.t(), module(), module(), module(), module()) ::
           {:ok, :retook | :removed} | {:error, term()}
-  def toggle_retake(user_id, original_take_id, retake_repo, take_repo, notification_repo) do
+  def toggle_retake(user_id, original_take_id, retake_repo, take_repo, user_repo, notification_repo) do
     case retake_repo.get_by_user_and_take(user_id, original_take_id) do
       {:ok, retake} ->
         # Already retook, so we undo it
@@ -44,7 +44,7 @@ defmodule YCore.Content.RetakeService do
 
       {:error, :not_found} ->
         # Not retook yet, so we perform simple retake
-        case retake(user_id, original_take_id, nil, retake_repo, take_repo, notification_repo) do
+        case retake(user_id, original_take_id, nil, retake_repo, take_repo, user_repo, notification_repo) do
           {:ok, _} -> {:ok, :retook}
           error -> error
         end

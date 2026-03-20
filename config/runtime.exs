@@ -28,7 +28,8 @@ if config_env() == :prod do
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
       ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
-    secret_key_base: secret_key_base
+    secret_key_base: secret_key_base,
+    server: true
 
   # ## Using releases
   #

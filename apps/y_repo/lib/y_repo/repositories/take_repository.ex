@@ -85,6 +85,7 @@ defmodule YRepo.Repositories.TakeRepository do
     end)
   end
 
+  @impl true
   def list_by_ids(ids) do
     SchemaTake
     |> where([t], t.id in ^ids)

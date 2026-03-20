@@ -2,7 +2,7 @@ defmodule YWeb.Hooks.Recommendations do
   @moduledoc """
   on_mount hook to fetch "Who to Follow" recommendations for authenticated users.
   """
-  import Phoenix.LiveView
+
   import Phoenix.Component
 
   def on_mount(:default, _params, _session, socket) do

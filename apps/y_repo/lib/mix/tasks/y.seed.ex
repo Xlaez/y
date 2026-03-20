@@ -69,7 +69,7 @@ defmodule Mix.Tasks.Y.Seed do
       num_to_follow = Enum.random(5..8)
 
       for u2 <- Enum.take_random(others, num_to_follow) do
-        YCore.Social.FollowService.follow(u1.id, u2.id, FollowRepository, NotificationRepository)
+        YCore.Social.FollowService.follow(u1.id, u2.id, FollowRepository, UserRepository, NotificationRepository)
       end
     end
   end
@@ -85,7 +85,7 @@ defmodule Mix.Tasks.Y.Seed do
       retakers = Enum.take_random(users, Enum.random(0..3))
       for user <- retakers, user.id != take.user_id do
         comment = if :rand.uniform() > 0.5, do: "Check this out!", else: nil
-        RetakeService.retake(user.id, take.id, comment, RetakeRepository, TakeRepository, NotificationRepository)
+        RetakeService.retake(user.id, take.id, comment, RetakeRepository, TakeRepository, UserRepository, NotificationRepository)
       end
 
       # Opinions (Threaded)
@@ -111,13 +111,13 @@ defmodule Mix.Tasks.Y.Seed do
       for _ <- 0..num_opinions do
         user = Enum.random(users)
         body = Enum.random(opinion_templates)
-        {:ok, op} = OpinionService.post(%{user_id: user.id, take_id: take.id, body: body}, OpinionRepository, TakeRepository, NotificationRepository)
+        {:ok, op} = OpinionService.post(%{user_id: user.id, take_id: take.id, body: body}, OpinionRepository, TakeRepository, UserRepository, NotificationRepository)
 
         # Nested opinions
         if :rand.uniform() > 0.7 do
           user2 = Enum.random(users)
           body2 = Enum.random(opinion_templates)
-          OpinionService.post(%{user_id: user2.id, take_id: take.id, parent_opinion_id: op.id, body: body2}, OpinionRepository, TakeRepository, NotificationRepository)
+          OpinionService.post(%{user_id: user2.id, take_id: take.id, parent_opinion_id: op.id, body: body2}, OpinionRepository, TakeRepository, UserRepository, NotificationRepository)
         end
       end
     end

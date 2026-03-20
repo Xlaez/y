@@ -2,12 +2,12 @@ defmodule YCore.Notifications.NotificationService do
   @moduledoc """
   Service for creating and broadcasting notifications.
   """
+  alias YCore.Accounts.UserRepository
   alias YCore.Notifications.Notification
   alias YCore.Notifications.NotificationRepository
-  alias YRepo.Repositories.UserRepository
 
-  @spec notify_agreed(String.t(), String.t(), atom(), String.t(), module()) :: :ok
-  def notify_agreed(actor_id, recipient_id, target_type, target_id, repo \\ NotificationRepository) do
+  @spec notify_agreed(String.t(), String.t(), atom(), String.t(), module(), module()) :: :ok
+  def notify_agreed(actor_id, recipient_id, target_type, target_id, repo, user_repo) do
     if should_notify?(actor_id, recipient_id) do
       case repo.create(%{
              actor_id: actor_id,
@@ -17,7 +17,7 @@ defmodule YCore.Notifications.NotificationService do
              target_id: target_id
            }) do
         {:ok, notification} ->
-          actor = UserRepository.get_by_id!(actor_id)
+          actor = user_repo.get_by_id!(actor_id)
           broadcast(notification, actor)
           {:ok, notification}
 
@@ -29,8 +29,8 @@ defmodule YCore.Notifications.NotificationService do
     end
   end
 
-  @spec notify_opined(String.t(), String.t(), String.t(), String.t(), module()) :: :ok
-  def notify_opined(actor_id, recipient_id, take_id, opinion_id, repo \\ NotificationRepository) do
+  @spec notify_opined(String.t(), String.t(), String.t(), String.t(), module(), module(), module()) :: :ok
+  def notify_opined(actor_id, recipient_id, _take_id, opinion_id, repo, user_repo, opinion_repo) do
     if should_notify?(actor_id, recipient_id) do
       case repo.create(%{
              actor_id: actor_id,
@@ -40,10 +40,17 @@ defmodule YCore.Notifications.NotificationService do
              target_id: opinion_id
            }) do
         {:ok, notification} ->
-          actor = UserRepository.get_by_id!(actor_id)
+          actor = user_repo.get_by_id!(actor_id)
           # Fetch the opinion body for the excerpt
-          opinion = YRepo.Repo.get!(YRepo.Schemas.Opinion, opinion_id)
-          broadcast(notification, actor, opinion.body)
+          excerpt = if opinion_repo do
+            case opinion_repo.get_by_id(opinion_id) do
+              {:ok, op} -> op.body
+              _ -> nil
+            end
+          else
+            nil
+          end
+          broadcast(notification, actor, excerpt)
           {:ok, notification}
 
         error ->
@@ -54,8 +61,8 @@ defmodule YCore.Notifications.NotificationService do
     end
   end
 
-  @spec notify_retook(String.t(), String.t(), String.t(), String.t(), module()) :: :ok
-  def notify_retook(actor_id, recipient_id, take_id, retake_id, repo \\ NotificationRepository) do
+  @spec notify_retook(String.t(), String.t(), String.t(), String.t(), module(), module(), module()) :: :ok
+  def notify_retook(actor_id, recipient_id, _take_id, retake_id, repo, user_repo, retake_repo) do
     if should_notify?(actor_id, recipient_id) do
       case repo.create(%{
              actor_id: actor_id,
@@ -65,10 +72,17 @@ defmodule YCore.Notifications.NotificationService do
              target_id: retake_id
            }) do
         {:ok, notification} ->
-          actor = UserRepository.get_by_id!(actor_id)
+          actor = user_repo.get_by_id!(actor_id)
           # Fetch the retake comment for the excerpt
-          retake = YRepo.Repo.get!(YRepo.Schemas.Retake, retake_id)
-          broadcast(notification, actor, retake.comment)
+          excerpt = if retake_repo do
+            case retake_repo.get_by_id(retake_id) do
+              {:ok, retake} -> retake.comment
+              _ -> nil
+            end
+          else
+            nil
+          end
+          broadcast(notification, actor, excerpt)
           {:ok, notification}
 
         error ->
@@ -79,8 +93,8 @@ defmodule YCore.Notifications.NotificationService do
     end
   end
 
-  @spec notify_followed(String.t(), String.t(), module()) :: :ok
-  def notify_followed(actor_id, recipient_id, repo \\ NotificationRepository) do
+  @spec notify_followed(String.t(), String.t(), module(), module()) :: :ok
+  def notify_followed(actor_id, recipient_id, repo, user_repo) do
     if should_notify?(actor_id, recipient_id) do
       case repo.create(%{
              actor_id: actor_id,
@@ -88,7 +102,7 @@ defmodule YCore.Notifications.NotificationService do
              type: "followed"
            }) do
         {:ok, notification} ->
-          actor = UserRepository.get_by_id!(actor_id)
+          actor = user_repo.get_by_id!(actor_id)
           broadcast(notification, actor)
           {:ok, notification}
 

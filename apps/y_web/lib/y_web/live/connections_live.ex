@@ -53,7 +53,7 @@ defmodule YWeb.ConnectionsLive do
           FollowService.unfollow(current_user.id, id, FollowRepository)
           {:noreply, refresh_lists(socket)}
         false ->
-          FollowService.follow(current_user.id, id, FollowRepository, NotificationRepository)
+          FollowService.follow(current_user.id, id, FollowRepository, UserRepository, NotificationRepository)
           {:noreply, refresh_lists(socket)}
       end
     else

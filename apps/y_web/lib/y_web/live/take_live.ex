@@ -65,7 +65,7 @@ defmodule YWeb.TakeLive do
       body: body
     }
 
-    case OpinionService.post(params, OpinionRepository, TakeRepository, @notification_repo) do
+    case OpinionService.post(params, OpinionRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _opinion} ->
         {:noreply,
          socket
@@ -173,7 +173,7 @@ defmodule YWeb.TakeLive do
     user_id = socket.assigns.current_user.id
     IO.inspect({:do_retake, user_id, id}, label: "RETAKE_EVENT")
     
-    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 
@@ -194,7 +194,7 @@ defmodule YWeb.TakeLive do
     user_id = socket.assigns.current_user.id
     IO.inspect({:undo_retake, user_id, id}, label: "RETAKE_EVENT")
     
-    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 
@@ -210,7 +210,7 @@ defmodule YWeb.TakeLive do
     user_id = socket.assigns.current_user.id
     id = socket.assigns.retake_modal.take_id
     
-    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, @notification_repo) do
+    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
       {:ok, _} -> 
         {:noreply, 
          socket 
@@ -239,7 +239,7 @@ defmodule YWeb.TakeLive do
     {:noreply, assign(socket, quote_active_skin_tone: tone)}
   end
 
-  def handle_event("quote_insert_emoji", %{"emoji" => emoji}, socket) do
+  def handle_event("quote_insert_emoji", %{"emoji" => _emoji}, socket) do
     {:noreply, 
       socket 
       |> assign(quote_show_emoji_picker: false)

@@ -32,7 +32,7 @@ defmodule YRepo.Repositories.AgreeRepository do
       {:ok, %{action: :agreed}} ->
         Task.start(fn ->
           owner_id = get_target_owner_id(target_type, target_id)
-          YCore.Notifications.NotificationService.notify_agreed(user_id, owner_id, target_type, target_id, notification_repo)
+          YCore.Notifications.NotificationService.notify_agreed(user_id, owner_id, target_type, target_id, notification_repo, YRepo.Repositories.UserRepository)
         end)
         {:ok, :agreed}
 
