@@ -63,6 +63,16 @@ defmodule YRepo.Repositories.AgreeRepository do
   end
 
   @impl true
+  def count_batch(target_type, target_ids) do
+    SchemaAgree
+    |> where([a], a.target_type == ^target_type and a.target_id in ^target_ids)
+    |> group_by([a], a.target_id)
+    |> select([a], {a.target_id, count(a.id)})
+    |> Repo.all()
+    |> Map.new()
+  end
+
+  @impl true
   def list_agreed_ids(user_id, target_type, target_ids) do
     SchemaAgree
     |> where([a], a.user_id == ^user_id and a.target_type == ^target_type and a.target_id in ^target_ids)

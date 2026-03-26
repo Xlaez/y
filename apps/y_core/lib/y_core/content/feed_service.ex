@@ -13,7 +13,7 @@ defmodule YCore.Content.FeedService do
       agree_repo: agree_repo,
       bookmark_repo: bookmark_repo,
       user_repo: user_repo,
-      opinion_repo: opinion_repo,
+      opinion_repo: _opinion_repo,
       retake_repo: retake_repo
     } = repos
 
@@ -39,29 +39,31 @@ defmodule YCore.Content.FeedService do
 
     users_map = user_repo.list_by_ids(user_ids) |> Map.new(& {&1.id, &1})
     agreed_ids = agree_repo.list_agreed_ids(user_id, :take, all_take_ids) |> MapSet.new()
+    agree_counts = agree_repo.count_batch(:take, all_take_ids)
     bookmarked_ids = bookmark_repo.list_for_user(user_id, target_type: :take)
                      |> Enum.map(& &1.target_id)
                      |> MapSet.new()
     retook_ids = retake_repo.list_retook_ids(user_id, all_take_ids) |> MapSet.new()
 
-    # Assemble feed items
+    # Assemble feed items using precomputed counts from the take schema
+    # and batch-fetched agree counts to avoid N+1 queries
     take_items = Enum.map(takes, fn take ->
       %{
         type: :take,
-        id: take.id, # For sorting
+        id: take.id,
         timestamp: take.inserted_at,
         take: take,
         author: Map.get(users_map, take.user_id),
-        agree_count: agree_repo.count(:take, take.id),
-        retake_count: retake_repo.count_for_take(take.id),
-        opinion_count: opinion_repo.count_for_take(take.id),
+        agree_count: Map.get(agree_counts, take.id, 0),
+        retake_count: take.retake_count,
+        opinion_count: take.opinion_count,
         viewer_agreed: MapSet.member?(agreed_ids, take.id),
         viewer_bookmarked: MapSet.member?(bookmarked_ids, take.id),
         viewer_retook: MapSet.member?(retook_ids, take.id)
       }
     end)
 
-    retake_items = 
+    retake_items =
       retakes
       |> Enum.map(fn retake ->
         case Map.get(referenced_takes, retake.original_take_id) do
@@ -75,9 +77,9 @@ defmodule YCore.Content.FeedService do
               author: Map.get(users_map, original_take.user_id),
               retaker: Map.get(users_map, retake.user_id),
               comment: retake.comment,
-              agree_count: agree_repo.count(:take, original_take.id),
-              retake_count: retake_repo.count_for_take(original_take.id),
-              opinion_count: opinion_repo.count_for_take(original_take.id),
+              agree_count: Map.get(agree_counts, original_take.id, 0),
+              retake_count: original_take.retake_count,
+              opinion_count: original_take.opinion_count,
               viewer_agreed: MapSet.member?(agreed_ids, original_take.id),
               viewer_bookmarked: MapSet.member?(bookmarked_ids, original_take.id),
               viewer_retook: MapSet.member?(retook_ids, original_take.id)
