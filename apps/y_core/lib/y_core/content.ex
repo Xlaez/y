@@ -17,13 +17,14 @@ end
 
 defmodule YCore.Content.Take do
   @enforce_keys [:id, :user_id, :body, :inserted_at]
-  defstruct [:id, :user_id, :body, :inserted_at, :author, opinion_count: 0, retake_count: 0]
+  defstruct [:id, :user_id, :body, :inserted_at, :author, :deleted_at, opinion_count: 0, retake_count: 0]
 
   @type t :: %__MODULE__{
           id: String.t(),
           user_id: String.t(),
           body: String.t(),
           inserted_at: DateTime.t(),
+          deleted_at: DateTime.t() | nil,
           opinion_count: non_neg_integer(),
           retake_count: non_neg_integer()
         }

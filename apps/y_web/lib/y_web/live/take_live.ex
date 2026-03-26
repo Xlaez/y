@@ -10,6 +10,12 @@ defmodule YWeb.TakeLive do
     user_id = socket.assigns.current_user.id
 
     case TakeRepository.get_by_id(id) do
+      {:ok, %{deleted_at: deleted_at}} when not is_nil(deleted_at) ->
+        {:ok,
+         socket
+         |> put_flash(:error, "This take has been removed")
+         |> push_navigate(to: ~p"/home")}
+
       {:ok, take} ->
         author = UserRepository.get_by_id!(take.user_id)
         opinions = OpinionRepository.list_for_take(id)
@@ -81,6 +87,20 @@ defmodule YWeb.TakeLive do
 
       {:error, reason} ->
         {:noreply, put_flash(socket, :error, "Could not post reply: #{reason}")}
+    end
+  end
+
+  def handle_event("delete_take", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    case YCore.Content.TakeService.delete(id, user_id, TakeRepository) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Take deleted")
+         |> push_navigate(to: ~p"/home")}
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not delete take")}
     end
   end
 

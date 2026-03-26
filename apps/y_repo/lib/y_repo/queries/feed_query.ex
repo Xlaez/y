@@ -11,7 +11,7 @@ defmodule YRepo.Queries.FeedQuery do
     limit = Keyword.get(opts, :limit, 20)
     before = Keyword.get(opts, :before)
 
-    query = from t in YRepo.Schemas.Take, select: t
+    query = from t in YRepo.Schemas.Take, where: is_nil(t.deleted_at), select: t
 
     query =
       if user_ids != :all do

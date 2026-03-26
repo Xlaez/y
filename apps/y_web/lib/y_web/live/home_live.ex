@@ -62,6 +62,20 @@ defmodule YWeb.HomeLive do
     end
   end
 
+  def handle_event("delete_take", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    case TakeService.delete(id, user_id, TakeRepository) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Take deleted")
+         |> refresh_feed()}
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not delete take")}
+    end
+  end
+
   def handle_event("validate_compose", %{"body" => body}, socket) do
     {:noreply, assign(socket, compose_body: body, compose_char_count: String.length(body))}
   end
