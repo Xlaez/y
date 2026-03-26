@@ -30,6 +30,8 @@ defmodule YCore.Interactions.AgreeRepository do
   @callback count(target_type :: atom(), target_id :: String.t()) :: non_neg_integer()
   @callback list_agreed_ids(user_id :: String.t(), target_type :: atom(), target_ids :: [String.t()]) ::
               [String.t()]
+  @callback count_batch(target_type :: atom(), target_ids :: [String.t()]) ::
+              %{String.t() => non_neg_integer()}
 end
 
 defmodule YCore.Interactions.BookmarkRepository do
