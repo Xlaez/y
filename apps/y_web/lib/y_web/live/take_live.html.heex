@@ -102,12 +102,16 @@
     <!-- Opinions Section (Threaded) -->
     <section class="px-4 pt-2">
       <%= for node <- @opinion_tree do %>
-        <.opinion_node 
-          node={node} 
-          current_user={@current_user} 
-          replying_to={@replying_to} 
-          replying_to_handle={@replying_to_handle} 
-          reply_body={@reply_body} 
+        <.opinion_node
+          node={node}
+          current_user={@current_user}
+          replying_to={@replying_to}
+          replying_to_handle={@replying_to_handle}
+          reply_body={@reply_body}
+          show_emoji_picker={@show_emoji_picker}
+          emoji_search={@emoji_search}
+          active_emoji_category={@active_emoji_category}
+          active_skin_tone={@active_skin_tone}
         />
       <% end %>
       

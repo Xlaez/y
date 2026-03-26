@@ -359,6 +359,10 @@ defmodule YWeb.TakeLive do
                 replying_to={@replying_to}
                 replying_to_handle={@replying_to_handle}
                 reply_body={@reply_body}
+                show_emoji_picker={@show_emoji_picker}
+                emoji_search={@emoji_search}
+                active_emoji_category={@active_emoji_category}
+                active_skin_tone={@active_skin_tone}
               />
             <% end %>
           </div>
