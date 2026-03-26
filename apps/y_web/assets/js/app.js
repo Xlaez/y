@@ -117,17 +117,27 @@ const Hooks = {
   },
   InfiniteScroll: {
     mounted() {
+      this.pending = false
+
       this.observer = new IntersectionObserver((entries) => {
         const entry = entries[0]
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !this.pending) {
+          this.pending = true
           this.pushEvent("load_more", {})
         }
       }, { rootMargin: "400px" })
 
       this.observer.observe(this.el)
+
+      // When the server finishes loading, re-check if still in view
+      this.handleEvent("load_more_complete", () => {
+        this.pending = false
+        // Re-observe to trigger a fresh intersection check
+        this.observer.disconnect()
+        this.observer.observe(this.el)
+      })
     },
     updated() {
-      // Re-observe in case the element was replaced
       this.observer.disconnect()
       this.observer.observe(this.el)
     },
