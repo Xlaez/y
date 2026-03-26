@@ -14,12 +14,13 @@
       id={"notification-#{notification.id}"}
       data-id={notification.id}
       data-unread={to_string(notification.unread)}
-      phx-click="mark_read"
+      phx-click={if notification.link, do: "navigate_notification", else: "mark_read"}
       phx-value-id={notification.id}
+      phx-value-link={notification.link}
       class={[
         "px-4 py-4 transition-all duration-200 cursor-pointer group flex items-start gap-3",
-        if(notification.unread, 
-          do: "bg-y-surface/20 border-l-2 border-y-agree", 
+        if(notification.unread,
+          do: "bg-y-surface/20 border-l-2 border-y-agree",
           else: "hover:bg-y-hover")
       ]}
     >

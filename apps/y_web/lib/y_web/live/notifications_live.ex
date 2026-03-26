@@ -50,6 +50,11 @@ defmodule YWeb.NotificationsLive do
     {:noreply, fetch_notifications(socket)}
   end
 
+  def handle_event("navigate_notification", %{"id" => id, "link" => link}, socket) do
+    NotificationRepository.mark_read(id)
+    {:noreply, push_navigate(socket, to: link)}
+  end
+
   defp fetch_notifications(socket) do
     user_id = socket.assigns.current_user.id
     notifications = NotificationRepository.list_for_user(user_id, limit: 50)
@@ -114,7 +119,8 @@ defmodule YWeb.NotificationsLive do
         text: text,
         excerpt: excerpt,
         unread: !n.read,
-        timestamp: YWeb.Helpers.Time.relative(n.inserted_at)
+        timestamp: YWeb.Helpers.Time.relative(n.inserted_at),
+        link: resolve_link(n, actor, takes, opinions, retakes)
       }
     end)
   end
@@ -124,6 +130,39 @@ defmodule YWeb.NotificationsLive do
       :take -> Map.get(takes, n.target_id, %{}) |> Map.get(:body)
       :opinion -> Map.get(opinions, n.target_id, %{}) |> Map.get(:body)
       :retake -> Map.get(retakes, n.target_id, %{}) |> Map.get(:comment)
+      _ -> nil
+    end
+  rescue
+    _ -> nil
+  end
+
+  defp resolve_link(n, actor, _takes, opinions, retakes) do
+    case n.type do
+      :followed ->
+        if actor, do: "/#{actor.username}", else: nil
+
+      :agreed ->
+        case n.target_type do
+          :take -> "/takes/#{n.target_id}"
+          :opinion ->
+            opinion = Map.get(opinions, n.target_id)
+            if opinion, do: "/takes/#{opinion.take_id}", else: nil
+          :retake ->
+            retake = Map.get(retakes, n.target_id)
+            if retake, do: "/takes/#{retake.original_take_id}", else: nil
+          _ -> nil
+        end
+
+      :opined ->
+        # target is the opinion that was created
+        opinion = Map.get(opinions, n.target_id)
+        if opinion, do: "/takes/#{opinion.take_id}", else: nil
+
+      :retook ->
+        # target is the retake
+        retake = Map.get(retakes, n.target_id)
+        if retake, do: "/takes/#{retake.original_take_id}", else: nil
+
       _ -> nil
     end
   rescue
