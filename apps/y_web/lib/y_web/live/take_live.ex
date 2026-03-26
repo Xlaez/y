@@ -584,6 +584,7 @@ defmodule YWeb.TakeLive do
       phx-click={assigns[:phx_click]}
       phx-value-target_type={assigns[:phx_value_target_type]}
       phx-value-target_id={assigns[:phx_value_target_id]}
+      phx-value-take_id={assigns[:phx_value_take_id]}
       class={[
         "flex items-center gap-2 p-2 rounded-full hover:bg-white/5 transition-colors group",
         if(assigns[:active], do: @active_text || "text-white", else: "text-[#8E8E93]")
