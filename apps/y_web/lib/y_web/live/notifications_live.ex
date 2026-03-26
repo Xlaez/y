@@ -98,7 +98,7 @@ defmodule YWeb.NotificationsLive do
           {"agreed with #{target_text}", resolve_excerpt(n, takes, opinions, retakes)}
           
         :opined -> 
-          {"opined on your take", resolve_excerpt(n, takes, opinions, retakes)}
+          {"dropped an opinion on your take", resolve_excerpt(n, takes, opinions, retakes)}
           
         :retook -> 
           {"retook your take", resolve_excerpt(n, takes, opinions, retakes)}
