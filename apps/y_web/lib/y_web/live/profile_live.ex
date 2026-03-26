@@ -32,6 +32,12 @@ defmodule YWeb.ProfileLive do
          |> assign(feed: feed)
          |> assign(show_edit_modal: false)
          |> assign(display_name: Map.get(profile.user, :display_name) || profile.user.username)
+         |> assign(retake_modal: nil)
+         |> assign(quote_body: "")
+         |> assign(quote_show_emoji_picker: false)
+         |> assign(quote_emoji_search: "")
+         |> assign(quote_active_emoji_category: "smileys")
+         |> assign(quote_active_skin_tone: "")
          |> allow_upload(:profile_picture,
            accept: ~w(.jpg .jpeg .png),
            max_entries: 1,
@@ -154,6 +160,100 @@ defmodule YWeb.ProfileLive do
       |> assign(profile_tab: tab)
       |> assign(feed: fetch_user_feed(user_id, viewer_id, tab))
     }
+  end
+
+  # Retake handlers
+  def handle_event("open_retake_modal", %{"take_id" => id}, socket) do
+    {:noreply,
+      socket
+      |> assign(retake_modal: %{take_id: id, type: :menu})
+      |> assign(quote_show_emoji_picker: false)
+      |> assign(quote_emoji_search: "")}
+  end
+
+  def handle_event("close_retake_modal", _, socket) do
+    {:noreply, assign(socket, retake_modal: nil, quote_body: "")}
+  end
+
+  def handle_event("select_quote", _, socket) do
+    modal = socket.assigns.retake_modal
+    {:noreply, assign(socket, retake_modal: %{modal | type: :quote})}
+  end
+
+  def handle_event("validate_quote", %{"body" => body}, socket) do
+    {:noreply, assign(socket, quote_body: body)}
+  end
+
+  def handle_event("do_retake", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign(retake_modal: nil)
+         |> refresh_user_feed()}
+      {:error, :cannot_retake_own} ->
+        {:noreply,
+         socket
+         |> assign(retake_modal: nil)
+         |> put_flash(:error, "You cannot retake your own take")}
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("undo_retake", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    case YCore.Content.RetakeService.toggle_retake(user_id, id, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign(retake_modal: nil)
+         |> refresh_user_feed()}
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("submit_quote_take", %{"body" => body}, socket) do
+    user_id = socket.assigns.current_user.id
+    id = socket.assigns.retake_modal.take_id
+
+    case YCore.Content.RetakeService.retake(user_id, id, body, RetakeRepository, TakeRepository, UserRepository, @notification_repo) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign(retake_modal: nil, quote_body: "")
+         |> put_flash(:info, "Your quote was shared!")
+         |> refresh_user_feed()}
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Could not quote: #{reason}")}
+    end
+  end
+
+  def handle_event("quote_toggle_emoji_picker", _, socket) do
+    {:noreply, assign(socket, quote_show_emoji_picker: !socket.assigns.quote_show_emoji_picker)}
+  end
+
+  def handle_event("quote_emoji_search_change", %{"value" => value}, socket) do
+    {:noreply, assign(socket, quote_emoji_search: value)}
+  end
+
+  def handle_event("quote_set_emoji_category", %{"category" => cat}, socket) do
+    {:noreply, assign(socket, quote_active_emoji_category: cat)}
+  end
+
+  def handle_event("quote_set_skin_tone", %{"tone" => tone}, socket) do
+    {:noreply, assign(socket, quote_active_skin_tone: tone)}
+  end
+
+  def handle_event("quote_insert_emoji", %{"emoji" => emoji}, socket) do
+    {:noreply,
+      socket
+      |> assign(quote_body: socket.assigns.quote_body <> emoji)
+      |> assign(quote_show_emoji_picker: false)}
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do

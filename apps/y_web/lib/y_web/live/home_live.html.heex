@@ -27,6 +27,23 @@
   <% end %>
 </div>
 
+<!-- Infinite scroll sentinel -->
+<%= if !@feed_exhausted do %>
+  <div id="infinite-scroll-sentinel" phx-hook="InfiniteScroll" class="flex justify-center py-8">
+    <%= if @loading_more do %>
+      <div class="animate-spin rounded-full h-6 w-6 border-2 border-[#8E8E93] border-t-white"></div>
+    <% else %>
+      <span class="text-[#8E8E93] text-sm">Scroll for more</span>
+    <% end %>
+  </div>
+<% else %>
+  <%= if @feed != [] do %>
+    <div class="flex justify-center py-8">
+      <span class="text-[#8E8E93] text-sm">You've seen it all 🎉</span>
+    </div>
+  <% end %>
+<% end %>
+
 <%= if @retake_modal do %>
   <% take = case TakeRepository.get_by_id(@retake_modal.take_id) do
        {:ok, t} -> 

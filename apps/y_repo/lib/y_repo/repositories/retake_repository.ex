@@ -86,12 +86,20 @@ defmodule YRepo.Repositories.RetakeRepository do
   @impl true
   def list_for_users(user_ids, opts) do
     limit = Keyword.get(opts, :limit, 20)
-    
+    before = Keyword.get(opts, :before)
+
     query = if user_ids == :all do
       SchemaRetake
     else
       where(SchemaRetake, [r], r.user_id in ^user_ids)
     end
+
+    query =
+      if before do
+        where(query, [r], r.inserted_at < ^before)
+      else
+        query
+      end
 
     query
     |> order_by(desc: :inserted_at)

@@ -7,6 +7,8 @@ defmodule YWeb.HomeLive do
   alias YRepo.Repositories.{TakeRepository, FollowRepository, AgreeRepository, BookmarkRepository, UserRepository, OpinionRepository, RetakeRepository, NotificationRepository}
   @notification_repo NotificationRepository
 
+  @page_size 20
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       # Subscribe to updates could go here in a real app
@@ -14,11 +16,15 @@ defmodule YWeb.HomeLive do
 
     current_user = socket.assigns.current_user
     feed = fetch_feed(current_user.id)
+    cursor = feed_cursor(feed)
 
     {:ok,
      socket
      |> assign(active_tab: :home)
      |> assign(feed: feed)
+     |> assign(feed_cursor: cursor)
+     |> assign(loading_more: false)
+     |> assign(feed_exhausted: length(feed) < @page_size)
      |> assign(compose_body: "")
      |> assign(compose_char_count: 0)
      |> assign(show_emoji_picker: false)
@@ -33,6 +39,26 @@ defmodule YWeb.HomeLive do
      |> assign(quote_active_skin_tone: "")
      |> assign(who_to_follow: socket.assigns[:who_to_follow] || []),
      layout: {YWeb.Layouts, :authenticated}}
+  end
+
+  def handle_event("load_more", _, socket) do
+    if socket.assigns.loading_more || socket.assigns.feed_exhausted do
+      {:noreply, socket}
+    else
+      socket = assign(socket, loading_more: true)
+      user_id = socket.assigns.current_user.id
+      cursor = socket.assigns.feed_cursor
+
+      new_items = fetch_feed(user_id, before: cursor)
+      new_cursor = feed_cursor(new_items) || cursor
+
+      {:noreply,
+       socket
+       |> assign(feed: socket.assigns.feed ++ new_items)
+       |> assign(feed_cursor: new_cursor)
+       |> assign(loading_more: false)
+       |> assign(feed_exhausted: length(new_items) < @page_size)}
+    end
   end
 
   def handle_event("validate_compose", %{"body" => body}, socket) do
@@ -210,7 +236,7 @@ defmodule YWeb.HomeLive do
     }
   end
 
-  defp fetch_feed(user_id) do
+  defp fetch_feed(user_id, opts \\ []) do
     repos = %{
       take_repo: TakeRepository,
       follow_repo: FollowRepository,
@@ -220,10 +246,23 @@ defmodule YWeb.HomeLive do
       opinion_repo: OpinionRepository,
       retake_repo: RetakeRepository
     }
-    FeedService.build_feed(user_id, [limit: 20], repos)
+    FeedService.build_feed(user_id, [limit: @page_size] ++ opts, repos)
   end
 
   defp refresh_feed(socket) do
-    assign(socket, feed: fetch_feed(socket.assigns.current_user.id))
+    feed = fetch_feed(socket.assigns.current_user.id)
+    cursor = feed_cursor(feed)
+
+    socket
+    |> assign(feed: feed)
+    |> assign(feed_cursor: cursor)
+    |> assign(feed_exhausted: length(feed) < @page_size)
+  end
+
+  defp feed_cursor([]), do: nil
+  defp feed_cursor(feed) do
+    feed
+    |> List.last()
+    |> Map.get(:timestamp)
   end
 end
