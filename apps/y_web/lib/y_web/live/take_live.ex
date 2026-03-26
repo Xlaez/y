@@ -14,9 +14,12 @@ defmodule YWeb.TakeLive do
         author = UserRepository.get_by_id!(take.user_id)
         opinions = OpinionRepository.list_for_take(id)
         opinion_tree = OpinionService.build_tree(opinions)
+        opinion_ids = Enum.map(opinions, & &1.id)
 
         agreed? = AgreeRepository.agreed?(user_id, :take, id)
         bookmarked? = BookmarkRepository.bookmarked?(user_id, :take, id)
+        opinion_agree_counts = AgreeRepository.count_batch(:opinion, opinion_ids)
+        opinion_agreed_ids = AgreeRepository.list_agreed_ids(user_id, :opinion, opinion_ids) |> MapSet.new()
 
         {:ok,
          socket
@@ -24,6 +27,8 @@ defmodule YWeb.TakeLive do
          |> assign(take: take)
          |> assign(author: author)
          |> assign(opinion_tree: opinion_tree)
+         |> assign(opinion_agree_counts: opinion_agree_counts)
+         |> assign(opinion_agreed_ids: opinion_agreed_ids)
          |> assign(agree_count: AgreeRepository.count(:take, id))
          |> assign(retake_count: RetakeRepository.count_for_take(id))
          |> assign(viewer_agreed: agreed?)
@@ -247,8 +252,14 @@ defmodule YWeb.TakeLive do
   end
 
   defp refresh_opinions(socket) do
+    user_id = socket.assigns.current_user.id
     opinions = OpinionRepository.list_for_take(socket.assigns.take.id)
-    assign(socket, opinion_tree: OpinionService.build_tree(opinions))
+    opinion_ids = Enum.map(opinions, & &1.id)
+
+    socket
+    |> assign(opinion_tree: OpinionService.build_tree(opinions))
+    |> assign(opinion_agree_counts: AgreeRepository.count_batch(:opinion, opinion_ids))
+    |> assign(opinion_agreed_ids: AgreeRepository.list_agreed_ids(user_id, :opinion, opinion_ids) |> MapSet.new())
   end
 
   defp refresh_take_data(socket) do
@@ -260,6 +271,7 @@ defmodule YWeb.TakeLive do
     |> assign(retake_count: RetakeRepository.count_for_take(id))
     |> assign(viewer_agreed: AgreeRepository.agreed?(user_id, :take, id))
     |> assign(viewer_bookmarked: BookmarkRepository.bookmarked?(user_id, :take, id))
+    |> refresh_opinions()
   end
   defp opinion_node(assigns) do
     # Fetch author once to avoid multiple lookups
@@ -317,8 +329,8 @@ defmodule YWeb.TakeLive do
           />
           <.opinion_action
             icon="hero-heart"
-            count={0}
-            active={false}
+            count={Map.get(@opinion_agree_counts, @node.opinion.id, 0)}
+            active={MapSet.member?(@opinion_agreed_ids, @node.opinion.id)}
             hover_text="group-hover:text-[#FF375F]"
             active_color="text-[#FF375F]"
             phx_click="toggle_agree"
@@ -363,6 +375,8 @@ defmodule YWeb.TakeLive do
                 emoji_search={@emoji_search}
                 active_emoji_category={@active_emoji_category}
                 active_skin_tone={@active_skin_tone}
+                opinion_agree_counts={@opinion_agree_counts}
+                opinion_agreed_ids={@opinion_agreed_ids}
               />
             <% end %>
           </div>
