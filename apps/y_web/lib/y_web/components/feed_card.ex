@@ -63,9 +63,10 @@ defmodule YWeb.Components.FeedCard do
               </span>
             </div>
             
-            <%= if @show_delete && @current_user.id == @item.take.user_id do %>
-              <button 
-                phx-click="delete_take" 
+            <%= if @current_user && @item.type == :take && @current_user.id == @item.take.user_id do %>
+              <button
+                phx-click="delete_take"
+                phx-click-stop
                 phx-value-take_id={@item.take.id}
                 class="p-2 -mr-2 hover:bg-y-opinion/10 rounded-full transition-colors text-y-muted hover:text-y-opinion"
                 title="Delete take"
@@ -90,18 +91,24 @@ defmodule YWeb.Components.FeedCard do
             <% end %>
 
             <%!-- Original take as an embedded quoted card --%>
-            <div class="border border-y-border rounded-xl p-3 mt-1 hover:bg-white/[0.02] transition-colors">
-              <div class="flex items-center gap-2 mb-1.5">
-                <.bitmoji user={@item.author} size="xs" />
-                <span class="text-white font-bold text-xs"><%= @item.author.username %></span>
-                <span class="text-y-muted text-xs"><%= @item.author.handle %></span>
-                <span class="text-y-muted text-xs">·</span>
-                <span class="text-y-muted text-xs"><%= YWeb.Helpers.Time.relative(@item.take.inserted_at) %></span>
+            <%= if @item.take.deleted_at do %>
+              <div class="border border-y-border rounded-xl p-3 mt-1 bg-white/[0.02]">
+                <p class="text-y-muted text-[14px] italic">This take has been removed.</p>
               </div>
-              <p class="text-[#D1D1D6] text-[14px] leading-relaxed break-words">
-                <%= @item.take.body %>
-              </p>
-            </div>
+            <% else %>
+              <div class="border border-y-border rounded-xl p-3 mt-1 hover:bg-white/[0.02] transition-colors">
+                <div class="flex items-center gap-2 mb-1.5">
+                  <.bitmoji user={@item.author} size="xs" />
+                  <span class="text-white font-bold text-xs"><%= @item.author.username %></span>
+                  <span class="text-y-muted text-xs"><%= @item.author.handle %></span>
+                  <span class="text-y-muted text-xs">·</span>
+                  <span class="text-y-muted text-xs"><%= YWeb.Helpers.Time.relative(@item.take.inserted_at) %></span>
+                </div>
+                <p class="text-[#D1D1D6] text-[14px] leading-relaxed break-words">
+                  <%= @item.take.body %>
+                </p>
+              </div>
+            <% end %>
           <% else %>
             <p class="text-white text-[15px] leading-relaxed break-words mt-1">
               <%= @item.take.body %>

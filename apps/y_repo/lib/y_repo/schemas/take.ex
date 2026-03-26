@@ -8,6 +8,7 @@ defmodule YRepo.Schemas.Take do
     field :body, :string
     field :opinion_count, :integer, default: 0
     field :retake_count, :integer, default: 0
+    field :deleted_at, :utc_datetime_usec
     field :score, :float, virtual: true
     belongs_to :user, YRepo.Schemas.User
 

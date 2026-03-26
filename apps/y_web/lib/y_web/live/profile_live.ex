@@ -49,6 +49,21 @@ defmodule YWeb.ProfileLive do
     end
   end
 
+  def handle_event("delete_take", %{"take_id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    case YCore.Content.TakeService.delete(id, user_id, TakeRepository) do
+      :ok ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Take deleted")
+         |> refresh_user_feed()
+         |> update_profile()}
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not delete take")}
+    end
+  end
+
   def handle_event("toggle_agree", %{"target_type" => type, "target_id" => id}, socket) do
     user_id = socket.assigns.current_user.id
     target_type = String.to_existing_atom(type)

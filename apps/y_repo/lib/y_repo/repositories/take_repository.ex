@@ -32,7 +32,9 @@ defmodule YRepo.Repositories.TakeRepository do
       nil -> {:error, :not_found}
       schema ->
         if schema.user_id == requesting_user_id do
-          Repo.delete!(schema)
+          schema
+          |> Ecto.Changeset.change(deleted_at: DateTime.utc_now())
+          |> Repo.update!()
           :ok
         else
           {:error, :forbidden}
@@ -51,9 +53,10 @@ defmodule YRepo.Repositories.TakeRepository do
   @impl true
   def list_for_user(user_id, opts) do
     limit = Keyword.get(opts, :limit, 20)
-    
+
     SchemaTake
     |> where(user_id: ^user_id)
+    |> where([t], is_nil(t.deleted_at))
     |> order_by(desc: :inserted_at)
     |> limit(^limit)
     |> Repo.all()
@@ -64,6 +67,7 @@ defmodule YRepo.Repositories.TakeRepository do
   def count_for_user(user_id) do
     SchemaTake
     |> where(user_id: ^user_id)
+    |> where([t], is_nil(t.deleted_at))
     |> Repo.aggregate(:count, :id)
   end
 
@@ -124,6 +128,7 @@ defmodule YRepo.Repositories.TakeRepository do
       user_id: schema.user_id,
       body: schema.body,
       inserted_at: schema.inserted_at,
+      deleted_at: schema.deleted_at,
       opinion_count: schema.opinion_count,
       retake_count: schema.retake_count
     }

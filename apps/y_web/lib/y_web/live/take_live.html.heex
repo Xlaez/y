@@ -17,7 +17,7 @@
         <.link navigate={~p"/#{@author.username}"} class="group">
           <YWeb.Layouts.bitmoji user={@author} size="md" class="size-11" />
         </.link>
-        <div class="flex flex-col">
+        <div class="flex-1 flex flex-col">
           <.link navigate={~p"/#{@author.username}"} class="hover:underline">
             <span class="text-white font-bold text-[15px] leading-tight block">
               <%= @author.username %>
@@ -27,6 +27,16 @@
             <%= @author.handle %>
           </span>
         </div>
+        <%= if @current_user && @current_user.id == @take.user_id do %>
+          <button
+            phx-click="delete_take"
+            phx-value-take_id={@take.id}
+            class="p-2 hover:bg-y-opinion/10 rounded-full transition-colors text-y-muted hover:text-y-opinion"
+            title="Delete take"
+          >
+            <span class="hero-trash size-5"></span>
+          </button>
+        <% end %>
       </header>
 
       <p class="text-[#E5E5E7] text-[17px] leading-relaxed break-words">
