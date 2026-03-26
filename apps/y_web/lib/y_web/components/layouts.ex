@@ -502,11 +502,12 @@ defmodule YWeb.Layouts do
   end
 
   attr :user, :map, required: true
-  attr :size, :string, default: "md", values: ["sm", "md", "lg", "xl"]
+  attr :size, :string, default: "md", values: ["xs", "sm", "md", "lg", "xl"]
   attr :class, :any, default: nil
 
   def bitmoji(assigns) do
     size_classes = %{
+      "xs" => "size-5 text-[8px]",
       "sm" => "size-10 text-xs",
       "md" => "size-12 text-sm",
       "lg" => "size-16 text-xl",

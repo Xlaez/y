@@ -81,15 +81,32 @@ defmodule YWeb.Components.FeedCard do
             </div>
           <% end %>
 
-          <%= if @item.type == :retake && @item.comment do %>
-             <p class="text-white text-[15px] leading-relaxed break-words mt-1 mb-3">
-              <%= @item.comment %>
+          <%= if @item.type == :retake do %>
+            <%!-- Retaker's comment (quote text) above the embedded card --%>
+            <%= if @item.comment do %>
+              <p class="text-white text-[15px] leading-relaxed break-words mt-1 mb-3">
+                <%= @item.comment %>
+              </p>
+            <% end %>
+
+            <%!-- Original take as an embedded quoted card --%>
+            <div class="border border-y-border rounded-xl p-3 mt-1 hover:bg-white/[0.02] transition-colors">
+              <div class="flex items-center gap-2 mb-1.5">
+                <.bitmoji user={@item.author} size="xs" />
+                <span class="text-white font-bold text-xs"><%= @item.author.username %></span>
+                <span class="text-y-muted text-xs"><%= @item.author.handle %></span>
+                <span class="text-y-muted text-xs">·</span>
+                <span class="text-y-muted text-xs"><%= YWeb.Helpers.Time.relative(@item.take.inserted_at) %></span>
+              </div>
+              <p class="text-[#D1D1D6] text-[14px] leading-relaxed break-words">
+                <%= @item.take.body %>
+              </p>
+            </div>
+          <% else %>
+            <p class="text-white text-[15px] leading-relaxed break-words mt-1">
+              <%= @item.take.body %>
             </p>
           <% end %>
-
-          <p class={"text-white text-[15px] leading-relaxed break-words #{if @item.type == :retake, do: "mt-0", else: "mt-1"}"}>
-            <%= @item.take.body %>
-          </p>
 
           <div class="flex items-center justify-between mt-4 max-w-sm">
             <.action_button
