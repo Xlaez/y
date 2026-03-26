@@ -57,7 +57,8 @@ defmodule YWeb.HomeLive do
        |> assign(feed: socket.assigns.feed ++ new_items)
        |> assign(feed_cursor: new_cursor)
        |> assign(loading_more: false)
-       |> assign(feed_exhausted: length(new_items) < @page_size)}
+       |> assign(feed_exhausted: length(new_items) < @page_size)
+       |> push_event("load_more_complete", %{})}
     end
   end
 
